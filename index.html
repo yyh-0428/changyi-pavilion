@@ -60,7 +60,7 @@
     .controls button span{display:block;margin-bottom:5px;color:var(--gold);font-family:serif;font-size:18px}
 
     #loading{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:#091519;transition:opacity .7s ease,visibility .7s ease}
-    #loading.done{opacity:0;visibility:hidden}
+    #loading.done{opacity:0;visibility:hidden;pointer-events:none}
     .loader{text-align:center;color:#e7efe9;font-size:14px;letter-spacing:.22em}
     .loader:before{content:"";display:block;width:49px;height:49px;margin:0 auto 18px;border:1px solid rgba(215,234,224,.17);border-top-color:#e0bd72;border-radius:50%;animation:spin 1.05s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -134,8 +134,8 @@
     const poem = document.getElementById('poem');
     const statusText = document.getElementById('statusText');
 
-    let scene, camera, renderer, controls, clock;
-    let pavilion, reflector, waterOverlay, waterMaterial, skyMaterial, moon, stars, fireflies;
+    let scene, camera, renderer, controls, timer;
+    let pavilion, reflector, waterOverlay, waterMaterial, skyMaterial, moon, sunGlow, stars, fireflies;
     let hemi, keyLight, rimLight, warmCore, plaqueSpotLights = [];
     let lanternMeshes = [], lanternLights = [], plaqueMeshes = [];
     let isNight = true, lampsOn = true, soundOn = false, interacted = false;
@@ -170,7 +170,7 @@
     function init(){
       scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x0b1b1d, 0.0155);
-      clock = new THREE.Clock();
+      timer = new THREE.Timer();
 
       camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 260);
       camera.position.set(0, 2.55, 25.5);
@@ -182,7 +182,7 @@
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.08;
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
       host.appendChild(renderer.domElement);
 
       controls = new OrbitControls(camera, renderer.domElement);
@@ -192,11 +192,13 @@
       controls.enablePan = false;
       controls.minDistance = 7.5;
       controls.maxDistance = 40;
-      controls.minPolarAngle = Math.PI*.28;
-      controls.maxPolarAngle = Math.PI*.495;
+      controls.minPolarAngle = Math.PI*.20;
+      controls.maxPolarAngle = Math.PI*.55;
       controls.autoRotate = true;
       controls.autoRotateSpeed = .14;
       controls.addEventListener('start', firstInteraction);
+      // 用户一旦拖拽，立即交还控制权，不再与镜头补间互相拉扯。
+      controls.addEventListener('start', ()=>{ cameraTween = null; });
 
       createSky();
       createLighting();
@@ -238,7 +240,10 @@
     }
     function beamBetween(a,b,thickness,material,parent=scene){
       const p1=new THREE.Vector3(...a),p2=new THREE.Vector3(...b),dir=new THREE.Vector3().subVectors(p2,p1);
-      const m=mesh(new THREE.BoxGeometry(thickness,dir.length(),thickness),material,parent,true,true);
+      const len=dir.length();
+      // 同规格梁共用一份几何体，避免数十次重复创建 BoxGeometry。
+      const key=`bb:${thickness.toFixed(3)}:${len.toFixed(3)}`;
+      const m=mesh(cachedGeometry(key,()=>new THREE.BoxGeometry(thickness,len,thickness)),material,parent,true,true);
       m.position.copy(p1).add(p2).multiplyScalar(.5);
       m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());
       return m;
@@ -267,6 +272,10 @@
       const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:radialTexture(),color:0xffe7b7,transparent:true,opacity:.34,depthWrite:false}));
       halo.scale.set(10,10,1);moon.add(halo);
 
+      // 白昼太阳：一团圆光即可，切换昼夜时显示/隐藏。
+      sunGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:radialTexture(),color:0xfff3d2,transparent:true,opacity:.95,depthWrite:false}));
+      sunGlow.scale.set(26,26,1);sunGlow.position.set(18,44,-52);sunGlow.visible=false;scene.add(sunGlow);
+
       const geo=new THREE.BufferGeometry();
       const count=innerWidth<650?360:680;
       const pos=new Float32Array(count*3);
@@ -290,7 +299,8 @@
 
     function createLighting(){
       hemi=new THREE.HemisphereLight(0x9fbcc5,0x273026,1.12);scene.add(hemi);
-      keyLight=new THREE.DirectionalLight(0xc2dbe1,2.45);keyLight.position.set(-16,26,14);keyLight.castShadow=true;
+      // 主光方位与月亮(-22,31,-52)同侧，月下投影方向自洽。
+      keyLight=new THREE.DirectionalLight(0xc2dbe1,2.45);keyLight.position.set(-19,27,-8);keyLight.castShadow=true;
       keyLight.shadow.mapSize.set(PERF.mobile?1024:2048,PERF.mobile?1024:2048);keyLight.shadow.camera.left=-26;keyLight.shadow.camera.right=26;keyLight.shadow.camera.top=26;keyLight.shadow.camera.bottom=-26;keyLight.shadow.bias=-.00035;scene.add(keyLight);
       rimLight=new THREE.DirectionalLight(0x7da8b7,.72);rimLight.position.set(18,15,-18);scene.add(rimLight);
       warmCore=new THREE.PointLight(0xffb65c,12.5,29,2);warmCore.position.set(0,7.1,0);warmCore.castShadow=false;scene.add(warmCore);
@@ -298,7 +308,8 @@
 
     function createWorld(){
       const grass=mat(C.grass,.96),stone=mat(C.stone2,.94),pale=mat(C.stone,.92);
-      const island=mesh(new THREE.CylinderGeometry(19.8,22.5,1.35,80),grass);island.position.y=-.82;
+      // 岛面抬升至 y=0：既高出水面(-0.10)，又与台基层底面(0)严丝合缝。
+      const island=mesh(new THREE.CylinderGeometry(19.8,22.5,1.35,80),grass);island.position.y=-.675;
       const rim=mesh(new THREE.CylinderGeometry(20.0,21.8,.46,80),stone);rim.position.y=-.18;
 
       // The former loose stepping stones looked like horizontal sticks on the lake shore.
@@ -390,8 +401,8 @@
       for(let i=0;i<8;i++){
         const a=Math.PI/8+i*Math.PI/4,x=Math.cos(a)*upperR,z=Math.sin(a)*upperR;upperCols.push([x,z]);
         cyl(.25,.30,2.22,16,red,x,7.70,z,pavilion);
-        cyl(.35,.35,.15,16,gold,x,6.66,z,pavilion);
-        cyl(.285,.285,.055,16,goldLight,x,6.84,z,pavilion);
+        cyl(.35,.35,.15,16,gold,x,6.92,z,pavilion);
+        cyl(.285,.285,.055,16,goldLight,x,7.06,z,pavilion);
         cyl(.280,.280,.050,16,goldLight,x,8.57,z,pavilion);
         cyl(.33,.27,.18,12,wood,x,8.82,z,pavilion);
       }
@@ -400,8 +411,8 @@
       createUpperLattice(upperR-.15,7.69,roofMats.window,pavilion);
 
       // Secondary upper plaques, also visible beneath the second eave
-      createPlaqueAssembly(0,8.18,3.22,0,pavilion,gold,goldLight,'长衣亭',.70);
-      createPlaqueAssembly(0,8.18,-3.22,Math.PI,pavilion,gold,goldLight,'长衣亭',.70);
+      createPlaqueAssembly(0,8.18,3.30,0,pavilion,gold,goldLight,'长衣亭',.60);
+      createPlaqueAssembly(0,8.18,-3.30,Math.PI,pavilion,gold,goldLight,'长衣亭',.60);
 
       const upperRoof=createOctagonalRoof({inner:2.58,outer:4.85,yPeak:10.78,yEave:9.12,lift:.88,top:roofMats.topB,topAlt:roofMats.topA,under:roofMats.under,ridge:roofMats.ridge,trim:gold,tileMat:roofMats.tileDetail,rows:9,lines:7});
       pavilion.add(upperRoof);
@@ -422,21 +433,24 @@
       const finial=mesh(new THREE.ConeGeometry(.18,.46,8),goldLight,pavilion);finial.position.y=14.83;
 
       // Interior furniture and rear calligraphy screen
-      const tableTop=mesh(new THREE.CylinderGeometry(1.02,.90,.17,24),wood,pavilion);tableTop.position.set(0,1.50,.45);
-      cyl(.20,.25,.88,18,woodDark,0,1.05,.45,pavilion);
-      box(3.9,.24,.82,wood,0,1.48,-2.2,pavilion);box(3.35,.80,.16,woodDark,0,1.08,-2.2,pavilion);
-      for(const x of [-1.48,1.48])box(.22,.76,.62,woodDark,x,1.04,-2.2,pavilion);
+      // 亭面标高 1.16：家具腿部从 1.16 落地起算，不再埋进地板。
+      const tableTop=mesh(new THREE.CylinderGeometry(1.02,.90,.17,24),wood,pavilion);tableTop.position.set(0,1.98,.45);
+      cyl(.20,.25,.80,18,woodDark,0,1.56,.45,pavilion);
+      box(3.9,.24,.82,wood,0,1.92,-2.2,pavilion);box(3.35,.80,.16,woodDark,0,1.40,-2.2,pavilion);
+      for(const x of [-1.48,1.48])box(.22,.76,.62,woodDark,x,1.54,-2.2,pavilion);
       createInteriorScreen(pavilion,wood,gold);
 
       // Lanterns are centered beneath real diagonal beams and physically linked to them.
-      [[-3.36,3.78,3.36],[3.36,3.78,3.36],[-3.36,3.78,-3.36],[3.36,3.78,-3.36]].forEach(p=>createLantern(...p,pavilion,1,5.56));
-      [[-1.98,7.84,1.98],[1.98,7.84,1.98],[-1.98,7.84,-1.98],[1.98,7.84,-1.98]].forEach(p=>createLantern(...p,pavilion,.72,8.68));
+      // 锚点改在梁底面(下层梁底 5.40 / 上层 8.58)略下方，吊钩露出可见。
+      [[-3.36,3.78,3.36],[3.36,3.78,3.36],[-3.36,3.78,-3.36],[3.36,3.78,-3.36]].forEach(p=>createLantern(...p,pavilion,1,5.46));
+      [[-1.98,7.84,1.98],[1.98,7.84,1.98],[-1.98,7.84,-1.98],[1.98,7.84,-1.98]].forEach(p=>createLantern(...p,pavilion,.72,8.62));
     }
 
     function createGuardianLions(parent,stone,accent){
-      // Two stone lions flank the main stair and sit on carved plinths.
-      const left = createStoneLion(-2.78,1.10,7.26, 1,parent,stone,accent,true);
-      const right = createStoneLion( 2.78,1.10,7.26,-1,parent,stone,accent,false);
+      // 两尊石狮立于二层台座(顶面 y=0.98)栏杆开口两侧，基座完全落地，
+      // 不再与台阶块体、台基斜面相交。
+      const left = createStoneLion(-2.30,1.39,6.02, 1,parent,stone,accent,true);
+      const right = createStoneLion( 2.30,1.39,6.02,-1,parent,stone,accent,false);
       // subtle different poses
       const ball = mesh(new THREE.SphereGeometry(.18,12,10), accent, right);
       ball.position.set(.18,-.02,.72);
@@ -502,8 +516,8 @@
         curl.position.set(px,py,pz); curl.rotation.set(Math.PI/2,0,Math.random()*Math.PI);
       });
 
-      // orient and subtly mirror so the pair feels natural
-      if(mirror) g.scale.x = -1;
+      // 不再用负缩放做镜像：负缩放会翻转绕序，导致狮子表面内外翻面。
+      // 左右姿态差异已由 side 参数（抬爪方向）与绣球/幼狮区分。
       return g;
     }
 
@@ -557,17 +571,20 @@
         if(Math.abs(normalizeAngle(mid-opening))<.34)continue;
         const p1=new THREE.Vector3(Math.cos(a1)*radius,y,Math.sin(a1)*radius);
         const p2=new THREE.Vector3(Math.cos(a2)*radius,y,Math.sin(a2)*radius);
-        addRailSegment(p1,p2,material,parent,true);
+        addRailSegment(p1,p2,material,parent,true,.98);
       }
     }
 
-    function addRailSegment(p1,p2,material,parent,stoneStyle=false){
+    function addRailSegment(p1,p2,material,parent,stoneStyle=false,baseY=0){
       const mid=p1.clone().add(p2).multiplyScalar(.5),len=p1.distanceTo(p2),ang=segmentYaw(p1,p2);
       box(len,.17,.26,material,mid.x,mid.y+.45,mid.z,parent,0,ang,0);box(len,.16,.24,material,mid.x,mid.y-.28,mid.z,parent,0,ang,0);
       const count=Math.max(4,Math.floor(len/.62));
+      // 望柱从基面(baseY)略微嵌入起，一直伸入上枋底面之内，
+      // 保证既不悬空、也不与上枋脱开。
+      const balBottom=baseY-.06, balTop=(mid.y+.45-.085)+.10, balH=balTop-balBottom;
       for(let i=1;i<count;i++){
         const t=i/count,p=p1.clone().lerp(p2,t);
-        cyl(stoneStyle?.10:.075,stoneStyle?.10:.075,stoneStyle?.95:.78,8,material,p.x,mid.y+.06,p.z,parent);
+        cyl(stoneStyle?.10:.075,stoneStyle?.10:.075,balH,8,material,p.x,(balTop+balBottom)/2,p.z,parent);
         if(stoneStyle){const orb=mesh(new THREE.SphereGeometry(.105,8,8),material,parent);orb.position.set(p.x,mid.y+.61,p.z)}
       }
     }
@@ -577,7 +594,7 @@
         const a1=Math.PI/8+i*Math.PI/4,a2=a1+Math.PI/4,mid=(a1+a2)/2;
         if(!upper&&Math.abs(normalizeAngle(mid-Math.PI/2))<.34)continue;
         const p1=new THREE.Vector3(Math.cos(a1)*radius,y,Math.sin(a1)*radius),p2=new THREE.Vector3(Math.cos(a2)*radius,y,Math.sin(a2)*radius);
-        addRailSegment(p1,p2,wood,parent,false);
+        addRailSegment(p1,p2,wood,parent,false,upper?6.47:1.16);
         const count=6,ang=segmentYaw(p1,p2);
         for(let j=1;j<count;j++){
           const p=p1.clone().lerp(p2,j/count);
@@ -622,9 +639,10 @@
         // Two short bronze spacers visibly connect the board to the column.
         box(.32,.10,.24,gold,x,4.18,4.98,parent);
         box(.32,.10,.24,gold,x,2.42,4.98,parent);
-        // Decorative column bands make the mounting method read clearly.
+        // 柱箍半径按柱身收分(下 .45 上 .36)逐高度计算，确保箍环露出柱面。
         for(const yy of [2.42,4.18]){
-          const band=mesh(new THREE.TorusGeometry(.39,.032,7,18),gold,parent);
+          const colR=.45-(.45-.36)*((yy-1.105)/4.55);
+          const band=mesh(new THREE.TorusGeometry(colR+.028,.032,7,18),gold,parent);
           band.position.set(x,yy,4.76);band.rotation.x=Math.PI/2;
         }
       });
@@ -639,7 +657,10 @@
         const stud=mesh(new THREE.SphereGeometry(.065,10,8),goldLight,g);stud.position.set(sx*1.93,sy*.48,.16);
       }
       const crest=mesh(new THREE.TorusGeometry(.34,.055,8,24,Math.PI),goldLight,g);crest.rotation.z=Math.PI;crest.position.set(0,.84,.02);
-      const spot=new THREE.SpotLight(0xffd796,5.2,10,Math.PI/5,.45,1.7);spot.position.set(0,1.45,1.8);spot.target.position.set(0,0,0);g.add(spot);g.add(spot.target);plaqueSpotLights.push(spot);
+      // 灯光预算：移动端跳过上层小匾的聚光灯，避免着色器光源过多。
+      if(!(PERF.mobile&&scale<1)){
+        const spot=new THREE.SpotLight(0xffd796,5.2,10,Math.PI/5,.45,1.7);spot.position.set(0,1.45,1.8);spot.target.position.set(0,0,0);g.add(spot);g.add(spot.target);plaqueSpotLights.push(spot);
+      }
     }
 
     function createPlaqueTexture(text){
@@ -866,12 +887,14 @@
     }
 
     function createInteriorScreen(parent,wood,gold){
-      const g=new THREE.Group();g.position.set(0,3.08,-4.46);parent.add(g);
-      box(6.7,3.28,.12,wood,0,0,0,g);
-      for(let x=-3.1;x<=3.1;x+=.62)box(.07,3.05,.13,gold,x,0,.08,g);
-      for(let y=-1.38;y<=1.38;y+=.46)box(6.45,.07,.13,gold,0,y,.08,g);
+      // 屏风底边落到亭面(y=1.16)，整体高度 3.28；宽度收窄使角点半径
+      // 不越过后排木栏(r=5.0)，避免穿模。
+      const g=new THREE.Group();g.position.set(0,2.80,-4.35);parent.add(g);
+      box(5.2,3.28,.12,wood,0,0,0,g);
+      for(let x=-2.34;x<=2.34;x+=.78)box(.07,3.05,.13,gold,x,0,.08,g);
+      for(let y=-1.38;y<=1.38;y+=.46)box(4.95,.07,.13,gold,0,y,.08,g);
       const matPanel=new THREE.MeshStandardMaterial({map:createInteriorTexture(),transparent:true,roughness:.78});
-      const panel=box(4.1,2.0,.14,matPanel,0,0,.14,g);panel.castShadow=false;
+      const panel=box(3.9,2.0,.14,matPanel,0,0,.14,g);panel.castShadow=false;
     }
 
     function createInteriorTexture(){
@@ -892,7 +915,10 @@
       const shadeMat=new THREE.MeshStandardMaterial({color:0xf3c987,emissive:0xff983e,emissiveIntensity:lampsOn?3.0:.05,roughness:.68,transparent:true,opacity:.92});
       const shade=cyl(.34,.44,.88,12,shadeMat,0,-.18,0,g);shade.userData.lantern=true;lanternMeshes.push(shade);cyl(.35,.35,.12,12,gold,0,-.72,0,g);
       for(let i=0;i<5;i++)cyl(.018,.018,.52,6,gold,(i-2)*.074,-1.03,0,g);
-      const lightObj=new THREE.PointLight(0xffa04c,lampsOn?5.2:0,6.8,2.1);lightObj.position.set(0,-.12,.05);g.add(lightObj);lanternLights.push(lightObj);
+      // 灯光预算：移动端仅每隔一盏挂一盏真实点光，其余靠自发光罩体。
+      if(!PERF.mobile||lanternLights.length%2===0){
+        const lightObj=new THREE.PointLight(0xffa04c,lampsOn?5.2:0,6.8,2.1);lightObj.position.set(0,-.12,.05);g.add(lightObj);lanternLights.push(lightObj);
+      }
     }
 
     function createLandscape(){
@@ -934,6 +960,15 @@
       activeView=name;
       document.querySelectorAll('.controls button').forEach(b=>b.classList.remove('active'));
       const button={main:'viewMain',plaque:'viewPlaque',eave:'viewEave',inside:'viewInside'}[name];if(button)document.getElementById(button).classList.add('active');
+      // 每个机位按需放宽极角与距离：仰檐、入亭需要大于 90° 的俯仰角，
+      // 否则 OrbitControls 每帧都会把相机顶回去，造成镜头跳变。
+      const limits={
+        main:{min:7.5,max:40,polar:.55},
+        plaque:{min:4,max:26,polar:.56},
+        eave:{min:5,max:15,polar:.68},
+        inside:{min:3,max:9,polar:.74}
+      }[name];
+      controls.minDistance=limits.min;controls.maxDistance=limits.max;controls.maxPolarAngle=Math.PI*limits.polar;
       let pos,target,label;
       if(name==='main'){pos=new THREE.Vector3(0,2.55,25.5);target=new THREE.Vector3(0,6.35,0);label='人眼仰观'}
       else if(name==='plaque'){pos=new THREE.Vector3(0,4.78,11.2);target=new THREE.Vector3(0,5.05,5.20);label='匾额正视'}
@@ -960,8 +995,15 @@
       skyMaterial.uniforms.topColor.value.set(n?0x081a25:0x8fb9c8);skyMaterial.uniforms.bottomColor.value.set(n?0x315b54:0xefd2aa);
       scene.fog.color.set(n?0x0b1b1d:0xc9d0c3);scene.fog.density=n?.0155:.0105;
       hemi.color.set(n?0x9fbcc5:0xffdfb3);hemi.groundColor.set(n?0x273026:0x74836a);hemi.intensity=n?1.12:1.9;
+      // 夜间主光随月亮(-22,31,-52)，白天主光随太阳(18,44,-52)，投影方向始终与天象一致。
+      keyLight.position.set(n?-19:18,n?27:30,n?-8:-14);
       keyLight.color.set(n?0xc2dbe1:0xffd39b);keyLight.intensity=n?2.45:3.2;rimLight.intensity=n?.72:.44;
-      moon.visible=n;stars.visible=n;waterMaterial.uniforms.uNight.value=n?1:0;renderer.toneMappingExposure=n?1.08:1.02;
+      moon.visible=n;sunGlow.visible=!n;stars.visible=n;
+      if(fireflies)fireflies.visible=n;
+      if(reflector)reflector.material.uniforms.color.value.set(n?0x41666b:0x7fa5a8);
+      waterMaterial.uniforms.uNight.value=n?1:0;renderer.toneMappingExposure=n?1.08:1.02;
+      // 阴影图已被冻结，光源挪位后强制刷新一次。
+      renderer.shadowMap.needsUpdate=true;
     }
 
     async function toggleSound(){
@@ -980,10 +1022,10 @@
 
     function animate(){
       if(!running)return;
-      requestAnimationFrame(animate);const t=clock.getElapsedTime();frameCount++;
+      requestAnimationFrame(animate);timer.update();const t=timer.getElapsed();frameCount++;
       if(cameraTween){const now=performance.now(),p=Math.min(1,(now-cameraTween.start)/cameraTween.duration),e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;camera.position.lerpVectors(cameraTween.fromPos,cameraTween.toPos,e);controls.target.lerpVectors(cameraTween.fromTarget,cameraTween.toTarget,e);if(p>=1)cameraTween=null}
       controls.update();waterMaterial.uniforms.uTime.value=t;
-      if(fireflies){fireflies.rotation.y=t*.008;fireflies.position.y=Math.sin(t*.34)*.045;}
+      if(fireflies&&fireflies.visible){fireflies.rotation.y=t*.008;fireflies.position.y=Math.sin(t*.34)*.045;fireflies.material.opacity=.42+.18*(.5+.5*Math.sin(t*1.6));}
       // All architecture and lights are static in space; freeze shadow maps after
       // the initial frames to avoid repeating an expensive shadow render.
       if(frameCount===3)renderer.shadowMap.autoUpdate=false;
