@@ -30,7 +30,7 @@ npm run dev -- --host 127.0.0.1
 
 ## 文件
 
-`changyi-pavilion.glb` 是可导入 Blender 等软件的模型，包含建筑、植物和桥头庭园，使用 `EXT_mesh_gpu_instancing` 保留大量重复构件。网页中的水、天空、照明和动画由 Three.js 运行时提供，不包含在静态 GLB 中。
+模型（含 `changyi-pavilion.glb`）完全由代码程序化生成（GPT-6 Astra），不基于任何第三方建模软件制作；导出的 GLB 可导入 Blender 等软件查看，包含建筑、植物和桥头庭园，使用 `EXT_mesh_gpu_instancing` 保留大量重复构件。网页中的水、天空、照明和动画由 Three.js 运行时提供，不包含在静态 GLB 中。
 
 网页实拍截图（`preview-*.png`）与画布导出图（`changyi-render.png`）体积较大，未纳入本仓库，仅保留在本地。
 

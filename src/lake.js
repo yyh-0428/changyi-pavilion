@@ -106,7 +106,7 @@ const fragmentShader = /* glsl */`
 
 export async function createLake({ renderer, mobile, reducedMotion, sun }) {
   const loader = new THREE.TextureLoader();
-  const normalMaps = await Promise.all(['textures/water-normal-1.jpg', 'textures/water-normal-2.jpg'].map(path => loader.loadAsync(new URL(path, import.meta.env.BASE_URL).href)));
+  const normalMaps = await Promise.all(['textures/water-normal-1.jpg', 'textures/water-normal-2.jpg'].map(path => loader.loadAsync(`${import.meta.env.BASE_URL}${path}`)));
   normalMaps.forEach(texture => { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.anisotropy = renderer.capabilities.getMaxAnisotropy(); });
   const geometry = new THREE.PlaneGeometry(240, 240, 192, 192);
   const reflector = new Reflector(geometry, { textureWidth: 1, textureHeight: 1, multisample: mobile ? 0 : 2, clipBias: 0 });
