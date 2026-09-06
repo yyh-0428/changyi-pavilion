@@ -1,0 +1,111 @@
+:root { font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif; color: #3c5047; background: #d8e1da; font-synthesis: none; --ink: #3c5047; --muted: #5e7369; --accent: #986b60; --paper: #f8fcf8; --line: #40594d29; --glass: #fafffc40; --glass-panel: #fafffcad; --glass-border: #ffffff70; }
+* { box-sizing: border-box; letter-spacing: 0; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { opacity: .5; cursor: wait; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+button svg { width: 19px; height: 19px; stroke-width: 1.4; flex: 0 0 auto; }
+[hidden] { display: none !important; }
+#experience { width: 100%; height: 100%; min-height: 420px; position: relative; isolation: isolate; transition: color 1s; }
+#experience[data-theme="moonlight"] { --ink: #e0e8dd; --muted: #ccd9cf; --accent: #e1c5b0; --paper: #536e64; --line: #e5efe52e; --glass: #ebf7ef14; --glass-panel: #496059a8; --glass-border: #edf7ef38; color: var(--ink); }
+#scene { position: absolute; inset: 0; z-index: -1; }
+#scene canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+.masthead { position: absolute; z-index: 3; inset: 30px 44px auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.signature { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 18px; line-height: 1.5; }
+.signature-en { display: block; font-family: "Palatino Linotype", "Book Antiqua", serif; font-size: 9px; color: var(--muted); }
+.seal { height: 41px; width: 33px; display: grid; place-items: center; color: #f0e7d9; background: #97584d; border: 1px solid #b87b6e; box-shadow: inset 0 0 0 3px #97584d, inset 0 0 0 4px #e6c3b48c; font-size: 24px; }
+.header-right { display: flex; align-items: center; gap: 30px; }
+.dedication { color: var(--muted); font-size: 12px; }
+.text-action { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 9px 0; border: 0; border-bottom: 1px solid var(--line); background: none; font-size: 14px; }
+.text-action:hover { color: var(--accent); border-color: var(--accent); }
+.inscription { position: absolute; pointer-events: none; z-index: 1; left: 7%; top: 25%; opacity: 0; transform: translateY(16px); transition: opacity 1.4s .2s, transform 1.4s .2s; }
+.ready .inscription { opacity: 1; transform: translateY(0); }
+#experience:not([data-view="overview"]) .inscription { opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; }
+#experience:not([data-view="overview"]) .masthead::before { content: ""; position: absolute; z-index: -1; inset: -30px -44px -16px; background: var(--glass); backdrop-filter: blur(6px); }
+.eyebrow { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+.fine-rule { display: inline-block; width: 30px; height: 1px; background: currentColor; opacity: .55; }
+h1 { font-weight: 400; font-size: 70px; line-height: 1.2; margin: 23px 0 31px; text-shadow: 0 2px 30px #e4ede218; }
+.scene-verse { font-size: 18px; line-height: 2.2; margin: 0; min-height: 80px; transition: opacity .25s; }
+.inscription-foot { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 11px; margin-top: 34px; }
+.tiny-seal { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 24px; padding: 1px 3px; color: var(--accent); border: 1px solid var(--accent); font-size: 14px; }
+.scene-controls { position: absolute; inset: auto 44px 28px; z-index: 4; min-height: 64px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 24px; padding-top: 19px; }
+.scene-controls::before { content: ""; position: absolute; z-index: -1; inset: -8px -44px -28px; background: var(--glass); backdrop-filter: blur(6px); }
+.scene-caption { display: flex; align-items: center; gap: 10px; align-self: center; font-size: 12px; white-space: nowrap; }
+.status-dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; }
+.caption-separator { height: 12px; width: 1px; background: var(--line); margin: 0 2px; }
+#view-name { color: var(--muted); }
+.light-switch { display: flex; align-items: center; gap: 22px; align-self: center; }
+.light-option { display: flex; gap: 7px; align-items: center; border: 0; background: none; padding: 9px 1px; color: var(--muted); position: relative; font-size: 13px; }
+.light-option::after { position: absolute; content: ""; width: 100%; height: 1px; left: 0; bottom: 0; background: var(--accent); transform: scaleX(0); transition: transform .3s; }
+.light-option.active { color: var(--ink); }
+.light-option.active::after { transform: scaleX(1); }
+.tool-strip { justify-self: end; display: flex; align-items: center; gap: 3px; }
+.icon-button { position: relative; border: 0; background: transparent; width: 37px; height: 38px; display: inline-flex; align-items: center; justify-content: center; color: var(--ink); border-radius: 3px; }
+.icon-button:hover, .icon-button[aria-pressed="true"], .icon-button[aria-expanded="true"] { background: var(--line); color: var(--accent); }
+.icon-button[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translate(-50%,4px); white-space: nowrap; background: var(--paper); color: var(--ink); padding: 6px 9px; font: 11px "PingFang SC", sans-serif; border-radius: 3px; pointer-events: none; opacity: 0; transition: .15s; box-shadow: 0 2px 12px #0c271419; }
+.icon-button:hover::after, .icon-button:focus-visible::after { opacity: 1; transform: translate(-50%,0); }
+.tool-divider { width: 1px; height: 19px; background: var(--line); margin: 0 9px; }
+.menu-anchor { position: relative; }
+.tool-menu { position: absolute; bottom: 52px; right: 0; width: 176px; border: 1px solid var(--glass-border); background: var(--glass-panel); backdrop-filter: blur(14px); box-shadow: 0 8px 30px #162e2012; padding: 6px; border-radius: 4px; }
+.tool-menu button { width: 100%; display: flex; gap: 11px; align-items: center; text-align: left; border: 0; background: none; padding: 12px 10px; font-size: 13px; border-radius: 2px; }
+.tool-menu button:hover, .tool-menu button:focus-visible { background: var(--line); }
+.tool-menu svg { width: 17px; height: 17px; }
+#loading { position: absolute; z-index: 10; inset: 0; display: flex; flex-direction: column; gap: 19px; align-items: center; justify-content: center; background: #d8e1da; color: #455d4f; transition: opacity .9s, visibility .9s; font-size: 13px; }
+.loading-mark { font-size: 44px; }
+.loading-line { width: 74px; height: 1px; background: #6c847560; position: relative; overflow: hidden; }
+.loading-line::after { content: ""; height: 1px; width: 35%; background: #915547; position: absolute; animation: loading 1.5s ease-in-out infinite; }
+.ready #loading { opacity: 0; visibility: hidden; pointer-events: none; }
+@keyframes loading { from { left: -35%; } to { left: 100%; } }
+#render-error { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 15; background: #d8e1da; }
+#toast { position: absolute; z-index: 20; bottom: 115px; left: 50%; transform: translate(-50%,10px); opacity: 0; pointer-events: none; transition: .2s; font-size: 13px; padding: 10px 17px; background: var(--paper); border: 1px solid var(--line); border-radius: 3px; max-width: calc(100% - 40px); text-align: center; }
+#toast.visible { opacity: 1; transform: translate(-50%,0); }
+#poem-dialog { position: fixed; inset: 100px 34px 110px auto; margin: 0; width: 342px; max-height: calc(100dvh - 210px); max-width: calc(100vw - 32px); padding: 25px 30px; background: var(--glass-panel); backdrop-filter: blur(14px); color: var(--ink); border: 1px solid var(--glass-border); border-radius: 4px; box-shadow: 0 16px 50px #18342b12; }
+#poem-dialog::backdrop { background: #061c1405; }
+.poem-header { display: flex; justify-content: space-between; align-items: center; font-size: 17px; border-bottom: 1px solid var(--line); padding-bottom: 15px; }
+.poem-header .icon-button { width: 29px; height: 29px; }
+.poem-body { padding: 15px 0 10px; display: flex; flex-direction: column; gap: 6px; }
+.couplet { display: flex; align-items: baseline; gap: 15px; width: 100%; padding: 11px 0; border: 0; text-align: left; background: none; line-height: 1.9; font-size: 18px; white-space: nowrap; transition: color .25s; }
+.verse-index { font-size: 11px; color: var(--muted); }
+.couplet.active, .couplet:hover { color: var(--accent); }
+.poem-signature { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--line); padding-top: 20px; font-size: 11px; color: var(--muted); }
+.poem-signature .tiny-seal { margin-left: auto; writing-mode: vertical-rl; height: 35px; min-width: 20px; font-size: 11px; }
+@media (min-width: 1700px) { .inscription { left: 9%; top: 28%; } h1 { font-size: 82px; } }
+@media (max-width: 1150px) { .scene-caption { font-size: 11px; gap: 6px; } .scene-controls { gap: 16px; inset-inline: 28px; } .desktop-tool { display: none; } .inscription { left: 6%; } h1 { font-size: 58px; } .scene-verse { font-size: 16px; } }
+@media (max-width: 760px) {
+  .masthead { inset: 21px 23px auto; gap: 12px; }
+  #experience:not([data-view="overview"]) .masthead::before { inset: -21px -23px -14px; }
+  .signature { font-size: 15px; gap: 9px; }
+  .signature-en { font-size: 7px; }
+  .seal { width: 27px; height: 35px; font-size: 22px; }
+  .header-right { gap: 15px; }
+  .dedication { font-size: 10px; }
+  .text-action { font-size: 12px; gap: 5px; }
+  .text-action svg { width: 17px; height: 17px; }
+  .inscription { left: 26px; top: 113px; }
+  .eyebrow { font-size: 10px; gap: 8px; }
+  .fine-rule { width: 20px; }
+  h1 { font-size: 40px; margin: 13px 0 17px; }
+  .scene-verse { font-size: 13px; line-height: 1.9; min-height: 50px; }
+  .inscription-foot { display: none; }
+  .scene-controls { inset: auto 21px max(22px, env(safe-area-inset-bottom)); grid-template-columns: 1fr auto; row-gap: 14px; min-height: 90px; padding-top: 11px; }
+  .scene-controls::before { inset-inline: -21px; bottom: calc(-1 * max(22px, env(safe-area-inset-bottom))); }
+  .scene-caption { grid-column: 1 / -1; align-self: start; font-size: 10px; }
+  .light-switch { gap: 18px; }
+  .light-option { font-size: 12px; padding: 7px 0; gap: 4px; }
+  .light-option svg { width: 17px; height: 17px; }
+  .tool-strip { gap: 1px; }
+  .icon-button { width: 31px; height: 33px; }
+  .icon-button svg { width: 17px; height: 17px; }
+  .tool-divider { margin: 0 4px; }
+  .tool-menu { bottom: 46px; }
+  #poem-dialog { inset: auto 16px max(18px, env(safe-area-inset-bottom)); width: auto; max-width: unset; max-height: calc(100dvh - 110px); padding: 20px 26px; }
+  .poem-body { gap: 0; padding-block: 10px; }
+  .couplet { justify-content: center; font-size: 17px; padding: 8px 0; }
+  .poem-signature { padding-top: 16px; }
+  #toast { bottom: 137px; }
+}
+@media (max-width: 370px) { .dedication { display: none; } .scene-controls { inset-inline: 16px; } .light-switch { gap: 12px; } .icon-button { width: 28px; } }
+@media (max-height: 700px) and (min-width: 761px) { .inscription { top: 23%; } h1 { font-size: 52px; margin-block: 17px 22px; } .inscription-foot { margin-top: 18px; } #poem-dialog { inset-block: 80px 90px; padding: 15px 24px; max-height: calc(100dvh - 170px); } .couplet { font-size: 16px; padding-block: 5px; } }
+@media (max-height: 700px) and (max-width: 760px) { .inscription { top: 93px; } h1 { font-size: 34px; margin-bottom: 9px; } .scene-verse { font-size: 12px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

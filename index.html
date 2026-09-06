@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#d8e1da" />
+    <meta name="description" content="长衣亭，赠予张依婷。愿挽星河缀嫁裳。" />
+    <title>长衣亭 · 予张依婷</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <main id="experience" data-theme="sunset">
+      <div id="scene" aria-label="长衣亭三维场景"></div>
+      <header class="masthead">
+        <a class="signature" href="./" aria-label="长衣亭首页"><span class="seal">依</span><span>长衣亭<span class="signature-en">CHANGYI PAVILION</span></span></a>
+        <div class="header-right"><span class="dedication">为张依婷而筑</span><button class="text-action" id="poem-open" aria-haspopup="dialog"><i data-lucide="feather"></i><span>诗笺</span></button></div>
+      </header>
+
+      <section class="inscription" aria-labelledby="pavilion-title">
+        <div class="eyebrow"><span class="fine-rule"></span>一亭 · 一生</div>
+        <h1 id="pavilion-title">长衣亭</h1>
+        <p class="scene-verse" id="scene-verse">瑶台纵有月华凉，<br />不及携卿看夕阳。</p>
+        <div class="inscription-foot"><span class="tiny-seal">婷</span><span>予你，一处朝暮。</span></div>
+      </section>
+
+      <div id="loading" role="status"><div class="loading-mark">亭</div><span>亭前候你</span><div class="loading-line"></div></div>
+      <div id="render-error" hidden role="alert"><p>此刻未能展开长衣亭。</p><button class="text-action" id="reload"><i data-lucide="rotate-cw"></i>重新打开</button></div>
+
+      <footer class="scene-controls">
+        <div class="scene-caption"><span class="status-dot"></span><span id="scene-time">夕照 · 酉时</span><span class="caption-separator"></span><span id="view-name">临水观亭</span></div>
+        <div class="light-switch" role="group" aria-label="光景"><button class="light-option active" data-light="sunset" aria-pressed="true"><i data-lucide="sun-medium"></i><span>夕照</span></button><button class="light-option" data-light="moonlight" aria-pressed="false"><i data-lucide="moon"></i><span>月夜</span></button></div>
+        <div class="tool-strip">
+          <button class="icon-button" id="orbit-toggle" data-tip="自动环绕" aria-label="自动环绕" aria-pressed="false"><i data-lucide="rotate-3d"></i></button>
+          <div class="menu-anchor"><button class="icon-button" id="view-open" data-tip="观景视角" aria-label="观景视角" aria-haspopup="menu" aria-expanded="false"><i data-lucide="scan-eye"></i></button><div class="tool-menu" id="view-menu" role="menu" hidden><button role="menuitem" data-view="overview"><i data-lucide="mountain"></i>临水观亭</button><button role="menuitem" data-view="architecture"><i data-lucide="landmark"></i>青瓦重檐</button><button role="menuitem" data-view="inside"><i data-lucide="lamp"></i>檐下听风</button><button role="menuitem" data-view="blossom"><i data-lucide="flower-2"></i>花间望亭</button><button role="menuitem" data-view="garden"><i data-lucide="landmark"></i>曲径入园</button></div></div>
+          <button class="icon-button desktop-tool" id="zoom-in" data-tip="靠近" aria-label="靠近"><i data-lucide="plus"></i></button>
+          <button class="icon-button desktop-tool" id="zoom-out" data-tip="远望" aria-label="远望"><i data-lucide="minus"></i></button>
+          <span class="tool-divider"></span>
+          <div class="menu-anchor"><button class="icon-button" id="download-open" data-tip="留存" aria-label="留存" aria-haspopup="menu" aria-expanded="false"><i data-lucide="download"></i></button><div class="tool-menu" id="download-menu" role="menu" hidden><button role="menuitem" id="save-image"><i data-lucide="image"></i>保存此景</button><button role="menuitem" id="save-model"><i data-lucide="box"></i>下载模型 .glb</button></div></div>
+          <button class="icon-button" id="fullscreen" data-tip="全屏" aria-label="全屏"><i data-lucide="maximize"></i></button>
+        </div>
+      </footer>
+      <div id="toast" role="status" aria-live="polite"></div>
+      <dialog id="poem-dialog" aria-labelledby="poem-recipient">
+        <div class="poem-header"><span id="poem-recipient">予 · 张依婷</span><button class="icon-button" id="poem-close" aria-label="收起诗笺" data-tip="收起诗笺"><i data-lucide="x"></i></button></div>
+        <div class="poem-body">
+          <button class="couplet" data-stanza="0"><span class="verse-index">一</span><span>银汉低回傍霓裳，<br />明月窥帘照玉珰。</span></button>
+          <button class="couplet" data-stanza="1"><span class="verse-index">二</span><span>若教春色妒卿妆，<br />桃李无言自敛芳。</span></button>
+          <button class="couplet active" data-stanza="2"><span class="verse-index">三</span><span>瑶台纵有月华凉，<br />不及携卿看夕阳。</span></button>
+          <button class="couplet" data-stanza="3"><span class="verse-index">四</span><span>此生相守鬓成霜，<br />愿挽星河缀嫁裳。</span></button>
+        </div>
+        <div class="poem-signature"><span class="fine-rule"></span><span>长衣亭中，朝暮与共。</span><span class="tiny-seal">依婷</span></div>
+      </dialog>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+node_modules/
+dist/
+preview-*.png
+changyi-render.png
+.DS_Store
+*.log
