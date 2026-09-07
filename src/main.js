@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { createIcons, Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Image, Box, X, RotateCw } from 'lucide';
 import { buildPavilion } from './model.js';
 import { createLake, createLakebed } from './lake.js';
@@ -25,7 +24,8 @@ async function start() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#cbd9d2');
   scene.fog = new THREE.FogExp2('#cbd9d2', .009);
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: true });
+  // The image action renders immediately before toBlob, so no retained backbuffer is needed.
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, mobileQuery.matches ? 1.6 : 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.shadowMap.enabled = true;
@@ -33,6 +33,8 @@ async function start() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.04;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  // Water has two nested scene renders. Count the complete frame, including shadows.
+  renderer.info.autoReset = false;
   $('#scene').appendChild(renderer.domElement);
   renderer.domElement.setAttribute('aria-label', '长衣亭三维模型');
   renderer.domElement.setAttribute('tabindex', '0');
@@ -102,7 +104,11 @@ async function start() {
   const sunDirection = new THREE.Vector3(-.65, .16, -.65).normalize();
   skyUniforms.sunPosition.value.copy(sunDirection);
 
-  const model = buildPavilion(); scene.add(model.root);
+  // Reuse the original model's lettering so every phone gets the same calligraphy.
+  const plaqueMap = await new THREE.TextureLoader().loadAsync(`${import.meta.env.BASE_URL}textures/plaque-atlas.png`);
+  plaqueMap.flipY = false; plaqueMap.colorSpace = THREE.SRGBColorSpace;
+  plaqueMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const model = buildPavilion({ plaqueMap }); scene.add(model.root);
   const lampLights = model.lightPositions.map(position => {
     const light = new THREE.PointLight('#ffbd70', .4, 5.5, 2); light.position.copy(position); scene.add(light); return light;
   });
@@ -236,6 +242,7 @@ async function start() {
   $('#save-model').addEventListener('click', async () => {
     const button = $('#save-model'); button.disabled = true; button.setAttribute('aria-busy', 'true'); toast('正在收好这座亭');
     try {
+      const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
       const result = await new GLTFExporter().parseAsync(model.root, { binary: true, onlyVisible: true, maxTextureSize: 1024 });
       download(new Blob([result], { type: 'model/gltf-binary' }), '长衣亭-赠张依婷.glb'); toast('长衣亭已留存');
     } catch (error) { console.error('Model export failed', error); toast('模型暂未能保存，请再试一次'); }
@@ -262,13 +269,16 @@ async function start() {
       camera.position.lerpVectors(transition.from, transition.position, easing); controls.target.lerpVectors(transition.fromTarget, transition.target, easing);
       if (t === 1) transition = null;
     }
-    if (!reducedMotion) model.update(elapsed);
+    if (!reducedMotion) {
+      model.update(elapsed);
+      lampLights.forEach((light, i) => light.position.copy(model.lightPositions[i]));
+    }
     lake.update(elapsed);
-    controls.update(); renderer.render(scene, camera); frames++;
+    controls.update(dt); renderer.info.reset(); renderer.render(scene, camera); frames++;
     if (frames === 3) { experience.classList.add('ready'); $('#loading').setAttribute('aria-hidden', 'true'); }
   }
   window.__pavilion = {
-    stats: () => ({ frames, theme, view: currentView, transitioning: Boolean(transition), camera: camera.position.toArray(), triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, geometries: renderer.info.memory.geometries, waterPhase: lake.stats().time, water: lake.stats(), detailCounts: model.root.userData.detailCounts, modelBounds: new THREE.Box3().setFromObject(model.root).getSize(new THREE.Vector3()).toArray() }),
+    stats: () => ({ frames, theme, view: currentView, transitioning: Boolean(transition), camera: camera.position.toArray(), triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, renderScope: 'complete-frame-including-water-and-shadows', geometries: renderer.info.memory.geometries, geometryMetrics: model.root.userData.geometryMetrics, waterPhase: lake.stats().time, water: lake.stats(), detailCounts: model.root.userData.detailCounts, modelBounds: new THREE.Box3().setFromObject(model.root).getSize(new THREE.Vector3()).toArray() }),
     model: model.root,
   };
   addEventListener('pagehide', () => { disposed = true; });

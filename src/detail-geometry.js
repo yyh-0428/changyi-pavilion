@@ -2,7 +2,8 @@ import * as THREE from 'three';
 
 export function clayTileGeometry(pan = false) {
   const positions = [], uvs = [], indices = [];
-  const nx = 10, nz = 3, layerSize = (nx + 1) * (nz + 1);
+  // Longitudinal taper is linear: extra lengthwise rings add no shape detail.
+  const nx = pan ? 6 : 8, nz = 1, layerSize = (nx + 1) * (nz + 1);
   for (let layer = 0; layer < 2; layer++) {
     for (let z = 0; z <= nz; z++) for (let x = 0; x <= nx; x++) {
       const u = x / nx, t = z / nz;
@@ -23,7 +24,13 @@ export function clayTileGeometry(pan = false) {
   for (let z = nz - 1; z > 0; z--) boundary.push(z * (nx + 1));
   for (let i = 0; i < boundary.length; i++) {
     const a = boundary[i], b = boundary[(i + 1) % boundary.length];
-    indices.push(a, b, a + layerSize, b, b + layerSize, a + layerSize);
+    // Split the cut faces from the curved shell for crisp ceramic edges.
+    const offset = positions.length / 3;
+    for (const vertex of [a, b, a + layerSize, b + layerSize]) {
+      positions.push(...positions.slice(vertex * 3, vertex * 3 + 3));
+      uvs.push(...uvs.slice(vertex * 2, vertex * 2 + 2));
+    }
+    indices.push(offset, offset + 1, offset + 2, offset + 1, offset + 3, offset + 2);
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -34,16 +41,18 @@ export function clayTileGeometry(pan = false) {
 export function taperedBranchGeometry(points, baseRadius, tipRadius, segments = 16) {
   const curve = new THREE.CatmullRomCurve3(points);
   const frames = curve.computeFrenetFrames(segments, false);
-  const positions = [], uvs = [], indices = [], sides = 9;
+  const positions = [], uvs = [], indices = [];
+  const sides = baseRadius >= .1 ? 10 : baseRadius >= .025 ? 8 : 5;
+  const length = curve.getLength();
   for (let i = 0; i <= segments; i++) {
     const t = i / segments, center = curve.getPointAt(t);
     const radius = tipRadius + (baseRadius - tipRadius) * (1 - t) ** .86;
     for (let j = 0; j <= sides; j++) {
       const angle = j / sides * Math.PI * 2;
       const offset = frames.normals[i].clone().multiplyScalar(Math.cos(angle)).addScaledVector(frames.binormals[i], Math.sin(angle));
-      const corrugation = 1 + Math.sin(j * 2.8 + t * 13) * .055;
+      const corrugation = 1 + Math.sin(angle * 3 + t * 13) * .055;
       positions.push(...center.clone().addScaledVector(offset, radius * corrugation).toArray());
-      uvs.push(j / sides, t * curve.getLength() / Math.max(baseRadius * 8, .1));
+      uvs.push(j / sides, t * length / Math.max(baseRadius * 8, .1));
       if (i < segments && j < sides) {
         const a = i * (sides + 1) + j, b = a + sides + 1;
         indices.push(a, b, a + 1, b, b + 1, a + 1);
@@ -53,22 +62,38 @@ export function taperedBranchGeometry(points, baseRadius, tipRadius, segments = 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-  geo.setIndex(indices); geo.computeVertexNormals(); return geo;
+  geo.setIndex(indices); geo.computeVertexNormals();
+  // UVs need two seam vertices, but bark lighting must remain continuous.
+  const normals = geo.attributes.normal;
+  for (let i = 0; i <= segments; i++) {
+    const a = i * (sides + 1), b = a + sides;
+    const normal = new THREE.Vector3().fromBufferAttribute(normals, a).add(new THREE.Vector3().fromBufferAttribute(normals, b)).normalize();
+    normals.setXYZ(a, normal.x, normal.y, normal.z); normals.setXYZ(b, normal.x, normal.y, normal.z);
+  }
+  return geo;
 }
 
 export function peachLeafGeometry() {
-  const positions = [], uvs = [], indices = [], rows = 12, columns = 4;
-  for (let row = 0; row <= rows; row++) {
+  const positions = [], uvs = [], indices = [], rows = 8, columns = 2;
+  positions.push(0, 0, 0); uvs.push(.5, 0);
+  for (let row = 1; row < rows; row++) {
     const t = row / rows, width = Math.sin(Math.PI * t) ** .85 * .038 * (1 + (row % 2) * .045);
     for (let column = 0; column <= columns; column++) {
       const across = column / columns * 2 - 1;
-      positions.push(across * width, t * .26, Math.sin(t * Math.PI) * .012 - Math.abs(across) * .009 + t * t * .028);
+      positions.push(across * width, t * .26, Math.sin(t * Math.PI) * (.012 - Math.abs(across) * .009) + t * t * .028);
       uvs.push(column / columns, t);
-      if (row < rows && column < columns) {
-        const a = row * (columns + 1) + column, b = a + columns + 1;
+      if (row < rows - 1 && column < columns) {
+        const a = 1 + (row - 1) * (columns + 1) + column, b = a + columns + 1;
         indices.push(a, a + 1, b, b, a + 1, b + 1);
       }
     }
+  }
+  const tip = positions.length / 3;
+  positions.push(0, .26, .028); uvs.push(.5, 1);
+  for (let column = 0; column < columns; column++) {
+    indices.push(0, 2 + column, 1 + column);
+    const a = 1 + (rows - 2) * (columns + 1) + column;
+    indices.push(a, a + 1, tip);
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -124,17 +149,50 @@ export function grassClumpGeometry() {
   for (let blade = 0; blade < 6; blade++) {
     const angle = blade * 2.39996, height = .18 + (blade % 4) * .047, bend = .065 + (blade % 3) * .028;
     const width = .009 + (blade % 2) * .003, bx = Math.cos(angle) * .065, bz = Math.sin(angle) * .065, offset = positions.length / 3;
-    for (let row = 0; row < 4; row++) {
-      const t = row / 3, across = width * (1 - t * .94), curve = bend * t * t;
+    for (let row = 0; row < 3; row++) {
+      const t = row / 2, across = width * (1 - t), curve = bend * t * t;
       const color = t < .5 ? root.clone().lerp(middle, t * 2) : middle.clone().lerp(tip, (t - .5) * 2);
-      for (const side of [-1, 1]) {
+      for (const side of row === 2 ? [0] : [-1, 1]) {
         positions.push(bx + Math.cos(angle) * across * side - Math.sin(angle) * curve, height * t, bz + Math.sin(angle) * across * side + Math.cos(angle) * curve);
         colors.push(color.r, color.g, color.b); uvs.push((side + 1) / 2, t);
       }
-      if (row < 3) { const a = offset + row * 2; indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+      if (row === 0) indices.push(offset, offset + 1, offset + 2, offset + 1, offset + 3, offset + 2);
+      if (row === 1) indices.push(offset + 2, offset + 3, offset + 4);
     }
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   geo.setIndex(indices); geo.computeVertexNormals(); return geo;
+}
+
+// Five cupped petals, with a warm throat and rounded tips instead of ellipsoids.
+export function peachBlossomGeometry() {
+  const positions = [], colors = [], uvs = [], indices = [];
+  const throat = new THREE.Color('#e6adb4'), edge = new THREE.Color('#fff4f5');
+  for (let petal = 0; petal < 5; petal++) {
+    const angle = petal * Math.PI * 2 / 5, offset = positions.length / 3;
+    const add = (x, y, z, t) => {
+      positions.push(Math.cos(angle) * x + Math.sin(angle) * z, y, -Math.sin(angle) * x + Math.cos(angle) * z);
+      uvs.push(x / .064 + .5, z / .082);
+      const color = throat.clone().lerp(edge, t); colors.push(color.r, color.g, color.b);
+    };
+    add(0, .008, .028, .4);
+    for (const radius of [.52, 1]) for (let i = 0; i < 8; i++) {
+      const theta = i / 8 * Math.PI * 2;
+      const z = .028 + Math.cos(theta) * .039 * radius;
+      const x = Math.sin(theta) * .029 * radius * (.9 + .1 * Math.cos(theta));
+      const notch = Math.max(0, Math.cos(theta)) ** 12 * .003 * radius;
+      add(x, .008 + radius * radius * .010 + z * .05, z - notch, THREE.MathUtils.clamp(z / .070, 0, 1));
+    }
+    for (let i = 0; i < 8; i++) {
+      const next = (i + 1) % 8;
+      indices.push(offset, offset + 1 + i, offset + 1 + next);
+      indices.push(offset + 1 + i, offset + 9 + i, offset + 1 + next, offset + 1 + next, offset + 9 + i, offset + 9 + next);
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices); geometry.computeVertexNormals(); return geometry;
 }
