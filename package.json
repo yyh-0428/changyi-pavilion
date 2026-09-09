@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "node --test tests/*.test.mjs",
     "export:model": "node scripts/export-model.mjs",
-    "verify:export": "node scripts/verify-export.mjs"
+    "verify:export": "node scripts/verify-export.mjs",
+    "start:local": "node scripts/launch.mjs",
+    "stop:local": "node scripts/launch.mjs --stop"
   },
   "dependencies": {
     "lucide": "^0.468.0",
@@ -17,6 +19,10 @@
     "vite": "^7.1.0"
   },
   "devDependencies": {
-    "@napi-rs/canvas": "0.1.100"
+    "@napi-rs/canvas": "0.1.100",
+    "gltf-validator": "2.0.0-dev.3.10"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

@@ -4,3 +4,12 @@ preview-*.png
 changyi-render.png
 .DS_Store
 *.log
+
+# Reproducible expanded scene can exceed GitHub's single-file limit.
+changyi-pavilion-compatible.glb
+changyi-pavilion-model.glb
+
+# Per-project Mac launcher state and dependency stamp stay local.
+.pavilion-local.json
+.pavilion-local.json.*.tmp
+*.glb.*.tmp

@@ -35,9 +35,47 @@ export function batchModel(root) {
     for (const geometry of geometries) geometry.dispose();
   }
   root.traverse(object => {
-    if (object.isInstancedMesh) { object.computeBoundingBox(); object.computeBoundingSphere(); }
+    if (object.isInstancedMesh) {
+      object.computeBoundingBox(); object.computeBoundingSphere();
+      if (object.userData.deformingGeometry) {
+        object.boundingBox.expandByScalar(.08); object.boundingSphere.radius += .08;
+      }
+    }
     object.updateMatrix();
     if (!object.userData.dynamic) object.matrixAutoUpdate = false;
+  });
+  const packed = new Set(), requirements = new Map();
+  root.traverse(object => {
+    if (!object.isMesh) return;
+    const uses = requirements.get(object.geometry) ?? { uv: false, color: false };
+    uses.uv ||= Object.entries(object.material).some(([name,value]) => name !== 'envMap' && value?.isTexture);
+    uses.color ||= object.material.vertexColors;
+    requirements.set(object.geometry,uses);
+  });
+  root.traverse(object => {
+    if (!object.isMesh || packed.has(object.geometry)) return;
+    packed.add(object.geometry);
+    const geometry = object.geometry, uses = requirements.get(geometry);
+    if (!uses.uv) geometry.deleteAttribute('uv');
+    if (!uses.color) geometry.deleteAttribute('color');
+    const { normal, uv, color } = geometry.attributes;
+    if (normal) {
+      const attribute = new THREE.Int16BufferAttribute(new Int16Array(normal.count * 3), 3, true);
+      attribute.setUsage(normal.usage);
+      for (let i = 0; i < normal.count; i++) attribute.setXYZ(i, normal.getX(i), normal.getY(i), normal.getZ(i));
+      geometry.setAttribute('normal', attribute);
+    }
+    if (uv) {
+      const unitRange = uv.array.every(value => value >= 0 && value <= 1);
+      const attribute = unitRange ? new THREE.Uint16BufferAttribute(new Uint16Array(uv.count * 2),2,true) : new THREE.Float16BufferAttribute(new Uint16Array(uv.count * 2), 2);
+      for (let i = 0; i < uv.count; i++) attribute.setXY(i, uv.getX(i), uv.getY(i));
+      geometry.setAttribute('uv', attribute);
+    }
+    if (color && !(color.array instanceof Uint8Array) && color.array.every(value => value >= 0 && value <= 1)) {
+      const attribute = new THREE.Uint8BufferAttribute(new Uint8Array(color.count * 3),3,true);
+      for (let i = 0; i < color.count; i++) attribute.setXYZ(i,color.getX(i),color.getY(i),color.getZ(i));
+      geometry.setAttribute('color',attribute);
+    }
   });
 }
 

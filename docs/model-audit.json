@@ -1,6 +1,16 @@
 {
-  "baseline_commit": "f4d5d45",
+  "baseline_commit": "feb66b3",
+  "original_commit": "f4d5d45",
   "baseline": {
+    "triangles": 2456840,
+    "geometryBytes": 16415592,
+    "meshes": 92,
+    "instances": 66797,
+    "geometries": 92,
+    "materials": 22,
+    "textures": 11
+  },
+  "original": {
     "triangles": 5032848,
     "geometryBytes": 36944696,
     "meshes": 142,
@@ -9,27 +19,48 @@
     "glbBytes": 38033376
   },
   "upgraded": {
-    "triangles": 2381404,
-    "geometryBytes": 15249296,
+    "triangles": 2456840,
+    "geometryBytes": 16260931,
     "meshes": 92,
-    "geometries": 51,
-    "materials": 19,
-    "glbBytes": 13574596
+    "instances": 66797,
+    "geometries": 92,
+    "materials": 22,
+    "textures": 11
+  },
+  "exports": {
+    "changyi-pavilion.glb": {
+      "bytes": 29166944,
+      "sha256": "4c03c3d65a0517aa97240a61913f021db68a282c179bd6af5c07766a5915e623",
+      "validatorErrors": 0,
+      "validatorWarnings": 0,
+      "validatorInfos": 199
+    },
+    "changyi-pavilion-compatible.glb": {
+      "bytes": 133668960,
+      "sha256": "ba61a98a741cc4700a8170326e2ba05f415956f480251743bbc27ab8651cd030",
+      "validatorErrors": 0,
+      "validatorWarnings": 0,
+      "validatorInfos": 3
+    }
   },
   "unchangedFilesSha256": {
+    "src/main.js": "cb2c574bc179e32dfe4ff3a7000957f41822f872dd263a7132d6c81c4e258262",
     "src/style.css": "fe3b8e081fcba27fbfca08e8f99a82e9d629723c2e9f9c35220f6e9eab7ede99",
-    "index.html": "af2b3a87a5cd1a1cd93da94c213503960dd3828b82df7f1f28dfda07833931b8",
     "src/lake.js": "5d3bd85a04de9894754c30badfa95bc5876990eeaac52d20d448d33a4da7d4b0",
+    "index.html": "92e95e8fdaef4fdaabc96a04e7c4228fc0b16b36e99ee4b76d0631eba09338ab",
     "vite.config.js": "08fcf3a573f0607a56d1182c00b7518864335b6cfa129db442563ff6e1126e22",
     ".github/workflows/deploy.yml": "99d6699c0fe0ef6f66ef134214d6bcd1d9f0e154fc9b3d53def2d22a1595db21"
   },
-  "mobileCameraAndResolutionSettingsUnchanged": true,
   "validation": {
-    "modelTestsPassed": 9,
-    "glbRoundTrip": true,
+    "testsPassed": 24,
+    "launcherTestsPassed": 6,
+    "crossProfileInstanceSamples": 147,
+    "crossProfileCompleteCloths": 6,
+    "glbRoundTripBothProfiles": true,
     "build": true,
-    "localAssetsPresent": true,
+    "macNativeRun": false,
     "browserVisualQA": false,
     "realMobileFPS": false
-  }
+  },
+  "mobileCameraAndResolutionSettingsUnchanged": true
 }

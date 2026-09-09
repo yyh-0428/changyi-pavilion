@@ -6,6 +6,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { createIcons, Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Image, Box, X, RotateCw } from 'lucide';
 import { buildPavilion } from './model.js';
 import { createLake, createLakebed } from './lake.js';
+import { createTerrain } from './scene-context.js';
 
 const icons = { Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Image, Box, X, RotateCw };
 createIcons({ icons });
@@ -114,22 +115,8 @@ async function start() {
   });
 
   const lake = await createLake({ renderer, mobile: mobileQuery.matches, reducedMotion, sun });
-  scene.add(lake.water, createLakebed());
-
-  const terrainGeometry = new THREE.PlaneGeometry(290, 290, 120, 120); terrainGeometry.rotateX(-Math.PI / 2);
-  const terrainPos = terrainGeometry.attributes.position, terrainColors = [];
-  for (let i = 0; i < terrainPos.count; i++) {
-    const x = terrainPos.getX(i), z = terrainPos.getZ(i), r = Math.hypot(x, z);
-    const growth = THREE.MathUtils.smoothstep(r, 55, 100);
-    const noise = Math.sin(x * .052 + Math.sin(z * .027) * 2) * 4 + Math.sin(z * .061 + x * .017) * 3 + Math.sin(x * .17 - z * .071) * 1.6;
-    const height = -5.2 + growth * (7.4 + noise * .66);
-    terrainPos.setY(i, height);
-    const color = new THREE.Color().setHSL(.30 + growth * .03, .12, .27 + growth * .12 + noise * .008);
-    terrainColors.push(color.r, color.g, color.b);
-  }
-  terrainGeometry.setAttribute('color', new THREE.Float32BufferAttribute(terrainColors, 3)); terrainGeometry.computeVertexNormals();
-  const terrain = new THREE.Mesh(terrainGeometry, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
-  terrain.receiveShadow = true; scene.add(terrain);
+  const lakebed = createLakebed(), terrain = createTerrain();
+  scene.add(lake.water, lakebed, terrain);
 
   const moonTexture = document.createElement('canvas'); moonTexture.width = moonTexture.height = 256;
   const mc = moonTexture.getContext('2d'); mc.fillStyle = '#e3e5d9'; mc.fillRect(0, 0, 256, 256);
@@ -239,15 +226,24 @@ async function start() {
     renderer.render(scene, camera);
     renderer.domElement.toBlob(blob => { if (blob) { download(blob, `长衣亭-${theme === 'sunset' ? '夕照' : '月夜'}.png`); toast('此景已留存'); } else toast('此景暂未能保存'); });
   });
-  $('#save-model').addEventListener('click', async () => {
-    const button = $('#save-model'); button.disabled = true; button.setAttribute('aria-busy', 'true'); toast('正在收好这座亭');
+  const exportButtons = [$('#save-model'), $('#save-compatible')];
+  exportButtons.forEach(button => button.addEventListener('click', async () => {
+    exportButtons.forEach(item => { item.disabled = true; item.setAttribute('aria-busy', 'true'); });
+    const profile = button.id === 'save-compatible' ? 'compatible' : 'compact';
+    toast(profile === 'compatible' ? '正在导出兼容场景，文件较大，请稍候' : '正在收好此刻的亭与庭园');
     try {
-      const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
-      const result = await new GLTFExporter().parseAsync(model.root, { binary: true, onlyVisible: true, maxTextureSize: 1024 });
-      download(new Blob([result], { type: 'model/gltf-binary' }), '长衣亭-赠张依婷.glb'); toast('长衣亭已留存');
-    } catch (error) { console.error('Model export failed', error); toast('模型暂未能保存，请再试一次'); }
-    finally { button.disabled = false; button.removeAttribute('aria-busy'); }
-  });
+      const { captureScene, exportScene } = await import('./export-scene.js');
+      const snapshot = captureScene(model.root, {
+        time: reducedMotion ? 0 : elapsed, waterTime: lake.stats().time, theme, camera,
+        objects: [terrain, lakebed, sun, fill, ...lampLights, moon, stars],
+        normalMap: lake.water.material.uniforms.normalMap0.value, exposure: renderer.toneMappingExposure,
+      });
+      const result = await exportScene(snapshot, { profile, yieldControl: () => new Promise(resolve => setTimeout(resolve, 0)) });
+      download(new Blob([result], { type: 'model/gltf-binary' }), `长衣亭-${theme === 'sunset' ? '夕照' : '月夜'}-${profile === 'compatible' ? '兼容场景' : '轻量场景'}.glb`);
+      toast('此刻场景已保存；水面为静态近似');
+    } catch (error) { console.error('Scene export failed', error); toast('场景暂未能保存，请再试一次'); }
+    finally { exportButtons.forEach(item => { item.disabled = false; item.removeAttribute('aria-busy'); }); }
+  }));
 
   let resizeTimer;
   addEventListener('resize', () => {

@@ -6,6 +6,7 @@ import { buildPavilion } from '../src/model.js';
 import { clayTileGeometry, peachLeafGeometry, peachBlossomGeometry, taperedBranchGeometry } from '../src/detail-geometry.js';
 import { clipToHexagon } from '../src/architecture-geometry.js';
 import { modelMetrics } from '../src/model-optimization.js';
+import { CLOTH_TIE_Y, clothWave, clothProfile } from '../src/cloth.js';
 import { installCanvas, loadPlaqueMap } from '../scripts/node-canvas.mjs';
 
 installCanvas();
@@ -123,11 +124,29 @@ test('geometry budget improves without removing tiles or garden instances', () =
   assert.deepEqual([counts.grass.island, counts.grass.arrival, counts.grass.blades], [6118, 51483, 345606]);
   const size = new THREE.Box3().setFromObject(model.root).getSize(new THREE.Vector3());
   assert.ok(size.distanceTo(new THREE.Vector3(27.85598373413086, 9.490000247955322, 42.34136724472046)) < 1e-5);
+  model.root.traverse(object => {
+    if (!object.userData.roofSpec) return;
+    // Bright green multipliers must not wrap past 255 into magenta tiles.
+    for (const channel of object.geometry.attributes.color.array) assert.ok(channel > 155);
+  });
 });
 
 test('rebuilding in one session gives identical geometry and placement', async () => {
   const rebuilt = buildPavilion({ plaqueMap: await loadPlaqueMap() });
   assert.equal(fingerprint(model.root), fingerprint(rebuilt.root));
+});
+
+test('moon gate clears the path and curb tops and keeps a solid lintel', () => {
+  const gate = model.root.getObjectByName('月洞门·桥头入园');
+  const walls = [], color = new THREE.Color('#d6d6c8');
+  model.root.traverse(object => { if (object.isMesh && object.material.color.equals(color)) walls.push(object); });
+  assert.equal(walls.length,1);
+  for (const [x,y,blocked] of [[-.90,.08,false],[.90,.08,false],[0,.04,false],[0,2.8,true]]) {
+    const origin = new THREE.Vector3(x,y,-1).applyMatrix4(gate.matrixWorld);
+    const direction = new THREE.Vector3(0,0,1).transformDirection(gate.matrixWorld);
+    const hits = new THREE.Raycaster(origin,direction,0,2).intersectObjects(walls);
+    assert.equal(hits.length > 0,blocked,`gate opening at ${x}, ${y}`);
+  }
 });
 
 test('cloth uniforms advance without uploading vertices; lantern light follows its pivot', () => {
@@ -146,4 +165,21 @@ test('cloth uniforms advance without uploading vertices; lantern light follows i
     const center = new THREE.Vector3(0, -.53, 0).applyMatrix4(lamp.matrixWorld);
     assert.ok(center.distanceTo(model.lightPositions[i]) < 1e-8);
   });
+});
+
+test('gathered curtains fit their elliptical ties and keep the same wind phase', () => {
+  const ties = [];
+  model.root.traverse(object => { if (object.userData.clothTiePhase !== undefined) ties.push(object); });
+  assert.equal(ties.length,6);
+  for (let i = 0; i <= 40; i++) {
+    const point = clothProfile(-.38 + i / 40 * .76,CLOTH_TIE_Y), center = clothProfile(0,CLOTH_TIE_Y).z;
+    assert.ok((point.x / .085) ** 2 + ((point.z - center) / .0306) ** 2 < 1);
+  }
+  for (const time of [0,2.3,9.8]) {
+    model.update(time);
+    for (const tie of ties) {
+      const expected = clothProfile(0,CLOTH_TIE_Y).z + clothWave(CLOTH_TIE_Y,time,tie.userData.clothTiePhase).offset;
+      assert.ok(Math.abs(tie.position.z - expected) < 1e-8);
+    }
+  }
 });
