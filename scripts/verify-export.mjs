@@ -28,7 +28,7 @@ const compatible = filename.includes('compatible');
 assert.equal(Boolean(document.extensionsRequired?.includes('EXT_mesh_gpu_instancing')), !compatible);
 if (compatible) assert.equal(document.extensionsRequired,undefined);
 const gltf = await new GLTFLoader().parseAsync(file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength), '');
-const root = gltf.scene.children.find(object => object.userData.design?.revision === 6);
+const root = gltf.scene.children.find(object => object.userData.design?.revision === 7);
 assert.ok(root);
 const metrics = modelMetrics(root);
 assert.equal(metrics.triangles,root.userData.geometryMetrics.triangles);
@@ -54,7 +54,7 @@ gltf.scene.traverse(object => {
 assert.equal(lamps,6); assert.equal(directionals,2); assert.ok(normalMaps.size >= 6);
 const materials = new Map();
 gltf.scene.traverse(object => { if (object.isMesh) materials.set(object.material.name, object.material); });
-for (const name of ['wood', 'darkWood', 'stone', 'stoneDark', 'tile', 'tileLight', 'bark', '石灰抹面']) {
+for (const name of ['wood', 'darkWood', 'stone', 'stoneDark', 'tile', 'tileLight', 'bark', '月洞门·手作青砖', '月洞门·细砂灰泥']) {
   const material = materials.get(name); assert.ok(material, name);
   assert.ok(material.map && material.normalMap && material.roughnessMap, `${name}: all PBR maps survive`);
   assert.equal(material.metalness, 0, `${name}: dielectric`);

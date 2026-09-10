@@ -117,12 +117,12 @@ test('roof deck is visible from above and has a soffit at the specified depth', 
 
 test('craft details stay within a bounded budget without removing tiles or garden instances', () => {
   const metrics = modelMetrics(model.root);
-  assert.ok(metrics.triangles < baseline.triangles * .5);
-  // Per-part patina needs COLOR_0 on masonry and timber; V6 adds real chamfers
-  // and ridge caps. Keep buffers below 19 MiB and draws below 100.
-  assert.ok(metrics.geometryBytes < 19 * 1048576);
-  assert.ok(metrics.textureBytesWithMipmaps < 28 * 1048576);
-  assert.ok(metrics.meshes <= 100);
+  // V7 adds solid moon-gate masonry and four small garden compositions. Keep
+  // the complete addition below 3% of the uploaded V6 triangle count.
+  assert.ok(metrics.triangles < 2491436 * 1.03);
+  assert.ok(metrics.geometryBytes < 21 * 1048576);
+  assert.ok(metrics.textureBytesWithMipmaps < 32 * 1048576);
+  assert.ok(metrics.meshes <= 112);
   assert.ok(metrics.meshes < baseline.meshes);
   const counts = model.root.userData.detailCounts;
   assert.deepEqual([counts.roofTiles, counts.branches, counts.leaves, counts.blossoms], [9526, 1044, 4752, 2210]);
@@ -146,10 +146,12 @@ test('moon gate clears the path and curb tops and keeps a solid lintel', () => {
   const walls = [], color = new THREE.Color('#d6d6c8');
   model.root.traverse(object => { if (object.isMesh && object.material.color.equals(color)) walls.push(object); });
   assert.equal(walls.length,1);
-  for (const [x,y,blocked] of [[-.90,.08,false],[.90,.08,false],[0,.04,false],[0,2.8,true]]) {
+  const masonry = [];
+  model.root.traverse(object => { if (object.isMesh && object.material.name.startsWith('月洞门·')) masonry.push(object); });
+  for (const [x,y,blocked] of [[-.90,.08,false],[.90,.08,false],[0,.04,false],[0,2.8,true],[0,3.0,true]]) {
     const origin = new THREE.Vector3(x,y,-1).applyMatrix4(gate.matrixWorld);
     const direction = new THREE.Vector3(0,0,1).transformDirection(gate.matrixWorld);
-    const hits = new THREE.Raycaster(origin,direction,0,2).intersectObjects(walls);
+    const hits = new THREE.Raycaster(origin,direction,0,2).intersectObjects(masonry);
     assert.equal(hits.length > 0,blocked,`gate opening at ${x}, ${y}`);
   }
 });

@@ -9,6 +9,8 @@ import { createArchitecturalSurfaces } from './surface-materials.js';
 import { finishSurfaces, timberUV, detailRandom } from './surface-finishing.js';
 import { addPavilionCraft } from './pavilion-craft.js';
 import { batchModel, modelMetrics } from './model-optimization.js';
+import { refineMoonGate } from './moon-gate.js';
+import { addGardenDetails } from './garden-details.js';
 
 const TAU = Math.PI * 2;
 let seed = 48;
@@ -494,13 +496,14 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
     for (let j = 0; j < 3; j++) box(.8, .014, .012, x, .4 + j * .24, .203, mats.stoneDark, gate);
   }
   for (const sign of [-1, 1]) {
-    const cap = box(5.06, .09, .42, 0, 3.37, sign * .25, mats.tileDark, gate); cap.rotation.x = sign * .23;
+    const cap = box(5.06, .09, .42, 0, 3.37, sign * .25, mats.tileDark, gate); cap.rotation.x = sign * .23; cap.userData.gateCoping = true;
     for (let i = 0; i < 38; i++) {
       const tile = mesh(clayTileGeometry(false), mats.tileLight, v((i - 18.5) * .13, 3.43, sign * .25), gate);
       tile.scale.set(.124, .13, .42); tile.rotation.set(sign * .23, sign < 0 ? Math.PI : 0, 0); detailCounts.roofTiles++;
+      tile.userData.gateCoping = true;
     }
   }
-  tube([v(-2.51, 3.48, 0), v(0, 3.5, 0), v(2.51, 3.48, 0)], .065, mats.tileLight, gate, 20, 8);
+  tube([v(-2.51, 3.48, 0), v(0, 3.5, 0), v(2.51, 3.48, 0)], .065, mats.tileLight, gate, 20, 8).userData.gateCoping = true;
   for (const [x, z] of [[-1.48, 11.8], [1.51, 11.8]]) {
     box(.42, .15, .42, x, .1, z, mats.stoneDark, garden);
     box(.24, .52, .24, x, .4, z, mats.stone, garden);
@@ -515,7 +518,7 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
   cylinder(.65, .67, .09, -.65, 1.39, -.7, mats.darkWood, 48);
   cylinder(.09, .17, .69, -.65, 1.02, -.7, mats.wood, 16);
   for (const z of [-1.65, .25]) { cylinder(.28, .30, .08, -.65, 1.10, z, mats.darkWood, 32); for (const dx of [-.16, .16]) box(.06, .43, .17, -.65 + dx, .86, z, mats.wood); }
-  const porcelain = new THREE.MeshPhysicalMaterial({ color: '#d1ded1', roughness: .2, clearcoat: .7 });
+  const porcelain = new THREE.MeshPhysicalMaterial({ name: '青瓷茶器', color: '#d1ded1', roughness: .2, clearcoat: .7 });
   for (const z of [-1.02, -.39]) {
     cylinder(.12, .07, .035, -.65, 1.4525, z, porcelain, 24);
     const cupShape = [[0,0],[.04,0],[.048,.012],[.06,.016],[.092,.084],[.091,.093],[.080,.096],[.075,.09],[.064,.027],[.03,.020],[0,.020]].map(p => new THREE.Vector2(...p));
@@ -644,10 +647,12 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
   root.userData.detailCounts = detailCounts;
 
   finishSurfaces(root);
+  detailCounts.moonGate = refineMoonGate({ gate, mats });
+  detailCounts.gardenCraft = addGardenDetails({ garden, pavilion, gate, mats, porcelain, surfaces });
   standardizeSurfaceMaterials(root);
   batchModel(root);
   root.userData.geometryMetrics = modelMetrics(root);
-  root.userData.design = { type: 'original-artistic-pavilion', units: 'metres', roofDeckThickness: .055, pavingRadius: 3.74, revision: 6 };
+  root.userData.design = { type: 'original-artistic-pavilion', units: 'metres', roofDeckThickness: .055, pavingRadius: 3.74, revision: 7 };
 
   return {
     root, lanternMaterial: mats.lantern, lightPositions,

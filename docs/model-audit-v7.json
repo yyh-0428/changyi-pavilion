@@ -1,0 +1,72 @@
+{
+  "revision": 7,
+  "baseline": "uploaded V6",
+  "baselineMetrics": {
+    "triangles": 2491436,
+    "geometryBytes": 18685763,
+    "meshes": 95,
+    "instances": 66797,
+    "geometries": 95,
+    "materials": 23,
+    "textures": 26,
+    "textureBytes": 20447232,
+    "textureBytesWithMipmaps": 27262944
+  },
+  "upgradedMetrics": {
+    "triangles": 2540496,
+    "geometryBytes": 20231332,
+    "meshes": 106,
+    "instances": 66797,
+    "geometries": 106,
+    "materials": 28,
+    "textures": 29,
+    "textureBytes": 23592960,
+    "textureBytesWithMipmaps": 31457244
+  },
+  "detailCounts": {
+    "roofTiles": 9526,
+    "ridgeCaps": 228,
+    "branches": 1044,
+    "leaves": 4752,
+    "blossoms": 2210,
+    "pavingStones": 77,
+    "craft": {
+      "ashlarBlocks": 90,
+      "timberPegs": 12,
+      "bracketKeys": 36
+    },
+    "grass": {
+      "island": 6118,
+      "arrival": 51483,
+      "blades": 345606,
+      "minimumPathClearance": 1.0401354261073237
+    },
+    "moonGate": {
+      "ringBricks": 44,
+      "wallBricks": 20,
+      "medallions": 4
+    },
+    "gardenCraft": {
+      "planters": 2,
+      "bambooCulms": 5,
+      "irisFlowers": 16,
+      "pebbles": 80,
+      "fallenPetals": 36,
+      "teaObjects": 7
+    }
+  },
+  "preservation": {
+    "grass": {
+      "identical": true,
+      "sha256": "45e4650b65d8b268d5333a140eb16de6b467c5d39b50a9dfa9f6fb3b1e144aab"
+    },
+    "peachTrees": {
+      "identical": true,
+      "sha256": "2630142524096cdf3156d98f8c6eb826ae3fc50b78e39aae96439089a8231957"
+    },
+    "roofTiles": {
+      "identical": true,
+      "sha256": "76636d76c1d9e0cd23c7a275fdb9e56d079f36ae917fafaeb91a8d86448c6d2b"
+    }
+  }
+}

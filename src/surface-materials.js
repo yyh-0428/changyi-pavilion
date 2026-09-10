@@ -32,8 +32,22 @@ function barkCells(u, v) {
 }
 
 function field(kind, u, v) {
-  const seed = { wood: 0, bark: 117, stone: 529, tile: 911, plaster: 380, endgrain: 771, linen: 0, paper: 0 }[kind];
+  const seed = { wood: 0, bark: 117, stone: 529, tile: 911, plaster: 380, endgrain: 771, linen: 0, paper: 0, gateBrick: 1207, gateLime: 1561 }[kind];
   const broad = noise(u, v, 5, 5, 71 + seed), fine = noise(u, v, 96, 96, 109 + seed);
+  if (kind === 'gateBrick') {
+    const clay = noise(u, v, 38, 51, 717), sand = noise(u, v, 229, 237, 1003);
+    const pores = Math.pow(1 - noise(u, v, 89, 101, 621), 7);
+    const firing = noise(u, v, 9, 7, 914), drag = noise(u, v, 87, 13, 361);
+    const salt = clamp((noise(u, v, 61, 59, 527) - .75) * 4);
+    const color = .73 + broad * .07 + firing * .10 + clay * .065 - pores * .37 + salt * .15;
+    return { color: [color * .975, color, color * 1.014], height: .5 + clay * .07 + sand * .045 + drag * .02 - pores * .40, roughness: .76 + clay * .15 + pores * .16 + salt * .08 };
+  }
+  if (kind === 'gateLime') {
+    const trowel = noise(u, v, 13, 8, 511), sand = noise(u, v, 241, 239, 149);
+    const pores = Math.pow(1 - noise(u, v, 121, 119, 131), 7);
+    const color = .91 + broad * .025 + trowel * .035 + sand * .018 - pores * .17;
+    return { color: [color, color * .997, color * .982], height: .5 + trowel * .025 + sand * .052 - pores * .24, roughness: .84 + trowel * .11 + pores * .05 };
+  }
   if (kind === 'wood') {
     const du = Math.sin((u - .34) * Math.PI), dv = Math.sin((v - .58) * Math.PI);
     const knot = Math.exp(-(du * du * 54 + dv * dv * 21));
@@ -159,7 +173,7 @@ function imageField(source, size) {
 }
 
 export function createSurface(kind, sourceImage) {
-  const size = kind === 'linen' || kind === 'paper' ? 128 : kind === 'plaster' || kind === 'endgrain' ? 256 : 512;
+  const size = kind === 'linen' || kind === 'paper' ? 128 : kind === 'plaster' || kind === 'endgrain' || kind === 'gateBrick' ? 256 : 512;
   const colors = new Uint8ClampedArray(size * size * 4), heights = new Float32Array(size * size);
   const roughness = new Uint8ClampedArray(size * size * 4);
   const source = sourceImage ? imageField(sourceImage, size) : null;

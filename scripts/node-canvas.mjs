@@ -11,6 +11,9 @@ export function installCanvas() {
     createElement(tag) {
       if (tag !== 'canvas') throw new Error(`Unsupported offscreen element: ${tag}`);
       const canvas = createCanvas(1, 1);
+      // Native canvases expose data() as a method. GLTFExporter otherwise
+      // mistakes that method for a DataTexture pixel buffer and writes zeros.
+      Object.defineProperty(canvas, 'data', { value: undefined });
       canvas.toBlob = (callback, type = 'image/png') => callback(new Blob([canvas.toBuffer(type)], { type }));
       return canvas;
     },
