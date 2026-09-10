@@ -3,6 +3,7 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { createWaterSnapshot } from './scene-context.js';
 import { modelMetrics } from './model-optimization.js';
 import { clothWave } from './cloth.js';
+import { lightingPreset } from './lighting.js';
 
 function floatAttribute(source) {
   const values = new Float32Array(source.count * source.itemSize);
@@ -42,7 +43,7 @@ export function snapshotGeometry(source, time = 0, needsUV = true) {
 
 // Synchronous capture owns all mutable data before export yields to animation/UI.
 export function captureScene(root, context = {}) {
-  const { time = 0, theme = 'sunset', waterTime = time, camera, objects = [], normalMap, includeContext = true, exposure = 1.04 } = context;
+  const { time = 0, theme = 'sunset', waterTime = time, camera, objects = [], normalMap, includeContext = true, exposure = lightingPreset(theme).exposure } = context;
   root.updateMatrixWorld(true);
   const scene = new THREE.Scene(); scene.name = '长衣亭·当前场景';
   const materialCache = new Map(), geometryCache = new Map();
@@ -60,7 +61,14 @@ export function captureScene(root, context = {}) {
       const key = `${object.geometry.uuid}:${needsUV}`;
       if (!geometryCache.has(key)) geometryCache.set(key, snapshotGeometry(object.geometry, time, needsUV));
       target.geometry = geometryCache.get(key);
-      if (!materialCache.has(object.material)) materialCache.set(object.material, object.material.clone());
+      if (!materialCache.has(object.material)) {
+        const material = object.material.clone();
+        // Our roughness textures already pack G with white B. Zero-metal materials
+        // can reuse that image in glTF, avoiding a duplicate image per material.
+        // Leave the live material unchanged: it does not need another sampler.
+        if (material.roughnessMap?.userData.gltfMetallicRoughness && material.metalness === 0 && !material.metalnessMap) material.metalnessMap = material.roughnessMap;
+        materialCache.set(object.material, material);
+      }
       target.material = materialCache.get(object.material);
     }
     for (const child of object.children) { const cloned = copy(child); if (cloned) target.add(cloned); }
@@ -83,11 +91,12 @@ export function captureScene(root, context = {}) {
     scene.add(view);
   }
   scene.userData = {
-    generator: 'Changyi Pavilion 4', time, theme, units: 'metres', exposure,
+    generator: 'Changyi Pavilion 5', time, theme, units: 'metres', exposure,
     modelBounds: new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3()).toArray(),
     detailCounts: structuredClone(root.userData.detailCounts),
     displayNotes: 'Choose the embedded camera. Water is a static PBR approximation. Procedural sky, fog, hemisphere/IBL lighting, ACES exposure and camera view offset depend on the viewer and are recorded as metadata, not baked into materials.',
-    background: theme === 'moonlight' ? '#203c3b' : '#cbd9d2',
+    background: lightingPreset(theme).background,
+    lighting: structuredClone(lightingPreset(theme)),
   };
   scene.updateMatrixWorld(true);
   return scene;

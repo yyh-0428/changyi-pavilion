@@ -1,46 +1,17 @@
 import * as THREE from 'three';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { clayTileGeometry, taperedBranchGeometry, peachLeafGeometry, peachLeafTexture, peachBlossomGeometry, meadowNoise, meadowTexture, grassClumpGeometry } from './detail-geometry.js';
-import { clipToHexagon, pavingStoneGeometry, columnBaseGeometry, timberColumnGeometry, bracketArmGeometry, bridgeHeight, archStoneGeometry, hexRingGeometry, joinedLatticeGeometry, pathSlabGeometry } from './architecture-geometry.js';
+import { clipToHexagon, pavingStoneGeometry, columnBaseGeometry, timberColumnGeometry, bracketArmGeometry, bridgeHeight, archStoneGeometry, hexRingGeometry, joinedLatticeGeometry, pathSlabGeometry, beveledBoxGeometry } from './architecture-geometry.js';
 import { roofPoint, roofTileSectors, tileElevation, ROOF_COLOR_SCALE } from './roof-geometry.js';
 import { CLOTH_HEIGHT, CLOTH_TIE_Y, clothProfile, clothWave, clothShader } from './cloth.js';
 import { standardizeSurfaceMaterials } from './materials.js';
+import { createArchitecturalSurfaces } from './surface-materials.js';
 import { batchModel, modelMetrics } from './model-optimization.js';
 
 const TAU = Math.PI * 2;
 let seed = 48;
 const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
-
-function surfaceTexture(kind) {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 512;
-  const ctx = canvas.getContext('2d');
-  const pixels = ctx.createImageData(512, 512);
-  for (let y = 0; y < 512; y++) {
-    for (let x = 0; x < 512; x++) {
-      const i = (y * 512 + x) * 4;
-      let value;
-      if (kind === 'wood') {
-        const grain = Math.sin(x * .7 + Math.sin(y * .012) * 2 + Math.sin(x * .055) * 4);
-        value = 193 + grain * 6 + Math.sin(x * 2.4 + y * .004) * 3 + random() * 8;
-      } else if (kind === 'tile') {
-        const rim = y < 14 ? 23 * (1 - y / 14) : 0;
-        value = 207 - rim + (random() - .5) * 28;
-      } else value = 204 + (random() - .5) * 45;
-      pixels.data[i] = value;
-      pixels.data[i + 1] = value;
-      pixels.data[i + 2] = value;
-      pixels.data[i + 3] = 255;
-    }
-  }
-  ctx.putImageData(pixels, 0, 0);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
-  return texture;
-}
 
 function plaqueTexture() {
   const canvas = document.createElement('canvas');
@@ -72,27 +43,27 @@ function rockGeometry(radius) {
 }
 
 export function buildPavilion({ plaqueMap } = {}) {
-  seed = 48; // Every rebuild/export starts from the same garden and tile distribution.
+  // Seed 48 after the legacy three 512² texture fields. Texture changes now leave
+  // every established tile, tree, blossom and grass placement untouched.
+  seed = 1622933552;
   const root = new THREE.Group(); root.name = '长衣亭 · 予张依婷';
   const pavilion = new THREE.Group(); pavilion.name = '六角重檐亭'; root.add(pavilion);
   const garden = new THREE.Group(); garden.name = '临水桃花庭'; root.add(garden);
-  const woodMap = surfaceTexture('wood');
-  const stoneMap = surfaceTexture('stone');
-  const tileMap = surfaceTexture('tile');
+  const surfaces = createArchitecturalSurfaces();
   const meadowMap = meadowTexture();
   const mats = {
-    wood: new THREE.MeshStandardMaterial({ color: '#8f4b3d', map: woodMap, bumpMap: woodMap, bumpScale: .012, roughness: .58 }),
-    darkWood: new THREE.MeshStandardMaterial({ color: '#49342a', map: woodMap, roughness: .76 }),
-    stone: new THREE.MeshStandardMaterial({ color: '#c4c5b9', map: stoneMap, bumpMap: stoneMap, bumpScale: .045, roughness: .93 }),
-    stoneDark: new THREE.MeshStandardMaterial({ color: '#838f82', map: stoneMap, bumpMap: stoneMap, bumpScale: .035, roughness: .94 }),
-    tile: new THREE.MeshPhysicalMaterial({ color: '#454b48', map: tileMap, roughness: .76, metalness: .01, clearcoat: .06, clearcoatRoughness: .65, bumpMap: tileMap, bumpScale: .009 }),
-    tileLight: new THREE.MeshStandardMaterial({ color: '#69716c', map: tileMap, roughness: .74, metalness: .015, bumpMap: tileMap, bumpScale: .007 }),
+    wood: new THREE.MeshStandardMaterial({ color: '#8f4b3d', ...surfaces.wood, normalScale: new THREE.Vector2(.45, .45), roughness: .88 }),
+    darkWood: new THREE.MeshStandardMaterial({ color: '#49342a', ...surfaces.wood, normalScale: new THREE.Vector2(.38, .38), roughness: 1 }),
+    stone: new THREE.MeshStandardMaterial({ color: '#c4c5b9', ...surfaces.stone, normalScale: new THREE.Vector2(.68, .68), roughness: 1 }),
+    stoneDark: new THREE.MeshStandardMaterial({ color: '#838f82', ...surfaces.stone, normalScale: new THREE.Vector2(.60, .60), roughness: 1 }),
+    tile: new THREE.MeshStandardMaterial({ color: '#454b48', ...surfaces.tile, normalScale: new THREE.Vector2(.45, .45), roughness: 1 }),
+    tileLight: new THREE.MeshStandardMaterial({ color: '#69716c', ...surfaces.tile, normalScale: new THREE.Vector2(.38, .38), roughness: .96 }),
     tileDark: new THREE.MeshStandardMaterial({ color: '#353b37', roughness: .8 }),
     brass: new THREE.MeshStandardMaterial({ color: '#b89a62', roughness: .43, metalness: .6 }),
     soil: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, map: meadowMap, bumpMap: meadowMap, bumpScale: .025 }),
-    bark: new THREE.MeshStandardMaterial({ color: '#675849', roughness: 1, map: woodMap, bumpMap: woodMap, bumpScale: .045 }),
+    bark: new THREE.MeshStandardMaterial({ color: '#716254', ...surfaces.bark, normalScale: new THREE.Vector2(.85, .85), roughness: 1 }),
     leaf: new THREE.MeshStandardMaterial({ color: '#71886b', roughness: .85, side: THREE.DoubleSide }),
-    lantern: new THREE.MeshStandardMaterial({ color: '#eedcaf', roughness: .75, emissive: '#ffbf70', emissiveIntensity: .25 }),
+    lantern: new THREE.MeshStandardMaterial({ color: '#eedcaf', ...surfaces.paper, roughness: .92, emissive: '#ffbf70', emissiveMap: surfaces.paper.map, emissiveIntensity: .25 }),
   };
   for (const [name, material] of Object.entries(mats)) material.name = name;
   const lanterns = [], lightPositions = [], curtainTies = [], clothTime = { value: 0 };
@@ -104,18 +75,40 @@ export function buildPavilion({ plaqueMap } = {}) {
     m.castShadow = true; m.receiveShadow = true; parent.add(m); return m;
   }
   function box(w, h, d, x, y, z, material = mats.wood, parent = pavilion) {
-    return mesh(new THREE.BoxGeometry(w, h, d), material, v(x, y, z), parent);
+    const stone = material === mats.stone || material === mats.stoneDark;
+    const timber = material === mats.wood || material === mats.darkWood;
+    const bevel = (stone || timber) && Math.min(w, h, d) >= .075 ? (stone ? .006 : .003) : 0;
+    const geometry = bevel ? beveledBoxGeometry(w, h, d, bevel) : new THREE.BoxGeometry(w, h, d);
+    if (stone) {
+      const { position, normal, uv } = geometry.attributes;
+      for (let i = 0; i < position.count; i++) {
+        const nx = Math.abs(normal.getX(i)), ny = Math.abs(normal.getY(i)), nz = Math.abs(normal.getZ(i));
+        if (ny >= nx && ny >= nz) uv.setXY(i, (position.getX(i) + x) * 1.3, (position.getZ(i) + z) * 1.3);
+        else uv.setXY(i, (nx > nz ? position.getZ(i) + z : position.getX(i) + x) * 1.3, (position.getY(i) + y) * 1.3);
+      }
+    }
+    return mesh(geometry, material, v(x, y, z), parent);
   }
   function cylinder(rt, rb, h, x, y, z, material, segments = 24, parent = pavilion) {
-    return mesh(new THREE.CylinderGeometry(rt, rb, h, segments), material, v(x, y, z), parent);
+    const geometry = new THREE.CylinderGeometry(rt, rb, h, segments);
+    if (material === mats.stone || material === mats.stoneDark) {
+      const { position, normal, uv } = geometry.attributes, repeats = Math.max(1, Math.round((rt + rb) / 2 * TAU * 1.3));
+      for (let i = 0; i < position.count; i++) {
+        if (Math.abs(normal.getY(i)) > .9) uv.setXY(i, (position.getX(i) + x) * 1.3, (position.getZ(i) + z) * 1.3);
+        else uv.setXY(i, uv.getX(i) * repeats, (position.getY(i) + y) * 1.3);
+      }
+    }
+    return mesh(geometry, material, v(x, y, z), parent);
   }
   function beam(a, b, width, height, material = mats.wood, parent = pavilion) {
     const m = box(width, height, a.distanceTo(b), ...a.clone().add(b).multiplyScalar(.5).toArray(), material, parent);
     if (material === mats.wood || material === mats.darkWood) {
       const { position, normal, uv } = m.geometry.attributes;
       for (let i = 0; i < position.count; i++) {
-        const cross = Math.abs(normal.getX(i)) > .5 ? position.getY(i) / height : position.getX(i) / width;
-        uv.setXY(i, cross + .5, position.getZ(i) / a.distanceTo(b) + .5);
+        const nx = Math.abs(normal.getX(i)), ny = Math.abs(normal.getY(i)), nz = Math.abs(normal.getZ(i));
+        // Keep a physical grain scale; end faces need a 2D UV frame as well.
+        if (nz >= nx && nz >= ny) uv.setXY(i, position.getX(i) / .22 + .5, position.getY(i) / .22 + .5);
+        else uv.setXY(i, (nx > ny ? position.getY(i) : position.getX(i)) / .22 + .5, position.getZ(i) / 2 + .5);
       }
     }
     m.quaternion.setFromUnitVectors(v(0, 0, 1), b.clone().sub(a).normalize());
@@ -319,7 +312,7 @@ export function buildPavilion({ plaqueMap } = {}) {
   plaqueFace.name = '长衣亭题字';
   for (const x of [-.62, .62]) box(.025, .15, .035, x, 4.25, 2.8, mats.brass);
 
-  const clothMaterial = new THREE.MeshPhysicalMaterial({ name: '轻纱', color: '#ecebda', side: THREE.DoubleSide, transparent: true, opacity: .79, roughness: 1, sheen: .7, sheenColor: new THREE.Color('#fff4e4'), depthWrite: false });
+  const clothMaterial = new THREE.MeshPhysicalMaterial({ name: '轻纱', color: '#ecebda', ...surfaces.linen, normalScale: new THREE.Vector2(.3, .3), side: THREE.DoubleSide, transparent: true, opacity: .79, roughness: 1, sheen: .7, sheenColor: new THREE.Color('#fff4e4'), depthWrite: false });
   clothMaterial.forceSinglePass = true;
   clothMaterial.onBeforeCompile = shader => {
     shader.uniforms.uClothTime = clothTime;
@@ -454,7 +447,7 @@ export function buildPavilion({ plaqueMap } = {}) {
     rock.scale.set(1.5, .55 + random() * .55, .8); rock.rotation.set(random(), random() * TAU, random());
   }
   const gate = new THREE.Group(); gate.name = '月洞门·桥头入园'; gate.position.set(4.7, .01, 16.3); gate.rotation.y = .57; garden.add(gate);
-  const plaster = new THREE.MeshStandardMaterial({ color: '#d6d6c8', map: stoneMap, bumpMap: stoneMap, bumpScale: .025, roughness: .97 });
+  const plaster = new THREE.MeshStandardMaterial({ name: '石灰抹面', color: '#d6d6c8', ...surfaces.stone, normalScale: new THREE.Vector2(.25, .25), roughness: 1 });
   const gateCenterY = 1.17, gateRadius = 1.47, openingAngle = Math.asin(gateCenterY / gateRadius);
   const gateShape = new THREE.Shape(); gateShape.moveTo(-2.35, 0);
   gateShape.lineTo(-Math.sqrt(gateRadius ** 2 - gateCenterY ** 2), 0);
@@ -616,7 +609,7 @@ export function buildPavilion({ plaqueMap } = {}) {
   standardizeSurfaceMaterials(root);
   batchModel(root);
   root.userData.geometryMetrics = modelMetrics(root);
-  root.userData.design = { type: 'original-artistic-pavilion', units: 'metres', roofDeckThickness: .055, pavingRadius: 3.74, revision: 4 };
+  root.userData.design = { type: 'original-artistic-pavilion', units: 'metres', roofDeckThickness: .055, pavingRadius: 3.74, revision: 5 };
 
   return {
     root, lanternMaterial: mats.lantern, lightPositions,

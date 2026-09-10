@@ -1,6 +1,48 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
+// Six original planes, twelve edge chamfers and eight corner cuts. All vertices
+// stay inside the original box, so existing joints and clearances cannot grow.
+export function beveledBoxGeometry(width, height, depth, radius = .003) {
+  if (![width, height, depth, radius].every(value => Number.isFinite(value) && value > 0)) throw new Error('Invalid bevel dimensions');
+  const half = [width / 2, height / 2, depth / 2], r = Math.min(radius, ...half.map(value => value * .25));
+  const inner = half.map(value => value - r), positions = [], normals = [], uvs = [], indices = [];
+  function face(points, direction) {
+    const normal = new THREE.Vector3(...direction).normalize();
+    const p = points.map(point => new THREE.Vector3(...point));
+    if (p[1].clone().sub(p[0]).cross(p[2].clone().sub(p[0])).dot(normal) < 0) p.reverse();
+    const axis = direction.findIndex(value => Math.abs(value) === Math.max(...direction.map(Math.abs)));
+    const a = (axis + 1) % 3, b = (axis + 2) % 3, start = positions.length / 3;
+    for (const point of p) {
+      positions.push(...point.toArray()); normals.push(...normal.toArray());
+      uvs.push(point.getComponent(a) / (half[a] * 2) + .5, point.getComponent(b) / (half[b] * 2) + .5);
+    }
+    for (let i = 1; i < p.length - 1; i++) indices.push(start, start + i, start + i + 1);
+  }
+  for (let axis = 0; axis < 3; axis++) for (const sign of [-1, 1]) {
+    const a = (axis + 1) % 3, b = (axis + 2) % 3, direction = [0, 0, 0]; direction[axis] = sign;
+    face([[-1,-1],[1,-1],[1,1],[-1,1]].map(([sa, sb]) => {
+      const point = [0, 0, 0]; point[axis] = half[axis] * sign; point[a] = inner[a] * sa; point[b] = inner[b] * sb; return point;
+    }), direction);
+    for (const otherSign of [-1, 1]) {
+      const direction = [0, 0, 0]; direction[axis] = sign; direction[a] = otherSign;
+      face([[0,-1],[1,-1],[1,1],[0,1]].map(([side, end]) => {
+        const point = [0, 0, 0]; point[axis] = (side ? inner[axis] : half[axis]) * sign;
+        point[a] = (side ? half[a] : inner[a]) * otherSign; point[b] = inner[b] * end; return point;
+      }), direction);
+    }
+  }
+  for (const x of [-1, 1]) for (const y of [-1, 1]) for (const z of [-1, 1]) {
+    const sign = [x, y, z];
+    face([0, 1, 2].map(axis => inner.map((value, i) => (i === axis ? half[i] : value) * sign[i])), sign);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geometry.setIndex(indices);
+  return geometry;
+}
+
 export function hexRingGeometry(radius, width, height) {
   const outer = radius + width / (2 * Math.cos(Math.PI / 6)), inner = radius - width / (2 * Math.cos(Math.PI / 6));
   const shape = new THREE.Shape(), hole = new THREE.Path();
@@ -108,7 +150,7 @@ export function timberColumnGeometry() {
     [0, 0], [.174, 0], [.177, .3], [.171, 1.2], [.157, 2.35], [.14, 3.35], [0, 3.35],
   ].map(p => new THREE.Vector2(...p)), 24);
   const { position, uv } = geometry.attributes;
-  for (let i = 0; i < position.count; i++) uv.setY(i, position.getY(i) / 3.35);
+  for (let i = 0; i < position.count; i++) uv.setXY(i, uv.getX(i) * 5, position.getY(i) / 2);
   return geometry;
 }
 

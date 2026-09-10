@@ -98,5 +98,17 @@ export function modelMetrics(root) {
     materials.add(object.material);
     for (const value of Object.values(object.material)) if (value?.isTexture) textures.add(value);
   });
-  return { triangles, geometryBytes, meshes, instances, geometries: geometries.size, materials: materials.size, textures: textures.size };
+  // Uncompressed RGBA8 model textures only; render targets, environment and water
+  // are accounted separately by the renderer. Include every generated mip level.
+  let textureBytes = 0, textureBytesWithMipmaps = 0;
+  for (const texture of textures) {
+    let width = texture.image?.width ?? 0, height = texture.image?.height ?? 0;
+    textureBytes += width * height * 4;
+    while (width && height) {
+      textureBytesWithMipmaps += width * height * 4;
+      if (!texture.generateMipmaps || (width === 1 && height === 1)) break;
+      width = Math.max(1, Math.floor(width / 2)); height = Math.max(1, Math.floor(height / 2));
+    }
+  }
+  return { triangles, geometryBytes, meshes, instances, geometries: geometries.size, materials: materials.size, textures: textures.size, textureBytes, textureBytesWithMipmaps };
 }

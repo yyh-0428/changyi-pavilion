@@ -5,6 +5,7 @@ import { validateBytes } from 'gltf-validator';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { modelMetrics } from '../src/model-optimization.js';
+import { lightingPreset } from '../src/lighting.js';
 
 globalThis.self = { URL };
 globalThis.createImageBitmap = async blob => loadImage(Buffer.from(await blob.arrayBuffer()));
@@ -27,7 +28,7 @@ const compatible = filename.includes('compatible');
 assert.equal(Boolean(document.extensionsRequired?.includes('EXT_mesh_gpu_instancing')), !compatible);
 if (compatible) assert.equal(document.extensionsRequired,undefined);
 const gltf = await new GLTFLoader().parseAsync(file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength), '');
-const root = gltf.scene.children.find(object => object.userData.design?.revision === 4);
+const root = gltf.scene.children.find(object => object.userData.design?.revision === 5);
 assert.ok(root);
 const metrics = modelMetrics(root);
 assert.equal(metrics.triangles,root.userData.geometryMetrics.triangles);
@@ -51,6 +52,28 @@ gltf.scene.traverse(object => {
   for (let i = 0; normal && i < normal.count; i += 137) assert.ok(Math.abs(Math.hypot(normal.getX(i),normal.getY(i),normal.getZ(i)) - 1) < 1e-4);
 });
 assert.equal(lamps,6); assert.equal(directionals,2); assert.ok(normalMaps.size >= 6);
+const materials = new Map();
+gltf.scene.traverse(object => { if (object.isMesh) materials.set(object.material.name, object.material); });
+for (const name of ['wood', 'darkWood', 'stone', 'stoneDark', 'tile', 'tileLight', 'bark', '石灰抹面']) {
+  const material = materials.get(name); assert.ok(material, name);
+  assert.ok(material.map && material.normalMap && material.roughnessMap, `${name}: all PBR maps survive`);
+  assert.equal(material.metalness, 0, `${name}: dielectric`);
+  assert.equal(material.map.colorSpace, THREE.SRGBColorSpace);
+  assert.equal(material.normalMap.colorSpace, THREE.NoColorSpace);
+  assert.equal(material.roughnessMap.colorSpace, THREE.NoColorSpace);
+}
+assert.notEqual(materials.get('wood').map.image, materials.get('bark').map.image);
+const linen = materials.get('轻纱'), paper = materials.get('lantern');
+assert.deepEqual(linen.map.repeat.toArray(), [8, 24]);
+assert.deepEqual(linen.normalMap.repeat.toArray(), [8, 24]);
+assert.ok(paper.emissiveMap);
+const preset = lightingPreset(gltf.scene.userData.theme);
+assert.equal(paper.emissiveIntensity, preset.lanternEmission);
+assert.deepEqual(gltf.scene.userData.lighting, preset);
+assert.equal(gltf.scene.userData.exposure, preset.exposure);
+const key = gltf.scene.getObjectByName('主光');
+assert.equal(key.intensity, preset.keyIntensity);
+assert.ok(new THREE.Vector3(0, 0, -1).transformDirection(key.matrixWorld).distanceTo(new THREE.Vector3(...preset.keyPosition).normalize().negate()) < 1e-6);
 assert.ok(gltf.scene.getObjectByName('场景环境'));
 assert.equal(gltf.scene.userData.exportProfile,compatible ? 'compatible' : 'compact');
 if (!compatible) assert.equal(colorInstances,metrics.instances - 2210);

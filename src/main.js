@@ -2,11 +2,11 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Sky } from 'three/addons/objects/Sky.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { createIcons, Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Image, Box, X, RotateCw } from 'lucide';
 import { buildPavilion } from './model.js';
 import { createLake, createLakebed } from './lake.js';
 import { createTerrain } from './scene-context.js';
+import { applyLighting, lightingPreset, MOON_POSITION } from './lighting.js';
 
 const icons = { Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Image, Box, X, RotateCw };
 createIcons({ icons });
@@ -84,26 +84,30 @@ async function start() {
   }
   setView('overview', false); projection();
 
-  const hemisphere = new THREE.HemisphereLight('#deedee', '#6e7860', 1.0); scene.add(hemisphere);
-  const sun = new THREE.DirectionalLight('#ffe0ae', 2.8); sun.position.set(-12, 16, 8);
+  const hemisphere = new THREE.HemisphereLight(); scene.add(hemisphere);
+  const sun = new THREE.DirectionalLight(); sun.name = '主光';
   sun.castShadow = true;
   sun.shadow.mapSize.set(mobileQuery.matches ? 1024 : 2048, mobileQuery.matches ? 1024 : 2048);
   Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 16, bottom: -12, near: 1, far: 55 });
   sun.shadow.normalBias = .025; sun.shadow.bias = -.0001; sun.shadow.radius = 3;
   scene.add(sun);
-  const fill = new THREE.DirectionalLight('#cde6dd', .6); fill.position.set(8, 6, -12); scene.add(fill);
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const room = new RoomEnvironment();
-  const environment = pmrem.fromScene(room, .04);
-  scene.environment = environment.texture; scene.environmentIntensity = .25;
-  room.dispose(); pmrem.dispose();
+  const fill = new THREE.DirectionalLight(); fill.name = '补光'; scene.add(fill);
+  applyLighting(theme, { sun, fill, hemisphere, scene, renderer });
 
   const sky = new Sky(); sky.scale.setScalar(4500); scene.add(sky);
   const skyUniforms = sky.material.uniforms;
   skyUniforms.turbidity.value = 3.5; skyUniforms.rayleigh.value = 1.25;
   skyUniforms.mieCoefficient.value = .006; skyUniforms.mieDirectionalG.value = .82;
-  const sunDirection = new THREE.Vector3(-.65, .16, -.65).normalize();
+  const sunDirection = new THREE.Vector3(...lightingPreset('sunset').keyPosition).normalize();
   skyUniforms.sunPosition.value.copy(sunDirection);
+  // Bake the same outdoor sky once; no per-frame environment capture or added pass.
+  const pmrem = new THREE.PMREMGenerator(renderer), environmentScene = new THREE.Scene();
+  const environmentSky = sky.clone(); environmentScene.add(environmentSky);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000), new THREE.MeshBasicMaterial({ color: '#596153' }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -1; environmentScene.add(ground);
+  const environment = pmrem.fromScene(environmentScene, .04);
+  scene.environment = environment.texture;
+  ground.geometry.dispose(); ground.material.dispose(); pmrem.dispose();
 
   // Reuse the original model's lettering so every phone gets the same calligraphy.
   const plaqueMap = await new THREE.TextureLoader().loadAsync(`${import.meta.env.BASE_URL}textures/plaque-atlas.png`);
@@ -126,7 +130,7 @@ async function start() {
   }
   const moonMap = new THREE.CanvasTexture(moonTexture); moonMap.colorSpace = THREE.SRGBColorSpace;
   const moon = new THREE.Mesh(new THREE.SphereGeometry(1.8, 32, 24), new THREE.MeshBasicMaterial({ map: moonMap, color: '#eaf1e0', fog: false }));
-  moon.position.set(8, 22, -48); moon.visible = false; scene.add(moon);
+  moon.position.set(...MOON_POSITION); moon.visible = false; scene.add(moon);
   const starPositions = [];
   for (let i = 0; i < 1150; i++) {
     const azimuth = i * 2.399963, elevation = .1 + ((i * 83) % 997) / 997 * 1.45;
@@ -151,20 +155,13 @@ async function start() {
     theme = value; const night = value === 'moonlight';
     experience.dataset.theme = value;
     document.querySelectorAll('[data-light]').forEach(button => { button.classList.toggle('active', button.dataset.light === value); button.setAttribute('aria-pressed', String(button.dataset.light === value)); });
-    scene.background.set(night ? '#203c3b' : '#cbd9d2'); scene.fog.color.set(night ? '#2b4744' : '#cbd9d2');
-    scene.fog.density = night ? .013 : .009;
     sky.visible = !night; moon.visible = night; stars.visible = night;
-    hemisphere.color.set(night ? '#c8dfe1' : '#deedee'); hemisphere.groundColor.set(night ? '#344b3a' : '#6e7860'); hemisphere.intensity = night ? .9 : 1.0;
-    sun.color.set(night ? '#c1dce6' : '#ffe0ae'); sun.intensity = night ? 1.25 : 2.8;
-    sun.position.set(...(night ? [8, 18, -9] : [-12, 16, 8]));
-    fill.intensity = night ? .3 : .6;
-    lampLights.forEach(light => { light.intensity = night ? 10 : .4; });
-    model.lanternMaterial.emissiveIntensity = night ? 2 : .25;
+    applyLighting(value, { sun, fill, hemisphere, lamps: lampLights, lanternMaterial: model.lanternMaterial, scene, renderer });
     lake.setTheme(night);
-    renderer.toneMappingExposure = night ? 1.18 : 1.04;
     $('#scene-time').textContent = night ? '月夜 · 亥时' : '夕照 · 酉时';
     if (changeVerse) setVerse(night ? 0 : 2);
   }
+  setTheme(theme, false);
   document.querySelectorAll('[data-light]').forEach(button => button.addEventListener('click', () => setTheme(button.dataset.light)));
 
   const menus = [['#view-open', '#view-menu'], ['#download-open', '#download-menu']];

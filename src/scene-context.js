@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createLakebed } from './lake.js';
+import { applyLighting, lightingPreset } from './lighting.js';
 
 // The website and exported scene use exactly the same terrain.
 export function createTerrain() {
@@ -30,7 +31,7 @@ export function createWaterSnapshot(time = 0, night = false, normalMap) {
     normal.setXYZ(i, n.x, n.y, n.z);
     uv.setXY(i, x * .16 + time * .008, z * .16 + time * .003);
   }
-  const material = new THREE.MeshStandardMaterial({ name: '清波·静态水面近似', color: night ? '#254744' : '#54827b', roughness: .2, metalness: .15, normalMap: normalMap ?? null, normalScale: new THREE.Vector2(.115, .115) });
+  const material = new THREE.MeshPhysicalMaterial({ name: '清波·静态水面近似', color: night ? '#254744' : '#54827b', roughness: .18, metalness: 0, ior: 1.333, normalMap: normalMap ?? null, normalScale: new THREE.Vector2(.115, .115) });
   const water = new THREE.Mesh(geometry, material); water.name = '清波·导出快照';
   water.userData.approximation = 'Static PBR surface; realtime reflection, refraction and depth absorption require the website renderer.';
   return water;
@@ -38,14 +39,14 @@ export function createWaterSnapshot(time = 0, night = false, normalMap) {
 
 // The command-line export starts at the same overview and evening lighting as the website.
 export function createExportContext(model, { time = 0, theme = 'sunset', normalMap } = {}) {
-  const night = theme === 'moonlight';
+  const preset = lightingPreset(theme);
   const camera = new THREE.PerspectiveCamera(39, 16 / 9, .1, 800);
   camera.position.set(19, 16, 32); camera.lookAt(.2, 1.7, 5.4);
-  const sun = new THREE.DirectionalLight(night ? '#c1dce6' : '#ffe0ae', night ? 1.25 : 2.8);
-  sun.position.set(...(night ? [8, 18, -9] : [-12, 16, 8])); sun.name = '主光';
-  const fill = new THREE.DirectionalLight('#cde6dd', night ? .3 : .6); fill.position.set(8, 6, -12); fill.name = '补光';
+  const sun = new THREE.DirectionalLight(); sun.name = '主光';
+  const fill = new THREE.DirectionalLight(); fill.name = '补光';
   const lamps = model.lightPositions.map((position, i) => {
-    const light = new THREE.PointLight('#ffbd70', night ? 10 : .4, 5.5, 2); light.position.copy(position); light.name = `灯光·${i + 1}`; return light;
+    const light = new THREE.PointLight('#ffbd70', preset.lampIntensity, 5.5, 2); light.position.copy(position); light.name = `灯光·${i + 1}`; return light;
   });
-  return { camera, objects: [createTerrain(), createLakebed(), sun, fill, ...lamps], time, waterTime: time, theme, normalMap, exposure: night ? 1.18 : 1.04 };
+  applyLighting(theme, { sun, fill, lamps, lanternMaterial: model.lanternMaterial });
+  return { camera, objects: [createTerrain(), createLakebed(), sun, fill, ...lamps], time, waterTime: time, theme, normalMap, exposure: preset.exposure };
 }
