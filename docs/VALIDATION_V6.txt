@@ -1,0 +1,112 @@
+✔ atomic GLB export verifies the replacement and preserves the old file on truncated input (14.338249ms)
+✔ conformal tiles stay closed at the narrow crown and wide eave, with clearance at laps (34.988494ms)
+✔ hex beam mitres and curved slabs enclose a single correctly wound solid (7.960771ms)
+✔ cross lattice has one member at the crossing and no doubled centre faces (4.777997ms)
+✔ dressed stones remain closed on straight and curved paths, and at all 77 clipped floor boundaries (34.443591ms)
+✔ snapshot decodes half-float UVs and bakes cloth without changing the source (2.295899ms)
+✔ portable expansion preserves transforms, normals and multiplied colours within 8-bit tolerance (38.827151ms)
+✔ water snapshot matches both live large-wave displacement terms at the captured time (23.181251ms)
+✔ Node version checks match the installed Vite engine requirement (0.896201ms)
+✔ Mac entrypoint handles Chinese, spaces and shell metacharacters in its folder name (366.645786ms)
+首次运行或依赖有变化，正在安装项目依赖…
+首次运行或依赖有变化，正在安装项目依赖…
+首次运行或依赖有变化，正在安装项目依赖…
+✔ dependency setup runs once, follows lock changes, and never stamps a failed install (16.333054ms)
+✔ launch lock reuses a verified service and refuses to terminate or replace an active unverified process (7.57003ms)
+✔ stop middleware authenticates this session and leaves unrelated routes untouched (0.962538ms)
+
+长衣亭已启动：http://127.0.0.1:4174/changyi-pavilion/
+请保留此窗口；按 Control+C 或双击 Stop-Mac.command 结束。
+
+长衣亭已停止。
+长衣亭已停止。
+✔ launcher uses Vite’s actual fallback port, opens only after listening, and cleans up on close/failure (9.351793ms)
+✔ all geometry, normals, indices and transforms are finite and in range (124.773085ms)
+✔ new tile shells are closed, correctly wound and have nonzero surface area (2.362678ms)
+✔ pointed leaves and cupped petals do not contain collapsed triangles (0.90057ms)
+✔ branch UV seam has matching positions and normals at every radius tier (1.340384ms)
+✔ paving clips to six straight faces, including exact boundary contacts (0.914499ms)
+✔ roof deck is visible from above and has a soffit at the specified depth (14.176432ms)
+✔ craft details stay within a bounded budget without removing tiles or garden instances (8.108024ms)
+✔ rebuilding in one session gives identical geometry and placement (2694.93862ms)
+✔ moon gate clears the path and curb tops and keeps a solid lintel (2.547984ms)
+✔ cloth uniforms advance without uploading vertices; lantern light follows its pivot (1.267211ms)
+✔ gathered curtains fit their elliptical ties and keep the same wind phase (1.686017ms)
+✔ physical surface maps stay within texture budget and carry valid colour and normal data (1202.422916ms)
+✔ millimetre chamfers have closed outward faces, keep dimensions and remove sharp corners (3.26108ms)
+✔ website and CLI share both lighting presets, including lantern emission and lunar direction (231.883347ms)
+✔ both GLB profiles retain surface maps, sheen weave transforms and emission without baking light into albedo (1391.617329ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6819.198967
+
+PRODUCTION BUILD
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 1577 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                         5.78 kB │ gzip:   2.06 kB
+dist/assets/index-BwJGzCYC.css         10.45 kB │ gzip:   3.13 kB
+dist/assets/export-scene-CiKN8-k8.js   41.08 kB │ gzip:  12.99 kB
+dist/assets/index-BU5CMg1T.js         660.91 kB │ gzip: 181.49 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.57s
+
+COMPACT GLB
+{
+  "filename": "changyi-pavilion.glb",
+  "validatorErrors": 0,
+  "validatorWarnings": 0,
+  "validatorInfos": 207,
+  "loaderRoundTrip": true,
+  "embeddedImages": 27,
+  "colorInstances": 64587,
+  "portableColors": 66,
+  "normalMaps": 10,
+  "lamps": 6,
+  "directionals": 2,
+  "cameras": 1,
+  "triangles": 2491436,
+  "instances": 66797,
+  "bytes": 34594956,
+  "modelBounds": [
+    27.85598373413086,
+    9.490000247955322,
+    42.34136724472046
+  ]
+}
+
+COMPATIBLE GLB
+Cross-profile parity: 153 sampled instances, 6 complete cloth meshes.
+{
+  "filename": "changyi-pavilion-compatible.glb",
+  "validatorErrors": 0,
+  "validatorWarnings": 0,
+  "validatorInfos": 3,
+  "loaderRoundTrip": true,
+  "embeddedImages": 27,
+  "colorInstances": 0,
+  "portableColors": 100,
+  "normalMaps": 10,
+  "lamps": 6,
+  "directionals": 2,
+  "cameras": 1,
+  "triangles": 2491436,
+  "instances": 0,
+  "bytes": 141979916,
+  "modelBounds": [
+    27.85598373413086,
+    9.490000247955322,
+    42.34136724472046
+  ]
+}

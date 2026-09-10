@@ -53,7 +53,21 @@ export function hexRingGeometry(radius, width, height) {
   }
   shape.closePath(); hole.closePath(); shape.holes.push(hole);
   const geometry = new THREE.ExtrudeGeometry(shape, { depth: height, bevelEnabled: false, steps: 1 });
-  geometry.rotateX(-Math.PI / 2); geometry.translate(0, -height / 2, 0); return geometry;
+  geometry.rotateX(-Math.PI / 2); geometry.translate(0, -height / 2, 0);
+  const { position: p, normal: n, uv } = geometry.attributes;
+  // Assign each face to its own mitred beam, with longitudinal grain.
+  const step = Math.PI / 3;
+  for (let i = 0; i < p.count; i += 3) {
+    const cx = (p.getX(i) + p.getX(i + 1) + p.getX(i + 2)) / 3;
+    const cz = (p.getZ(i) + p.getZ(i + 1) + p.getZ(i + 2)) / 3;
+    const a = (Math.floor((Math.atan2(cz, cx) + Math.PI * 2) / step) + .5) * step;
+    for (let j = i; j < i + 3; j++) {
+      const along = -Math.sin(a) * p.getX(j) + Math.cos(a) * p.getZ(j);
+      const across = Math.abs(n.getY(j)) > .5 ? Math.cos(a) * p.getX(j) + Math.sin(a) * p.getZ(j) : p.getY(j);
+      uv.setXY(j, across / .22, along / 2);
+    }
+  }
+  return geometry;
 }
 
 function clipHalfPlane(points, normal, distance) {
@@ -107,6 +121,52 @@ export function pathSlabGeometry(curve, start, end, left, right, thickness, star
   const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions,3)); geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2)); geometry.setIndex(indices); geometry.computeVertexNormals(); return geometry;
 }
 
+// The perimeter stays inside the original cut; both top and side faces catch
+// light along a real narrow chamfer instead of a painted outline.
+export function dressedSlabGeometry(top, thickness, bevel = .004, topTriangles) {
+  const r = Math.min(bevel, thickness / 4);
+  const contour = top.map(p => new THREE.Vector2(p.x, p.z));
+  const ccw = THREE.ShapeUtils.area(contour) > 0;
+  const inner = top.map((p, i) => {
+    const prev = contour[(i + top.length - 1) % top.length], curr = contour[i], next = contour[(i + 1) % top.length];
+    const a = curr.clone().sub(prev).normalize(), b = next.clone().sub(curr).normalize();
+    const na = new THREE.Vector2(-a.y, a.x).multiplyScalar(ccw ? 1 : -1);
+    const nb = new THREE.Vector2(-b.y, b.x).multiplyScalar(ccw ? 1 : -1);
+    const shift = na.clone().add(nb).multiplyScalar(r / Math.max(.15, 1 + na.dot(nb)));
+    if (shift.length() > r * 2.5) shift.setLength(r * 2.5);
+    return p.clone().add(new THREE.Vector3(shift.x, 0, shift.y));
+  });
+  const rings = [inner, top.map(p => p.clone().add(new THREE.Vector3(0, -r, 0))), top.map(p => p.clone().add(new THREE.Vector3(0, r - thickness, 0))), inner.map(p => p.clone().add(new THREE.Vector3(0, -thickness, 0)))];
+  const positions = [], uvs = [], indices = [];
+  const center = top.reduce((sum, p) => sum.add(p), new THREE.Vector3()).multiplyScalar(1 / top.length);
+  function face(vertices, expected) {
+    if (vertices[1].clone().sub(vertices[0]).cross(vertices[2].clone().sub(vertices[0])).dot(expected) < 0) vertices.reverse();
+    const start = positions.length / 3;
+    const horizontal = Math.abs(expected.y) > .9;
+    for (const p of vertices) { positions.push(p.x, p.y, p.z); uvs.push(horizontal ? p.x * 1.3 : (Math.abs(expected.x) > Math.abs(expected.z) ? p.z : p.x) * 1.3, horizontal ? p.z * 1.3 : p.y * 1.3); }
+    for (let i = 1; i < vertices.length - 1; i++) indices.push(start, start + i, start + i + 1);
+  }
+  const triangles = topTriangles || THREE.ShapeUtils.triangulateShape(inner.map(p => new THREE.Vector2(p.x, p.z)), []);
+  for (const triangle of triangles) {
+    face(triangle.map(i => rings[0][i]), new THREE.Vector3(0, 1, 0));
+    face(triangle.map(i => rings[3][i]), new THREE.Vector3(0, -1, 0));
+  }
+  for (let level = 0; level < 3; level++) for (let i = 0; i < top.length; i++) {
+    const j = (i + 1) % top.length, out = top[i].clone().add(top[j]).multiplyScalar(.5).sub(center); out.y = 0;
+    face([rings[level][i], rings[level][j], rings[level + 1][j], rings[level + 1][i]], out);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices); geometry.computeVertexNormals(); return geometry;
+}
+
+export function dressedPathSlabGeometry(curve, start, end, left, right, thickness, startFrame) {
+  const source = pathSlabGeometry(curve, start, end, left, right, thickness, startFrame);
+  const top = [0, 1, 3, 5, 4, 2].map(i => new THREE.Vector3().fromBufferAttribute(source.attributes.position, i));
+  const geometry = dressedSlabGeometry(top, thickness, Math.min(.005, (right - left) * .06), [[0, 1, 5], [1, 2, 5], [5, 2, 4], [2, 3, 4]]);
+  source.dispose(); return geometry;
+}
+
 // Clip a paving rectangle to the six faces of a point-on-X regular hexagon.
 export function clipToHexagon(points, radius) {
   const apothem = radius * Math.cos(Math.PI / 6);
@@ -126,9 +186,9 @@ export function clipToHexagon(points, radius) {
 }
 
 export function pavingStoneGeometry(points) {
-  const shape = new THREE.Shape(points.map(p => new THREE.Vector2(p.x, -p.y)));
-  const geometry = new THREE.ExtrudeGeometry(shape, { depth: .012, bevelEnabled: false, steps: 1 });
-  geometry.rotateX(-Math.PI / 2);
+  // Tiny cut boundary fragments use a proportionally smaller chamfer.
+  const shortest = Math.min(...points.map((p, i) => p.distanceTo(points[(i + 1) % points.length])));
+  const geometry = dressedSlabGeometry(points.map(p => new THREE.Vector3(p.x, .012, p.y)), .012, Math.min(.0025, shortest * .08));
   // A consistent world scale for stone grain, including cut boundary stones.
   const { position, normal, uv } = geometry.attributes;
   for (let i = 0; i < position.count; i++) {
@@ -139,10 +199,16 @@ export function pavingStoneGeometry(points) {
 }
 
 export function columnBaseGeometry() {
-  return new THREE.LatheGeometry([
+  const geometry = new THREE.LatheGeometry([
     [0, 0], [.267, 0], [.28, .018], [.28, .085], [.257, .112],
     [.222, .135], [.205, .17], [.205, .255], [.19, .285], [0, .285],
   ].map(p => new THREE.Vector2(...p)), 24);
+  const { position, normal, uv } = geometry.attributes;
+  for (let i = 0; i < position.count; i++) {
+    if (Math.abs(normal.getY(i)) > .8) uv.setXY(i, position.getX(i) * 1.3, position.getZ(i) * 1.3);
+    else uv.setXY(i, uv.getX(i) * 2, position.getY(i) * 1.3);
+  }
+  return geometry;
 }
 
 export function timberColumnGeometry() {

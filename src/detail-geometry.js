@@ -46,13 +46,14 @@ export function taperedBranchGeometry(points, baseRadius, tipRadius, segments = 
   const length = curve.getLength();
   for (let i = 0; i <= segments; i++) {
     const t = i / segments, center = curve.getPointAt(t);
-    const radius = tipRadius + (baseRadius - tipRadius) * (1 - t) ** .86;
+    const collar = baseRadius >= .025 && baseRadius > tipRadius ? baseRadius * .22 * Math.exp(-t * length / Math.max(baseRadius * 1.8, .08)) : 0;
+    const radius = tipRadius + (baseRadius - tipRadius) * (1 - t) ** .86 + collar;
     for (let j = 0; j <= sides; j++) {
       const angle = j / sides * Math.PI * 2;
       const offset = frames.normals[i].clone().multiplyScalar(Math.cos(angle)).addScaledVector(frames.binormals[i], Math.sin(angle));
-      const corrugation = 1 + Math.sin(angle * 3 + t * 13) * .055;
+      const corrugation = 1 + Math.sin(angle * 3 + t * 13) * .048 + Math.sin(angle * 5 - t * 8) * .022;
       positions.push(...center.clone().addScaledVector(offset, radius * corrugation).toArray());
-      uvs.push(j / sides, t * length / Math.max(baseRadius * 8, .1));
+      uvs.push(j / sides * Math.max(1, Math.round(baseRadius * Math.PI * 2 / .42)), t * length / .9);
       if (i < segments && j < sides) {
         const a = i * (sides + 1) + j, b = a + sides + 1;
         indices.push(a, b, a + 1, b, b + 1, a + 1);
@@ -73,14 +74,14 @@ export function taperedBranchGeometry(points, baseRadius, tipRadius, segments = 
   return geo;
 }
 
-export function peachLeafGeometry() {
+export function peachLeafGeometry(variant = 0) {
   const positions = [], uvs = [], indices = [], rows = 8, columns = 2;
   positions.push(0, 0, 0); uvs.push(.5, 0);
   for (let row = 1; row < rows; row++) {
-    const t = row / rows, width = Math.sin(Math.PI * t) ** .85 * .038 * (1 + (row % 2) * .045);
+    const t = row / rows, width = Math.sin(Math.PI * t) ** (.85 + variant * .1) * (.038 - variant * .002) * (1 + (row % 2) * .065);
     for (let column = 0; column <= columns; column++) {
       const across = column / columns * 2 - 1;
-      positions.push(across * width, t * .26, Math.sin(t * Math.PI) * (.012 - Math.abs(across) * .009) + t * t * .028);
+      positions.push(across * width + Math.sin(t * Math.PI) * variant * .006, t * .26, Math.sin(t * Math.PI) * (.012 - Math.abs(across) * .009) + t * t * .028 + Math.sin(t * Math.PI) * variant * .009);
       uvs.push(column / columns, t);
       if (row < rows - 1 && column < columns) {
         const a = 1 + (row - 1) * (columns + 1) + column, b = a + columns + 1;
@@ -104,13 +105,20 @@ export function peachLeafGeometry() {
 export function peachLeafTexture() {
   const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 512;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#73934c'; ctx.fillRect(0, 0, 128, 512);
+  const pixels = ctx.createImageData(128, 512);
+  for (let y = 0; y < 512; y++) for (let x = 0; x < 128; x++) {
+    const n = meadowNoise(x * .08 + 3, y * .024), fine = meadowNoise(x * .8, y * .5);
+    const edge = Math.abs(x - 64) / 64, age = Math.max(0, n - .57) * 26;
+    const i = (y * 128 + x) * 4;
+    pixels.data.set([83 + n * 21 + fine * 7 + age - edge * 9, 115 + n * 24 + fine * 7 - edge * 17, 49 + n * 15 + fine * 3 - edge * 5, 255], i);
+  }
+  ctx.putImageData(pixels, 0, 0);
   for (let x = 0; x < 128; x++) {
     ctx.fillStyle = `rgba(31,58,16,${Math.abs(x - 64) / 64 * .35})`; ctx.fillRect(x, 0, 1, 512);
   }
-  ctx.strokeStyle = '#aec27b'; ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(169,190,115,.72)'; ctx.lineWidth = 1.6;
   ctx.beginPath(); ctx.moveTo(64, 0); ctx.lineTo(64, 512); ctx.stroke();
-  ctx.strokeStyle = '#92a964'; ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(154,177,103,.55)'; ctx.lineWidth = .8;
   for (let y = 28; y < 500; y += 31) for (const side of [-1, 1]) {
     ctx.beginPath(); ctx.moveTo(64, y); ctx.quadraticCurveTo(64 + side * 30, y + 8, 64 + side * 62, y + 43); ctx.stroke();
   }

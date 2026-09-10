@@ -1,0 +1,40 @@
+Generated with built-in image_gen in one parallel batch.
+Three calls; no retries or variants.
+Requested resolution: 1024 x 1024. Actual returned resolution: 1254 x 1254, RGB PNG.
+
+peach-bark-albedo.png
+
+Use case: photorealistic-natural
+Asset type: physically neutral PBR diffuse/albedo texture for a realistic Chinese garden pavilion Three.js scene.
+Composition/framing: exactly one square 1024x1024 image; flat orthographic material sample filling the entire image edge to edge. Seamless and tileable across every edge, left to right and top to bottom.
+Lighting: evenly exposed, completely diffuse, neutral illumination.
+Constraints: Only believable fine surface material texture, not a rendered object. No baked shadows, no ambient occlusion, no specular shine, no directional lighting, no vignetting, no perspective, no text, no labels, no logos, no borders.
+Primary request: near-orthographic flat unwrapped bark from a mature Prunus persica peach tree, representing a physical sample 0.45 m wide by 0.9 m tall.
+Materials/textures: fine dark grey-brown irregular scaly bark, narrow vertical fissures, characteristic small horizontal lenticels. Restrained muted gray and warm brown palette; natural fine bark grain.
+Avoid: cracked mud, crocodile scales, regular stripes, trunk silhouette.
+
+------------------------------------------------------------
+
+pavilion-timber-albedo.png
+
+Use case: photorealistic-natural
+Asset type: physically neutral PBR diffuse/albedo texture for a realistic Chinese garden pavilion Three.js scene.
+Composition/framing: exactly one square 1024x1024 image; flat orthographic material sample filling the entire image edge to edge. Seamless and tileable across every edge, left to right and top to bottom.
+Lighting: evenly exposed, completely diffuse, neutral illumination.
+Constraints: Only believable fine surface material texture, not a rendered object. No baked shadows, no ambient occlusion, no specular shine, no directional lighting, no vignetting, no perspective, no text, no labels, no logos, no borders.
+Primary request: weathered traditional Chinese pavilion timber, an uninterrupted vertical old cedar/elm reddish walnut timber grain representing a physical sample 0.22 m wide by 2 m long.
+Materials/textures: long fine fibres with subtle natural growth direction; sparse dark pores; one small unobtrusive knot. Restrained reddish warm brown palette. Lightly oiled and aged while entirely matte and diffusely exposed.
+Avoid: glossy highlights, planks, seams, borders.
+
+------------------------------------------------------------
+
+roof-clay-albedo.png
+
+Use case: photorealistic-natural
+Asset type: physically neutral PBR diffuse/albedo texture for a realistic Chinese garden pavilion Three.js scene.
+Composition/framing: exactly one square 1024x1024 image; flat orthographic material sample filling the entire image edge to edge. Seamless and tileable across every edge, left to right and top to bottom.
+Lighting: evenly exposed, completely diffuse, neutral illumination.
+Constraints: Only believable fine surface material texture, not a rendered object. No baked shadows, no ambient occlusion, no specular shine, no directional lighting, no vignetting, no perspective, no text, no labels, no logos, no borders.
+Primary request: one continuous flat surface of grey-blue unglazed Chinese fired roof clay material.
+Materials/textures: charcoal blue slate gray, muted and low saturation; extremely fine ceramic pores; subtle irregular kiln clouds; tiny sparse pale mineral freckles; gentle fine rolling tool marks.
+Avoid: actual roof tiles, grooves, seams, grass, moss.

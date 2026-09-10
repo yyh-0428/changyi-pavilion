@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { detailRandom } from './surface-finishing.js';
 
 export const ROOF_COLOR_SCALE = 1.1;
 
@@ -67,7 +68,18 @@ export function roofTileSectors(spec, pan, tileColors, sectorColors, material) {
   for (let row = 0; row < spec.rows; row++) for (let column = pan ? 0 : 1; column < spec.lanes; column++) {
     const geometry = conformalTileGeometry({ ...spec, row, column, pan });
     const color = colors[tile++], rgb = new Uint8Array(geometry.attributes.position.count * 3);
-    for (let i = 0; i < rgb.length; i += 3) rgb.set([color.r, color.g, color.b].map(c => Math.round(THREE.MathUtils.clamp(c / ROOF_COLOR_SCALE,0,1) * 255)), i);
+    const { uv } = geometry.attributes, nx = pan ? 4 : 6, shellVertices = (nx + 1) * 3 * 2;
+    const offsetU = detailRandom(tile, 11) * 13, offsetV = detailRandom(tile, 18) * 13;
+    // Different areas of the kiln texture for each tile; coherent water marks
+    // remain at lap lines, while exposed cut edges show the lighter clay body.
+    for (let i = 0; i < uv.count; i++) {
+      const along = i < shellVertices ? (Math.floor(i / (nx + 1)) % 3) / 2 : 1;
+      const edge = i >= shellVertices;
+      const weather = edge ? 1.09 : .94 + along * .055;
+      const cool = pan ? .008 * (1 - along) : 0;
+      rgb.set([color.r * weather, color.g * weather, color.b * weather + cool].map(c => Math.round(THREE.MathUtils.clamp(c / ROOF_COLOR_SCALE, 0, 1) * 255)), i * 3);
+      uv.setXY(i, uv.getX(i) * .59 + offsetU, uv.getY(i) * .83 + offsetV);
+    }
     geometry.setAttribute('color', new THREE.Uint8BufferAttribute(rgb, 3, true)); geometries.push(geometry);
   }
   const geometry = mergeGeometries(geometries);

@@ -91,7 +91,7 @@ export function captureScene(root, context = {}) {
     scene.add(view);
   }
   scene.userData = {
-    generator: 'Changyi Pavilion 5', time, theme, units: 'metres', exposure,
+    generator: 'Changyi Pavilion 6', time, theme, units: 'metres', exposure,
     modelBounds: new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3()).toArray(),
     detailCounts: structuredClone(root.userData.detailCounts),
     displayNotes: 'Choose the embedded camera. Water is a static PBR approximation. Procedural sky, fog, hemisphere/IBL lighting, ACES exposure and camera view offset depend on the viewer and are recorded as metadata, not baked into materials.',

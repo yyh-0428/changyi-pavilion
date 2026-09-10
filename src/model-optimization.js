@@ -13,7 +13,9 @@ export function batchModel(root) {
     const key = `${parent.uuid}:${object.material.uuid}:${object.castShadow}:${object.receiveShadow}`;
     if (!batches.has(key)) batches.set(key, { parent, material: object.material, geometries: [], castShadow: object.castShadow, receiveShadow: object.receiveShadow });
     let geometry = object.geometry.clone();
-    for (const name of Object.keys(geometry.attributes)) if (!['position', 'normal', 'uv'].includes(name)) geometry.deleteAttribute(name);
+    for (const name of Object.keys(geometry.attributes)) if (!['position', 'normal', 'uv', 'color'].includes(name)) geometry.deleteAttribute(name);
+    if (object.material.vertexColors && !geometry.attributes.color) geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(geometry.attributes.position.count * 3).fill(1), 3));
+    if (!object.material.vertexColors) geometry.deleteAttribute('color');
     if (!geometry.attributes.uv) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(geometry.attributes.position.count * 2), 2));
     if (!geometry.index) {
       const indexed = mergeVertices(geometry, 1e-5); geometry.dispose(); geometry = indexed;

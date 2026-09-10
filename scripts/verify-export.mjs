@@ -28,7 +28,7 @@ const compatible = filename.includes('compatible');
 assert.equal(Boolean(document.extensionsRequired?.includes('EXT_mesh_gpu_instancing')), !compatible);
 if (compatible) assert.equal(document.extensionsRequired,undefined);
 const gltf = await new GLTFLoader().parseAsync(file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength), '');
-const root = gltf.scene.children.find(object => object.userData.design?.revision === 5);
+const root = gltf.scene.children.find(object => object.userData.design?.revision === 6);
 assert.ok(root);
 const metrics = modelMetrics(root);
 assert.equal(metrics.triangles,root.userData.geometryMetrics.triangles);

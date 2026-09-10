@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { clayTileGeometry, taperedBranchGeometry, peachLeafGeometry, peachLeafTexture, peachBlossomGeometry, meadowNoise, meadowTexture, grassClumpGeometry } from './detail-geometry.js';
-import { clipToHexagon, pavingStoneGeometry, columnBaseGeometry, timberColumnGeometry, bracketArmGeometry, bridgeHeight, archStoneGeometry, hexRingGeometry, joinedLatticeGeometry, pathSlabGeometry, beveledBoxGeometry } from './architecture-geometry.js';
+import { clipToHexagon, pavingStoneGeometry, columnBaseGeometry, timberColumnGeometry, bracketArmGeometry, bridgeHeight, archStoneGeometry, hexRingGeometry, joinedLatticeGeometry, dressedPathSlabGeometry as pathSlabGeometry, beveledBoxGeometry } from './architecture-geometry.js';
 import { roofPoint, roofTileSectors, tileElevation, ROOF_COLOR_SCALE } from './roof-geometry.js';
 import { CLOTH_HEIGHT, CLOTH_TIE_Y, clothProfile, clothWave, clothShader } from './cloth.js';
 import { standardizeSurfaceMaterials } from './materials.js';
 import { createArchitecturalSurfaces } from './surface-materials.js';
+import { finishSurfaces, timberUV, detailRandom } from './surface-finishing.js';
+import { addPavilionCraft } from './pavilion-craft.js';
 import { batchModel, modelMetrics } from './model-optimization.js';
 
 const TAU = Math.PI * 2;
@@ -42,32 +44,33 @@ function rockGeometry(radius) {
   const smooth = mergeVertices(geometry, .0001); smooth.computeVertexNormals(); geometry.dispose(); return smooth;
 }
 
-export function buildPavilion({ plaqueMap } = {}) {
+export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
   // Seed 48 after the legacy three 512² texture fields. Texture changes now leave
   // every established tile, tree, blossom and grass placement untouched.
   seed = 1622933552;
   const root = new THREE.Group(); root.name = '长衣亭 · 予张依婷';
   const pavilion = new THREE.Group(); pavilion.name = '六角重檐亭'; root.add(pavilion);
   const garden = new THREE.Group(); garden.name = '临水桃花庭'; root.add(garden);
-  const surfaces = createArchitecturalSurfaces();
+  const surfaces = createArchitecturalSurfaces(surfaceImages);
   const meadowMap = meadowTexture();
   const mats = {
-    wood: new THREE.MeshStandardMaterial({ color: '#8f4b3d', ...surfaces.wood, normalScale: new THREE.Vector2(.45, .45), roughness: .88 }),
-    darkWood: new THREE.MeshStandardMaterial({ color: '#49342a', ...surfaces.wood, normalScale: new THREE.Vector2(.38, .38), roughness: 1 }),
-    stone: new THREE.MeshStandardMaterial({ color: '#c4c5b9', ...surfaces.stone, normalScale: new THREE.Vector2(.68, .68), roughness: 1 }),
+    wood: new THREE.MeshStandardMaterial({ color: '#96604b', ...surfaces.wood, normalScale: new THREE.Vector2(.58, .58), roughness: 1 }),
+    darkWood: new THREE.MeshStandardMaterial({ color: '#5b4435', ...surfaces.wood, normalScale: new THREE.Vector2(.48, .48), roughness: 1 }),
+    stone: new THREE.MeshStandardMaterial({ color: '#c4c5b9', ...surfaces.stone, normalScale: new THREE.Vector2(.74, .74), roughness: 1 }),
     stoneDark: new THREE.MeshStandardMaterial({ color: '#838f82', ...surfaces.stone, normalScale: new THREE.Vector2(.60, .60), roughness: 1 }),
-    tile: new THREE.MeshStandardMaterial({ color: '#454b48', ...surfaces.tile, normalScale: new THREE.Vector2(.45, .45), roughness: 1 }),
-    tileLight: new THREE.MeshStandardMaterial({ color: '#69716c', ...surfaces.tile, normalScale: new THREE.Vector2(.38, .38), roughness: .96 }),
+    tile: new THREE.MeshStandardMaterial({ color: '#515959', ...surfaces.tile, normalScale: new THREE.Vector2(.62, .62), roughness: 1 }),
+    tileLight: new THREE.MeshStandardMaterial({ color: '#687273', ...surfaces.tile, normalScale: new THREE.Vector2(.55, .55), roughness: 1 }),
     tileDark: new THREE.MeshStandardMaterial({ color: '#353b37', roughness: .8 }),
-    brass: new THREE.MeshStandardMaterial({ color: '#b89a62', roughness: .43, metalness: .6 }),
+    brass: new THREE.MeshStandardMaterial({ color: '#9e895b', roughness: .58, metalness: .72 }),
     soil: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, map: meadowMap, bumpMap: meadowMap, bumpScale: .025 }),
-    bark: new THREE.MeshStandardMaterial({ color: '#716254', ...surfaces.bark, normalScale: new THREE.Vector2(.85, .85), roughness: 1 }),
+    bark: new THREE.MeshStandardMaterial({ color: '#8b8073', ...surfaces.bark, normalScale: new THREE.Vector2(.82, .82), roughness: 1 }),
     leaf: new THREE.MeshStandardMaterial({ color: '#71886b', roughness: .85, side: THREE.DoubleSide }),
     lantern: new THREE.MeshStandardMaterial({ color: '#eedcaf', ...surfaces.paper, roughness: .92, emissive: '#ffbf70', emissiveMap: surfaces.paper.map, emissiveIntensity: .25 }),
   };
   for (const [name, material] of Object.entries(mats)) material.name = name;
+  const endgrain = new THREE.MeshStandardMaterial({ name: '木端面', color: '#956f51', ...surfaces.endgrain, normalScale: new THREE.Vector2(.40, .40), roughness: 1 });
   const lanterns = [], lightPositions = [], curtainTies = [], clothTime = { value: 0 };
-  const detailCounts = { roofTiles: 0, branches: 0, leaves: 0, blossoms: 0, pavingStones: 0 };
+  const detailCounts = { roofTiles: 0, ridgeCaps: 0, branches: 0, leaves: 0, blossoms: 0, pavingStones: 0 };
 
   function mesh(geometry, material, pos, parent = pavilion) {
     const m = new THREE.Mesh(geometry, material);
@@ -79,6 +82,7 @@ export function buildPavilion({ plaqueMap } = {}) {
     const timber = material === mats.wood || material === mats.darkWood;
     const bevel = (stone || timber) && Math.min(w, h, d) >= .075 ? (stone ? .006 : .003) : 0;
     const geometry = bevel ? beveledBoxGeometry(w, h, d, bevel) : new THREE.BoxGeometry(w, h, d);
+    if (timber) timberUV(geometry, h >= w && h >= d ? 'y' : d >= w ? 'z' : 'x');
     if (stone) {
       const { position, normal, uv } = geometry.attributes;
       for (let i = 0; i < position.count; i++) {
@@ -91,6 +95,14 @@ export function buildPavilion({ plaqueMap } = {}) {
   }
   function cylinder(rt, rb, h, x, y, z, material, segments = 24, parent = pavilion) {
     const geometry = new THREE.CylinderGeometry(rt, rb, h, segments);
+    if (material === mats.wood || material === mats.darkWood) {
+      const { position, normal, uv } = geometry.attributes;
+      const repeats = Math.max(1, Math.round((rt + rb) * Math.PI / .22));
+      for (let i = 0; i < position.count; i++) {
+        if (Math.abs(normal.getY(i)) > .9) uv.setXY(i, position.getX(i) / .22, position.getZ(i) / 2);
+        else uv.setXY(i, uv.getX(i) * repeats, position.getY(i) / 2);
+      }
+    }
     if (material === mats.stone || material === mats.stoneDark) {
       const { position, normal, uv } = geometry.attributes, repeats = Math.max(1, Math.round((rt + rb) / 2 * TAU * 1.3));
       for (let i = 0; i < position.count; i++) {
@@ -171,7 +183,7 @@ export function buildPavilion({ plaqueMap } = {}) {
     for (let tier = 0; tier < 3; tier++) {
       const length = .56 + tier * .22;
       const armY = 4.34 + tier * .18;
-      const arm = mesh(bracketGeometries[tier], mats.wood, v(p.x, armY, p.z));
+      const arm = mesh(timberUV(bracketGeometries[tier], 'x'), mats.wood, v(p.x, armY, p.z));
       arm.rotation.y = -angle;
       const cross = box(.14, .07, length * .75, p.x, armY + .087, p.z);
       cross.rotation.y = -angle;
@@ -225,7 +237,8 @@ export function buildPavilion({ plaqueMap } = {}) {
       for (let y = 0; y <= rings; y++) {
         for (let x = 0; x <= columns; x++) {
           vertices.push(...position(sector, y / rings, x / columns).toArray());
-          uv.push(x / columns, y / rings);
+          const radial = inner + (outer - inner) * y / rings;
+          uv.push(x / columns * radial / .22, y / rings * (outer - inner) / 2);
           if (y < rings && x < columns) {
             const a = y * (columns + 1) + x, b = a + columns + 1;
             indices.push(a, b, a + 1, b, b + 1, a + 1);
@@ -279,15 +292,35 @@ export function buildPavilion({ plaqueMap } = {}) {
       const edge = Array.from({ length: 25 }, (_, j) => position(sector, 1, j / 24).add(v(0, -.11, 0)));
       tube(edge, .052, mats.darkWood, pavilion, 30, 8);
       tube(edge.map(p => p.clone().add(v(0, -.078, 0))), .025, mats.darkWood, pavilion, 30, 6);
-      const hip = Array.from({ length: 24 }, (_, j) => position(sector, j / 23, 0).add(v(0, .084, 0)));
-      tube(hip, .058, mats.tileLight, pavilion, 30, 8);
+      const hipPieces = outer > 3 ? 22 : 16;
+      for (let j = 0; j < hipPieces; j++) {
+        const a = position(sector, j / hipPieces, 0).add(v(0, .065, 0));
+        const b = position(sector, (j + 1) / hipPieces, 0).add(v(0, .065, 0));
+        const along = b.clone().sub(a).normalize(), across = v(along.z, 0, -along.x).normalize(), up = along.clone().cross(across).normalize();
+        const cap = mesh(clayTileGeometry(false), mats.tileLight, a.clone().lerp(b, .5));
+        cap.scale.set(.14, .13, a.distanceTo(b) * 1.035);
+        cap.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(across, up, along));
+        cap.name = '垂脊·分节搭接陶瓦'; detailCounts.ridgeCaps++;
+      }
       const tip = position(sector, 1, 0), radial = v(Math.cos(sector * TAU / 6), 0, Math.sin(sector * TAU / 6));
       tube([tip.clone().add(v(0, .04, 0)), tip.clone().addScaledVector(radial, .065).add(v(0, .065, 0)), tip.clone().addScaledVector(radial, .105).add(v(0, .13, 0))], .058, mats.tileLight, pavilion, 12, 8);
       for (const t of [.20, .40, .63, .83]) {
         tube(Array.from({ length: 9 }, (_, j) => position(sector, t, j / 8).add(v(0, -.21, 0))), .065, mats.darkWood, pavilion, 12, 8);
       }
       for (let j = 1; j < 17; j++) {
-        tube(Array.from({ length: 10 }, (_, k) => position(sector, .05 + k / 9 * .92, j / 17).add(v(0, -.12, 0))), .035, mats.wood, pavilion, 18, 6);
+        const rafter = Array.from({ length: 10 }, (_, k) => position(sector, .05 + k / 9 * .92, j / 17).add(v(0, -.12, 0)));
+        const rafterMesh = tube(rafter, .035, mats.wood, pavilion, 18, 6);
+        // TubeGeometry runs u along the timber; rotate it into the grain's v axis.
+        const rafterUV = rafterMesh.geometry.attributes.uv;
+        const rafterLength = new THREE.CatmullRomCurve3(rafter).getLength();
+        for (let k = 0; k < rafterUV.count; k++) rafterUV.setXY(k, rafterUV.getY(k), rafterUV.getX(k) * rafterLength / 2);
+        const end = rafter.at(-1), direction = end.clone().sub(rafter.at(-2)).normalize();
+        const cut = mesh(new THREE.CircleGeometry(.0345, 12), endgrain, end.clone().addScaledVector(direction, .0007));
+        cut.quaternion.setFromUnitVectors(v(0, 0, 1), direction); cut.name = '椽头·木材年轮端面';
+      }
+      // Fine joints between radial soffit boards stop inside the fascia.
+      for (let j = 1; j < 13; j++) {
+        tube(Array.from({ length: 8 }, (_, k) => position(sector, .045 + k / 7 * .94, j / 13).add(v(0, -.0565, 0))), .0015, mats.darkWood, pavilion, 9, 3).name = '檐下·望板拼缝';
       }
     }
     for (const pan of [false, true]) {
@@ -311,6 +344,7 @@ export function buildPavilion({ plaqueMap } = {}) {
   const plaqueFace = mesh(new THREE.PlaneGeometry(1.55, .48), new THREE.MeshStandardMaterial({ name: '匾额', map: plaqueMap || plaqueTexture(), roughness: .65 }), v(0, 3.95, 2.855));
   plaqueFace.name = '长衣亭题字';
   for (const x of [-.62, .62]) box(.025, .15, .035, x, 4.25, 2.8, mats.brass);
+  detailCounts.craft = addPavilionCraft({ mesh, box, beam, cylinder, tube, mats, endgrain, corners });
 
   const clothMaterial = new THREE.MeshPhysicalMaterial({ name: '轻纱', color: '#ecebda', ...surfaces.linen, normalScale: new THREE.Vector2(.3, .3), side: THREE.DoubleSide, transparent: true, opacity: .79, roughness: 1, sheen: .7, sheenColor: new THREE.Color('#fff4e4'), depthWrite: false });
   clothMaterial.forceSinglePass = true;
@@ -447,7 +481,7 @@ export function buildPavilion({ plaqueMap } = {}) {
     rock.scale.set(1.5, .55 + random() * .55, .8); rock.rotation.set(random(), random() * TAU, random());
   }
   const gate = new THREE.Group(); gate.name = '月洞门·桥头入园'; gate.position.set(4.7, .01, 16.3); gate.rotation.y = .57; garden.add(gate);
-  const plaster = new THREE.MeshStandardMaterial({ name: '石灰抹面', color: '#d6d6c8', ...surfaces.stone, normalScale: new THREE.Vector2(.25, .25), roughness: 1 });
+  const plaster = new THREE.MeshStandardMaterial({ name: '石灰抹面', color: '#d6d6c8', ...surfaces.plaster, normalScale: new THREE.Vector2(.4, .4), roughness: 1 });
   const gateCenterY = 1.17, gateRadius = 1.47, openingAngle = Math.asin(gateCenterY / gateRadius);
   const gateShape = new THREE.Shape(); gateShape.moveTo(-2.35, 0);
   gateShape.lineTo(-Math.sqrt(gateRadius ** 2 - gateCenterY ** 2), 0);
@@ -516,7 +550,9 @@ export function buildPavilion({ plaqueMap } = {}) {
             const node = twig.getPoint(n / 7), angle = az + n * 2.39996;
             const direction = v(Math.cos(angle) * .8, .30 + random() * .65, Math.sin(angle) * .8).normalize();
             dummy.position.copy(node); dummy.quaternion.setFromUnitVectors(v(0, 1, 0), direction); dummy.rotateY(random() * TAU);
-            dummy.scale.setScalar(.72 + random() * .65); dummy.updateMatrix();
+            dummy.scale.setScalar(.72 + random() * .65);
+            dummy.scale.x *= .82 + detailRandom(leafMatrices.length, 21) * .32;
+            dummy.rotateX((detailRandom(leafMatrices.length, 22) - .5) * .42); dummy.updateMatrix();
             leafMatrices.push(tree.matrixWorld.clone().multiply(dummy.matrix));
             leafColors.push(new THREE.Color().setHSL(.23 + random() * .07, .22 + random() * .25, .69 + random() * .2));
             if (random() < .48) {
@@ -532,7 +568,8 @@ export function buildPavilion({ plaqueMap } = {}) {
   peachTree(v(-5.05, -.04, -1.2), 1.05, .6);
   peachTree(v(4.8, -.04, -2.25), .75, 2.1);
   peachTree(v(-3.0, -.01, 14.5), .8, 1.1);
-  for (const [geometry, material, matrices, colors, name] of [[peachLeafGeometry(), peachLeafMat, leafMatrices, leafColors, '桃叶·叶脉与卷曲'], [blossomGeo, blossomMat, flowerMatrices, flowerColors, '五瓣桃花·逐枝着生']]) {
+  const leafGroups = [0, 1, 2].map(variant => [peachLeafGeometry(variant), peachLeafMat, leafMatrices.filter((_, i) => i % 3 === variant), leafColors.filter((_, i) => i % 3 === variant), `桃叶·叶脉与卷曲·${variant + 1}`]);
+  for (const [geometry, material, matrices, colors, name] of [...leafGroups, [blossomGeo, blossomMat, flowerMatrices, flowerColors, '五瓣桃花·逐枝着生']]) {
     const instances = new THREE.InstancedMesh(geometry, material, matrices.length); instances.name = name;
     matrices.forEach((m, i) => { instances.setMatrixAt(i, m); instances.setColorAt(i, colors[i]); });
     instances.castShadow = true; instances.receiveShadow = true; garden.add(instances);
@@ -606,10 +643,11 @@ export function buildPavilion({ plaqueMap } = {}) {
   detailCounts.grass = grassCounts;
   root.userData.detailCounts = detailCounts;
 
+  finishSurfaces(root);
   standardizeSurfaceMaterials(root);
   batchModel(root);
   root.userData.geometryMetrics = modelMetrics(root);
-  root.userData.design = { type: 'original-artistic-pavilion', units: 'metres', roofDeckThickness: .055, pavingRadius: 3.74, revision: 5 };
+  root.userData.design = { type: 'original-artistic-pavilion', units: 'metres', roofDeckThickness: .055, pavingRadius: 3.74, revision: 6 };
 
   return {
     root, lanternMaterial: mats.lantern, lightPositions,

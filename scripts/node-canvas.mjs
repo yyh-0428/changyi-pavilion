@@ -1,5 +1,6 @@
 import { createCanvas, CanvasElement, Image, ImageData, loadImage } from '@napi-rs/canvas';
 import * as THREE from 'three';
+import { SURFACE_ASSETS } from '../src/material-assets.js';
 
 // Build/export uses a real raster canvas; this adapter is never bundled into the website.
 export function installCanvas() {
@@ -25,4 +26,8 @@ export async function loadPlaqueMap() {
   const texture = new THREE.Texture(image);
   texture.flipY = false; texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 8; texture.needsUpdate = true;
   return texture;
+}
+
+export async function loadMaterialImages() {
+  return Object.fromEntries(await Promise.all(Object.entries(SURFACE_ASSETS).map(async ([kind, filename]) => [kind, await loadImage(new URL(`../public/textures/${filename}`, import.meta.url))])));
 }

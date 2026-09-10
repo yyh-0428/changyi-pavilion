@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { conformalTileGeometry, roofPoint, tileElevation } from '../src/roof-geometry.js';
-import { hexRingGeometry, joinedLatticeGeometry, pathSlabGeometry } from '../src/architecture-geometry.js';
+import { hexRingGeometry, joinedLatticeGeometry, pathSlabGeometry, dressedPathSlabGeometry, pavingStoneGeometry, clipToHexagon } from '../src/architecture-geometry.js';
 import { snapshotGeometry, captureScene, expandInstances } from '../src/export-scene.js';
 import { createWaterSnapshot } from '../src/scene-context.js';
 
@@ -64,6 +64,29 @@ test('cross lattice has one member at the crossing and no doubled centre faces',
   const mesh = new THREE.Mesh(joinedLatticeGeometry(.34,.41),new THREE.MeshBasicMaterial({ side: THREE.DoubleSide })); mesh.updateMatrixWorld(true);
   const hits = new THREE.Raycaster(new THREE.Vector3(.004,.003,1),new THREE.Vector3(0,0,-1)).intersectObject(mesh);
   assert.equal(hits.length,2); assert.ok(Math.abs(hits[1].distance - hits[0].distance - .033) < 1e-7);
+});
+
+test('dressed stones remain closed on straight and curved paths, and at all 77 clipped floor boundaries', () => {
+  for (const curve of [
+    new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, .4, 3), new THREE.Vector3(0, 0, 6)]),
+    new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0), new THREE.Vector3(1, .02, 3), new THREE.Vector3(3, .03, 5)]),
+  ]) {
+    const geometry = dressedPathSlabGeometry(curve, .30, .36, -.7, .7, .12);
+    closedVolume(geometry);
+    const original = pathSlabGeometry(curve, .30, .36, -.7, .7, .12);
+    original.computeBoundingBox();
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+      assert.ok(original.boundingBox.clone().expandByScalar(1e-6).containsPoint(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, i)));
+    }
+  }
+  let stones = 0;
+  for (let row = -6; row <= 5; row++) for (let column = -4; column <= 4; column++) {
+    const x = column * 1.04 + (Math.abs(row) % 2) * .52, z = row * .62;
+    const points = clipToHexagon([[x + .006, z + .006], [x + 1.034, z + .006], [x + 1.034, z + .614], [x + .006, z + .614]].map(p => new THREE.Vector2(...p)), 3.74);
+    if (points.length < 3 || Math.abs(THREE.ShapeUtils.area(points)) < .001) continue;
+    closedVolume(pavingStoneGeometry(points)); stones++;
+  }
+  assert.equal(stones, 77);
 });
 
 test('snapshot decodes half-float UVs and bakes cloth without changing the source', () => {

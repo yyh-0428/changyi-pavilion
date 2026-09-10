@@ -2,12 +2,12 @@ import { writeVerifiedGlb } from './write-glb.mjs';
 import * as THREE from 'three';
 import { loadImage } from '@napi-rs/canvas';
 import { buildPavilion } from '../src/model.js';
-import { installCanvas, loadPlaqueMap } from './node-canvas.mjs';
+import { installCanvas, loadPlaqueMap, loadMaterialImages } from './node-canvas.mjs';
 import { captureScene, exportScene } from '../src/export-scene.js';
 import { createExportContext } from '../src/scene-context.js';
 
 installCanvas();
-const model = buildPavilion({ plaqueMap: await loadPlaqueMap() });
+const model = buildPavilion({ plaqueMap: await loadPlaqueMap(), surfaceImages: await loadMaterialImages() });
 const normalMap = new THREE.Texture(await loadImage(new URL('../public/textures/water-normal-1.jpg', import.meta.url)));
 normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
 const time = 2.3;

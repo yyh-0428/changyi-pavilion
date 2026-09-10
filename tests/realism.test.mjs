@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import * as THREE from 'three';
-import { installCanvas } from '../scripts/node-canvas.mjs';
+import { installCanvas, loadMaterialImages } from '../scripts/node-canvas.mjs';
 import { createArchitecturalSurfaces } from '../src/surface-materials.js';
 import { beveledBoxGeometry } from '../src/architecture-geometry.js';
 import { applyLighting, lightingPreset, MOON_POSITION } from '../src/lighting.js';
@@ -10,7 +10,8 @@ import { createExportContext } from '../src/scene-context.js';
 import { captureScene, exportScene } from '../src/export-scene.js';
 
 installCanvas();
-const surfaces = createArchitecturalSurfaces();
+const surfaceImages = await loadMaterialImages();
+const surfaces = createArchitecturalSurfaces(surfaceImages);
 const pixels = texture => texture.image.getContext('2d').getImageData(0, 0, texture.image.width, texture.image.height).data;
 
 test('physical surface maps stay within texture budget and carry valid colour and normal data', () => {
@@ -34,17 +35,27 @@ test('physical surface maps stay within texture budget and carry valid colour an
     }
     if (surface.roughnessMap) {
       const values = pixels(surface.roughnessMap).filter((_, i) => i % 4 === 1);
-      assert.ok(Math.min(...values) >= 150 && Math.max(...values) <= 255, name);
-      assert.ok(Math.max(...values) - Math.min(...values) >= 18, `${name} has spatial roughness`);
+      const low = values.reduce((a, b) => Math.min(a, b), 255), high = values.reduce((a, b) => Math.max(a, b), 0);
+      assert.ok(low >= 150 && high <= 255, name);
+      assert.ok(high - low >= 18, `${name} has spatial roughness`);
     }
   }
-  // V4's three 512² albedos and three 256² normals used 3.75 MiB.
-  assert.ok(bytes <= 3.75 * 1048576, 'six surfaces fit below the previous three surface families');
+  // V6 deliberately spends texture memory on four 512² PBR families plus
+  // independent plaster and sawn ends. Keep the full scene below 28 MiB with mips.
+  assert.ok(bytes <= 14 * 1048576, 'eight surface families remain within the V6 texture budget');
   assert.notDeepEqual(pixels(surfaces.bark.map), pixels(surfaces.wood.map));
   assert.deepEqual(surfaces.linen.map.repeat, surfaces.linen.normalMap.repeat);
-  const again = createArchitecturalSurfaces();
+  const again = createArchitecturalSurfaces(surfaceImages);
   const digest = texture => createHash('sha256').update(pixels(texture)).digest('hex');
   for (const [name, surface] of Object.entries(surfaces)) for (const slot of Object.keys(surface)) assert.equal(digest(surface[slot]), digest(again[name][slot]));
+  for (const name of ['wood', 'bark', 'tile']) {
+    const map = surfaces[name].map, data = pixels(map), width = map.image.width;
+    assert.equal(map.userData.source, `authored-${name}-v6`);
+    for (let k = 0; k < width; k++) for (let c = 0; c < 3; c++) {
+      assert.equal(data[(k * width) * 4 + c], data[(k * width + width - 1) * 4 + c], `${name} horizontal repeat seam`);
+      assert.equal(data[k * 4 + c], data[((width - 1) * width + k) * 4 + c], `${name} vertical repeat seam`);
+    }
+  }
 });
 
 test('millimetre chamfers have closed outward faces, keep dimensions and remove sharp corners', () => {

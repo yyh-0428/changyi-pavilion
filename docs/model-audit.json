@@ -1,27 +1,7 @@
 {
-  "revision": 5,
-  "baseline_commit": "8c0454e",
-  "original_commit": "f4d5d45",
-  "baseline": {
-    "triangles": 2456840,
-    "geometryBytes": 16260931,
-    "meshes": 92,
-    "instances": 66797,
-    "geometries": 92,
-    "materials": 22,
-    "textures": 11,
-    "textureBytes": 10027008,
-    "textureBytesWithMipmaps": 13369332
-  },
-  "original": {
-    "triangles": 5032848,
-    "geometryBytes": 36944696,
-    "meshes": 142,
-    "geometries": 101,
-    "materials": 24,
-    "glbBytes": 38033376
-  },
-  "upgraded": {
+  "revision": 6,
+  "baseline": "uploaded V5 project",
+  "baselineMetrics": {
     "triangles": 2459624,
     "geometryBytes": 16432635,
     "meshes": 92,
@@ -32,13 +12,29 @@
     "textureBytes": 9437184,
     "textureBytesWithMipmaps": 12582888
   },
-  "instanceFingerprint": "650fc3db509762b72c8da39c2819d52c835899f6eff7670bfe8dbc02d8c5cb8c",
+  "upgradedMetrics": {
+    "triangles": 2491436,
+    "geometryBytes": 18685763,
+    "meshes": 95,
+    "instances": 66797,
+    "geometries": 95,
+    "materials": 23,
+    "textures": 26,
+    "textureBytes": 20447232,
+    "textureBytesWithMipmaps": 27262944
+  },
   "detailCounts": {
     "roofTiles": 9526,
+    "ridgeCaps": 228,
     "branches": 1044,
     "leaves": 4752,
     "blossoms": 2210,
     "pavingStones": 77,
+    "craft": {
+      "ashlarBlocks": 90,
+      "timberPegs": 12,
+      "bracketKeys": 36
+    },
     "grass": {
       "island": 6118,
       "arrival": 51483,
@@ -46,25 +42,23 @@
       "minimumPathClearance": 1.0401354261073237
     }
   },
-  "exports": {
-    "changyi-pavilion.glb": {
-      "bytes": 29964228,
-      "sha256": "bceef9dafda96ebfa34a667732dfd1f28af188406f4d4c01ecd468981ce2fd1d",
-      "validatorErrors": 0,
-      "validatorWarnings": 0,
-      "validatorInfos": 199
-    },
-    "changyi-pavilion-compatible.glb": {
-      "bytes": 134466236,
-      "sha256": "a852fd0a938d1015e747235208d8400501f047534eeb029725b7e00ab547a2b0",
-      "validatorErrors": 0,
-      "validatorWarnings": 0,
-      "validatorInfos": 3
+  "preservation": {
+    "grassGeometryTransformsColorsIdentical": true,
+    "grassHash": "100648ee2d9dd580c1231fa25cc450a1aa29aa51518c7a6fd5f03e465ab7c38e",
+    "unchangedFiles": {
+      "lighting.js": true,
+      "lake.js": true,
+      "cloth.js": true,
+      "scene-context.js": true,
+      "style.css": true
     }
   },
   "unchangedFilesSha256": {
-    "src/style.css": "fe3b8e081fcba27fbfca08e8f99a82e9d629723c2e9f9c35220f6e9eab7ede99",
+    "src/lighting.js": "adc0f6eb4289f849f669ad8850eade363c84a1c62738e6f2d00a303a925f1db7",
     "src/lake.js": "5d3bd85a04de9894754c30badfa95bc5876990eeaac52d20d448d33a4da7d4b0",
+    "src/cloth.js": "f9174a83863318e93084d94a13e7faa4c2c32b915f14dcf3b5a018e925d63234",
+    "src/scene-context.js": "4137edf77b6835aca2071c47e26ae1dbf9162914660b3ebb29c387518b1f89bb",
+    "src/style.css": "fe3b8e081fcba27fbfca08e8f99a82e9d629723c2e9f9c35220f6e9eab7ede99",
     "index.html": "92e95e8fdaef4fdaabc96a04e7c4228fc0b16b36e99ee4b76d0631eba09338ab",
     "vite.config.js": "08fcf3a573f0607a56d1182c00b7518864335b6cfa129db442563ff6e1126e22",
     ".github/workflows/deploy.yml": "99d6699c0fe0ef6f66ef134214d6bcd1d9f0e154fc9b3d53def2d22a1595db21",
@@ -76,22 +70,109 @@
     "package.json": "c3b18014fb2f80fdcf894f563a0dfd015462814760390d58c75f462f04ad413b",
     "package-lock.json": "0417d6fc1827ebde976b91a5a912927dc3be477be7a8df5003b89fd4540f787b"
   },
-  "protectedMainSectionsSha256": {
-    "cameraControlsViews": "e0b5595766e0bd72d92172806f85926b7a2725fd0578f6ec9087154f52b3ce65",
-    "pixelRatioCalls": "80a6b708476c91879ac17aa15321ce246bc412743414276110eae706619c8117",
-    "shadowSettings": "83c1d6ff473794c6c0f5df41a4795b22c938d5b7763a4b0aa600b63b7abde74d",
-    "interactionExportResize": "4e30f085ab75cb4ee2fd4b4fe12132f0a904bc489a0e15fc559687720db35cc0"
+  "mainChangesLimitedToMaterialLoading": true,
+  "exports": {
+    "changyi-pavilion.glb": {
+      "filename": "changyi-pavilion.glb",
+      "validatorErrors": 0,
+      "validatorWarnings": 0,
+      "validatorInfos": 207,
+      "loaderRoundTrip": true,
+      "embeddedImages": 27,
+      "colorInstances": 64587,
+      "portableColors": 66,
+      "normalMaps": 10,
+      "lamps": 6,
+      "directionals": 2,
+      "cameras": 1,
+      "triangles": 2491436,
+      "instances": 66797,
+      "bytes": 34594956,
+      "modelBounds": [
+        27.85598373413086,
+        9.490000247955322,
+        42.34136724472046
+      ],
+      "sha256": "8bbf4ed686c6cf86b5fbf9fe19e6605f190f8c232de24f09890db94fa115b820"
+    },
+    "changyi-pavilion-compatible.glb": {
+      "filename": "changyi-pavilion-compatible.glb",
+      "validatorErrors": 0,
+      "validatorWarnings": 0,
+      "validatorInfos": 3,
+      "loaderRoundTrip": true,
+      "embeddedImages": 27,
+      "colorInstances": 0,
+      "portableColors": 100,
+      "normalMaps": 10,
+      "lamps": 6,
+      "directionals": 2,
+      "cameras": 1,
+      "triangles": 2491436,
+      "instances": 0,
+      "bytes": 141979916,
+      "modelBounds": [
+        27.85598373413086,
+        9.490000247955322,
+        42.34136724472046
+      ],
+      "sha256": "de19b7a3f061622d2b2284848bab2ea657ae9ca32bd9fa9dd0d93f3e418289a8"
+    }
+  },
+  "materialSources": {
+    "timber-albedo-v6.png": {
+      "sha256": "8772818064335554e6b7bfaabd864af3ab23f8f733b482586026328bb28b58ff",
+      "bytes": 2707704,
+      "sourcePixels": [
+        1254,
+        1254
+      ],
+      "runtimeMapPixels": [
+        512,
+        512
+      ],
+      "generator": "built-in image_gen",
+      "prompts": "MATERIAL_PROMPTS_V6.txt"
+    },
+    "peach-bark-albedo-v6.png": {
+      "sha256": "9fb36fda0d3e1bf6026ec2a77a82c6e3b2edfbab54a81624e7d21966f085c9a1",
+      "bytes": 3492122,
+      "sourcePixels": [
+        1254,
+        1254
+      ],
+      "runtimeMapPixels": [
+        512,
+        512
+      ],
+      "generator": "built-in image_gen",
+      "prompts": "MATERIAL_PROMPTS_V6.txt"
+    },
+    "blue-clay-albedo-v6.png": {
+      "sha256": "3f05604de8bbaa0a1a4b64f8971cd463d76daa3215e89321b3b6004736556ff2",
+      "bytes": 3400757,
+      "sourcePixels": [
+        1254,
+        1254
+      ],
+      "runtimeMapPixels": [
+        512,
+        512
+      ],
+      "generator": "built-in image_gen",
+      "prompts": "MATERIAL_PROMPTS_V6.txt"
+    }
   },
   "validation": {
-    "testsPassed": 28,
+    "testsPassed": 29,
     "launcherTestsPassed": 6,
-    "crossProfileInstanceSamples": 147,
+    "productionBuild": true,
+    "localSourceImagesInspected": true,
+    "grassBytesIdentical": true,
+    "crossProfileInstanceSamples": 153,
     "crossProfileCompleteCloths": 6,
-    "glbRoundTripBothProfiles": true,
-    "build": true,
-    "macNativeRun": false,
     "browserVisualQA": false,
+    "macNativeRun": false,
     "realMobileFPS": false
-  },
-  "mobileCameraAndResolutionSettingsUnchanged": true
+  }
 }

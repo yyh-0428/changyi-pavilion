@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { createIcons, Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Image, Box, X, RotateCw } from 'lucide';
 import { buildPavilion } from './model.js';
+import { loadSurfaceImages } from './material-assets.js';
 import { createLake, createLakebed } from './lake.js';
 import { createTerrain } from './scene-context.js';
 import { applyLighting, lightingPreset, MOON_POSITION } from './lighting.js';
@@ -110,10 +111,13 @@ async function start() {
   ground.geometry.dispose(); ground.material.dispose(); pmrem.dispose();
 
   // Reuse the original model's lettering so every phone gets the same calligraphy.
-  const plaqueMap = await new THREE.TextureLoader().loadAsync(`${import.meta.env.BASE_URL}textures/plaque-atlas.png`);
+  const [plaqueMap, surfaceImages] = await Promise.all([
+    new THREE.TextureLoader().loadAsync(`${import.meta.env.BASE_URL}textures/plaque-atlas.png`),
+    loadSurfaceImages(import.meta.env.BASE_URL),
+  ]);
   plaqueMap.flipY = false; plaqueMap.colorSpace = THREE.SRGBColorSpace;
   plaqueMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-  const model = buildPavilion({ plaqueMap }); scene.add(model.root);
+  const model = buildPavilion({ plaqueMap, surfaceImages }); scene.add(model.root);
   const lampLights = model.lightPositions.map(position => {
     const light = new THREE.PointLight('#ffbd70', .4, 5.5, 2); light.position.copy(position); scene.add(light); return light;
   });
