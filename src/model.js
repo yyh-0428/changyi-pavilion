@@ -12,7 +12,6 @@ import { batchModel, modelMetrics } from './model-optimization.js';
 import { refineMoonGate } from './moon-gate.js';
 import { addGardenDetails } from './garden-details.js';
 import { createMeadowLayout } from './meadow-layout.js';
-import { createMeadowMaterial, meadowDetailTexture, updateMeadowVisibility } from './meadow-rendering.js';
 
 const TAU = Math.PI * 2;
 let seed = 48;
@@ -66,7 +65,7 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
     tileLight: new THREE.MeshStandardMaterial({ color: '#687273', ...surfaces.tile, normalScale: new THREE.Vector2(.55, .55), roughness: 1 }),
     tileDark: new THREE.MeshStandardMaterial({ color: '#353b37', roughness: .8 }),
     brass: new THREE.MeshStandardMaterial({ color: '#9e895b', roughness: .58, metalness: .72 }),
-    soil: new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 1, map: meadowMap, bumpMap: meadowDetailTexture(), bumpScale: .006 }),
+    soil: new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 1, map: meadowMap, bumpMap: meadowMap, bumpScale: .025 }),
     bark: new THREE.MeshStandardMaterial({ color: '#8b8073', ...surfaces.bark, normalScale: new THREE.Vector2(.82, .82), roughness: 1 }),
     leaf: new THREE.MeshStandardMaterial({ color: '#71886b', roughness: .85, side: THREE.DoubleSide }),
     lantern: new THREE.MeshStandardMaterial({ color: '#eedcaf', ...surfaces.paper, roughness: .92, emissive: '#ffbf70', emissiveMap: surfaces.paper.map, emissiveIntensity: .25 }),
@@ -599,9 +598,9 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
 
   // Short meadow cover and taller damp-bank tufts share geometry, but not a uniform distribution.
   const grassGeo = grassClumpGeometry(), grassStates = [];
-  grassGeo.computeBoundingBox(); grassGeo.boundingBox.expandByVector(v(.026, .025, .013));
+  grassGeo.computeBoundingBox(); grassGeo.boundingBox.expandByVector(v(.026, 0, .013));
   grassGeo.boundingSphere = grassGeo.boundingBox.getBoundingSphere(new THREE.Sphere());
-  const { material: grassMaterial, uniforms: meadowUniforms } = createMeadowMaterial();
+  const grassMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: .92, side: THREE.DoubleSide });
   const islandOutline = Array.from({ length: 64 }, (_, i) => {
     const a = Math.PI / 2 - i * TAU / 64;
     const noise = 1 + Math.sin(a * 7) * .025 + Math.sin(a * 13 + .7) * .012;
@@ -627,12 +626,11 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
   for (const [key, instances] of grassPatches) {
     const geometry = grassGeo.clone(); geometry.attributes.position.setUsage(THREE.DynamicDrawUsage); geometry.attributes.normal.setUsage(THREE.DynamicDrawUsage);
     const grass = new THREE.InstancedMesh(geometry, grassMaterial, instances.length); grass.name = `草坪·${key}`; grass.userData.deformingGeometry = true;
-    grass.userData.renderMotionMargin={x:.026,y:.025,z:.013};
-    grass.userData.meadow = true;
+    grass.userData.renderMotionMargin={x:.026,y:0,z:.013};
     instances.forEach(({matrix, color}, i) => { grass.setMatrixAt(i, matrix); grass.setColorAt(i, color); });
     grass.receiveShadow = true; grass.computeBoundingSphere(); garden.add(grass);
     const [px, pz] = key.split(',').map(Number);
-    grassStates.push({ mesh: grass, geometry, positions: grassGeo.attributes.position.array.slice(), normals: grassGeo.attributes.normal.array.slice(), x: (px + .5) * 5, z: (pz + .5) * 5 });
+    grassStates.push({ geometry, positions: grassGeo.attributes.position.array.slice(), normals: grassGeo.attributes.normal.array.slice(), x: (px + .5) * 5, z: (pz + .5) * 5 });
   }
   detailCounts.grass = grassCounts;
   root.userData.detailCounts = detailCounts;
@@ -647,11 +645,9 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
 
   return {
     root, lanternMaterial: mats.lantern, lightPositions,
-    updateMeadow(camera, drawingHeight) { updateMeadowVisibility(grassStates, meadowUniforms, camera, drawingHeight); },
     update(time) {
       // About 1,200 shared vertices move per frame, instead of millions of shader evaluations.
       for (const state of grassStates) {
-        if (!state.mesh.visible) continue;
         const a = Math.sin(time * 1.15 + state.x * .72 + state.z * .58) * .026;
         const b = Math.sin(time * .83 + state.z * .65) * .013;
         const { position, normal } = state.geometry.attributes;

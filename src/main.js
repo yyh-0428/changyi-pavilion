@@ -257,7 +257,6 @@ export async function start(ui) {
     lake.update(elapsed);
     fish.update(reducedMotion?0:dt,camera);
     controls.update(dt);
-    model.updateMeadow(camera, renderer.domElement.height);
     renderer.info.reset(); renderFrame(renderer,scene,camera); frames++;
     if (frames === 3) { experience.classList.add('ready'); $('#loading').setAttribute('aria-hidden', 'true'); }
   }
