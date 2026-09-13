@@ -5,14 +5,15 @@ import * as THREE from 'three';
 import { WebGLProgram } from 'three/src/renderers/webgl/WebGLProgram.js';
 import { createFishSchool } from '../src/fish-school.js';
 import { createLakebed } from '../src/lake.js';
+import { createMeadowMaterial } from '../src/meadow-rendering.js';
 
 const args=process.argv.slice(2),shadersOnly=args.includes('--shaders-only');
 const output=path.resolve(args.find(arg=>!arg.startsWith('--'))??'../fish-preview-work');await mkdir(output,{recursive:true});
-function shaders(material,{production=false,water=false,vertexColors=false,vertexShader,fragmentShader}={}) {
+function shaders(material,{production=false,water=false,vertexColors=false,instanced,instancedColors=false,vertexShader,fragmentShader}={}) {
   const shader={uniforms:{},vertexShader:vertexShader??THREE.ShaderLib.physical.vertexShader,fragmentShader:fragmentShader??THREE.ShaderLib.physical.fragmentShader};
   material?.onBeforeCompile(shader,{});
   const gl={VERTEX_SHADER:35633,FRAGMENT_SHADER:35632,createProgram:()=>({}),createShader:type=>({type}),shaderSource:(s,source)=>{s.source=source;},compileShader(){},attachShader(){},linkProgram(){},bindAttribLocation(){}};
-  const parameters={vertexShader:shader.vertexShader,fragmentShader:shader.fragmentShader,shaderType:water?'ShaderMaterial':'MeshPhysicalMaterial',shaderName:'FishDiagnostic',defines:water?{}:{STANDARD:'',PHYSICAL:''},precision:'highp',instancing:!water&&!vertexColors,doubleSided:material?.side===THREE.DoubleSide,clearcoat:material?.clearcoat>0,opaque:!material?.transparent,vertexColors,
+  const parameters={vertexShader:shader.vertexShader,fragmentShader:shader.fragmentShader,shaderType:water?'ShaderMaterial':'MeshPhysicalMaterial',shaderName:'FishDiagnostic',defines:water?{}:{STANDARD:'',PHYSICAL:''},precision:'highp',instancing:instanced??(!water&&!vertexColors),instancingColor:instancedColors,doubleSided:material?.side===THREE.DoubleSide,clearcoat:material?.clearcoat>0,opaque:!material?.transparent,vertexColors,
     envMap:production,envMapMode:THREE.CubeUVReflectionMapping,envMapCubeUVHeight:256,combine:THREE.MultiplyOperation,
     shadowMapEnabled:production,shadowMapType:THREE.PCFSoftShadowMap,useFog:production,fog:production,fogExp2:false,
     numDirLights:water?0:2,numPointLights:production?6:0,numHemiLights:water?0:1,numSpotLights:0,numSpotLightMaps:0,numSpotLightShadows:0,numSpotLightShadowsWithMaps:0,numDirLightShadows:production?1:0,numPointLightShadows:0,numRectAreaLights:0,numLightProbes:0,numClippingPlanes:0,numClipIntersection:0,
@@ -37,9 +38,13 @@ const bed=createLakebed();await saveShader('bed',shaders(null,{vertexColors:true
 const lakeSource=await readFile(new URL('../src/lake.js',import.meta.url),'utf8');
 const vs=lakeSource.match(/const vertexShader = \/\* glsl \*\/`([\s\S]*?)`;/)[1],fs=lakeSource.match(/const fragmentShader = \/\* glsl \*\/`([\s\S]*?)`;/)[1];
 await saveShader('water',shaders(null,{water:true,vertexShader:vs,fragmentShader:fs}));
+const meadow = createMeadowMaterial();
+await saveShader('meadow', shaders(meadow.material, { vertexColors: true, instanced: true, instancedColors: true }));
+await saveShader('meadow-production', shaders(meadow.material, { production: true, vertexColors: true, instanced: true, instancedColors: true }));
+meadow.material.dispose();
 if(shadersOnly) {
   school.dispose();bed.geometry.dispose();bed.material.dispose();
-  console.log(JSON.stringify({output,shaderPrograms:6,glbExported:false,framesGenerated:0}));
+  console.log(JSON.stringify({output,shaderPrograms:8,glbExported:false,framesGenerated:0}));
   process.exit(0);
 }
 const water=new THREE.PlaneGeometry(80,80,80,80);water.rotateX(-Math.PI/2);water.translate(0,-.15,0);

@@ -2,19 +2,26 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#d8e1da" />
     <meta name="description" content="长衣亭，赠予张依婷。愿挽星河缀嫁裳。" />
-    <meta name="pavilion-version" content="12" />
+    <meta name="pavilion-version" content="13" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="长衣亭 · 予张依婷" />
+    <meta property="og:description" content="予你，一处朝暮。愿挽星河缀嫁裳。" />
+    <meta property="og:image" content="https://yyh-0428.github.io/changyi-pavilion/pavilion-cover.jpg" />
+    <meta property="og:image:alt" content="长衣亭与临水桃花庭" />
+    <meta property="og:url" content="https://yyh-0428.github.io/changyi-pavilion/" />
+    <meta name="twitter:card" content="summary_large_image" />
     <title>长衣亭 · 予张依婷</title>
-    <link rel="icon" href="data:," />
+    <link rel="icon" type="image/svg+xml" href="/seal.svg" />
   </head>
   <body>
     <main id="experience" data-theme="sunset" data-view="overview">
       <div id="scene" aria-label="长衣亭三维场景"></div>
       <header class="masthead">
         <a class="signature" href="./" aria-label="长衣亭首页"><span class="seal">依</span><span>长衣亭<span class="signature-en">CHANGYI PAVILION</span></span></a>
-        <div class="header-right"><span class="dedication">为张依婷而筑</span><div class="view-shortcuts" role="group" aria-label="观景"><button class="text-action" data-view="fish" aria-pressed="false"><i data-lucide="fish"></i><span>观鲤</span></button><button class="text-action" data-view="overview" aria-pressed="true"><i data-lucide="landmark"></i><span>观亭</span></button></div><button class="text-action" id="poem-open" aria-haspopup="dialog"><i data-lucide="feather"></i><span>诗笺</span></button></div>
+        <div class="header-right"><span class="dedication">为张依婷而筑</span><div class="view-shortcuts" inert role="group" aria-label="观景"><button class="text-action" data-view="fish" aria-pressed="false"><i data-lucide="fish"></i><span>观鲤</span></button><button class="text-action" data-view="overview" aria-pressed="true"><i data-lucide="landmark"></i><span>观亭</span></button></div><button class="text-action" id="poem-open" aria-haspopup="dialog"><i data-lucide="feather"></i><span>诗笺</span></button></div>
       </header>
 
       <section class="inscription" aria-labelledby="pavilion-title">
@@ -25,9 +32,9 @@
       </section>
 
       <div id="loading" role="status"><div class="loading-mark">亭</div><span>亭前候你</span><div class="loading-line"></div></div>
-      <div id="render-error" hidden role="alert"><p>此刻未能展开长衣亭。</p><button class="text-action" id="reload"><i data-lucide="rotate-cw"></i>重新打开</button></div>
+      <div id="render-error" hidden role="status"><p>此刻先以一幅亭景迎你。<br /><span>写给你的诗，一直都在。</span></p><div class="fallback-actions"><button class="text-action" id="poem-open-fallback" aria-haspopup="dialog"><i data-lucide="feather"></i>读给你的诗</button><button class="text-action" id="reload"><i data-lucide="rotate-cw"></i>再试着入亭</button></div></div>
 
-      <footer class="scene-controls">
+      <footer class="scene-controls" inert>
         <div class="scene-caption"><span class="status-dot"></span><span id="scene-time">夕照 · 酉时</span><span class="caption-separator"></span><span id="view-name">临水观亭</span></div>
         <div class="light-switch" role="group" aria-label="光景"><button class="light-option active" data-light="sunset" aria-pressed="true"><i data-lucide="sun-medium"></i><span>夕照</span></button><button class="light-option" data-light="moonlight" aria-pressed="false"><i data-lucide="moon"></i><span>月夜</span></button></div>
         <div class="tool-strip">
@@ -36,7 +43,7 @@
           <button class="icon-button desktop-tool" id="zoom-in" data-tip="靠近" aria-label="靠近"><i data-lucide="plus"></i></button>
           <button class="icon-button desktop-tool" id="zoom-out" data-tip="远望" aria-label="远望"><i data-lucide="minus"></i></button>
           <span class="tool-divider"></span>
-          <div class="menu-anchor"><button class="icon-button" id="download-open" data-tip="留存" aria-label="留存" aria-haspopup="menu" aria-expanded="false"><i data-lucide="download"></i></button><div class="tool-menu" id="download-menu" role="menu" hidden><button role="menuitem" id="save-image"><i data-lucide="image"></i>保存此景</button><button role="menuitem" id="save-model"><i data-lucide="box"></i>轻量场景 .glb</button><button role="menuitem" id="save-compatible" title="适合导入建模软件，保留实例颜色，文件较大"><i data-lucide="box"></i>兼容场景 .glb</button></div></div>
+          <div class="menu-anchor"><button class="icon-button" id="download-open" data-tip="留存" aria-label="留存" aria-haspopup="menu" aria-expanded="false"><i data-lucide="download"></i></button><div class="tool-menu" id="download-menu" role="menu" hidden><button role="menuitem" id="save-image"><i data-lucide="image"></i>保存纪念画笺</button><button role="menuitem" id="save-model"><i data-lucide="box"></i>轻量场景 .glb</button><button role="menuitem" id="save-compatible" title="适合导入建模软件，保留实例颜色，文件较大"><i data-lucide="box"></i>兼容场景 .glb</button><p class="menu-note">模型含亭阁与庭园；水面为静态近似，不含游动锦鲤与页面题字。</p></div></div>
           <button class="icon-button" id="fullscreen" data-tip="全屏" aria-label="全屏"><i data-lucide="maximize"></i></button>
         </div>
       </footer>
@@ -52,6 +59,7 @@
         <div class="poem-signature"><span class="fine-rule"></span><span>长衣亭中，朝暮与共。</span><span class="tiny-seal">依婷</span></div>
       </dialog>
     </main>
-    <script type="module" src="/src/main.js"></script>
+    <noscript><section class="noscript-poem"><p>银汉低回傍霓裳，明月窥帘照玉珰。<br />若教春色妒卿妆，桃李无言自敛芳。<br />瑶台纵有月华凉，不及携卿看夕阳。<br />此生相守鬓成霜，愿挽星河缀嫁裳。</p><small>长衣亭中，朝暮与共。 · 予张依婷</small></section><style>#loading,.scene-controls,.header-right{display:none}.inscription{opacity:1;transform:none}.noscript-poem{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);width:max-content;max-width:94vw;padding:18px;background:#f8fcf8e8;font-size:14px;line-height:2.1}</style></noscript>
+    <script type="module" src="/src/gift.js"></script>
   </body>
 </html>

@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { conformalTileGeometry, roofPoint, tileElevation } from '../src/roof-geometry.js';
+import { conformalTileGeometry, roofPoint, tileElevation, hipTileBeddingGeometry } from '../src/roof-geometry.js';
+import { clayTileGeometry } from '../src/detail-geometry.js';
 import { hexRingGeometry, joinedLatticeGeometry, pathSlabGeometry, dressedPathSlabGeometry, pavingStoneGeometry, clipToHexagon } from '../src/architecture-geometry.js';
 import { snapshotGeometry, captureScene, expandInstances } from '../src/export-scene.js';
 import { createWaterSnapshot } from '../src/scene-context.js';
@@ -25,7 +26,7 @@ function closedVolume(geometry) {
   assert.ok(volume > 0); return volume;
 }
 
-test('conformal tiles stay closed at the narrow crown and wide eave, with clearance at laps', () => {
+test('conformal tiles stay closed and preserve their visible crown and eave profiles', () => {
   for (const spec of [{ inner: .20, outer: 2.49, base: 6.12, height: 1.81, rows: 14, lanes: 17 }, { inner: 1, outer: 4.66, base: 4.48, height: 1.94, rows: 21, lanes: 27 }]) {
     for (const row of [0,1,spec.rows - 1]) for (const pan of [true,false]) {
       const geometry = conformalTileGeometry({ ...spec, row, column: 1, pan }); closedVolume(geometry);
@@ -38,15 +39,59 @@ test('conformal tiles stay closed at the narrow crown and wide eave, with cleara
         assert.ok(Math.abs(actual.y - expected.y - tileElevation(x / nx,z / 2,pan,laneWidth)) < 1e-6);
       }
     }
-    for (let row = 0; row < spec.rows - 1; row++) for (const pan of [true,false]) {
-      const t0 = Math.max(0,(row - .22) / spec.rows), t1 = (row + 1) / spec.rows, next0 = (row + .78) / spec.rows, next1 = (row + 2) / spec.rows;
-      const width = (spec.inner + (spec.outer - spec.inner) * (t0 + t1) / 2) / spec.lanes;
-      const nextWidth = (spec.inner + (spec.outer - spec.inner) * (next0 + next1) / 2) / spec.lanes;
-      for (const t of [next0,(next0 + t1) / 2,t1]) for (const x of [0,.5,1]) {
-        assert.ok(tileElevation(x,(t - t0) / (t1 - t0),pan,width,true) - tileElevation(x,(t - next0) / (next1 - next0),pan,nextWidth) > .001);
+  }
+});
+
+test('actual adjacent tile triangles bear continuously across every row and column', () => {
+  const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+  const ray = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0));
+  for (const spec of [{ inner: .20, outer: 2.49, base: 6.12, height: 1.81, rows: 14, lanes: 17 }, { inner: 1, outer: 4.66, base: 4.48, height: 1.94, rows: 21, lanes: 27 }]) {
+    for (const pan of [true, false]) for (let row = 0; row < spec.rows - 1; row++) for (let column = pan ? 0 : 1; column < spec.lanes; column++) {
+      const upper = new THREE.Mesh(conformalTileGeometry({ ...spec, pan, row, column }), material);
+      const lower = new THREE.Mesh(conformalTileGeometry({ ...spec, pan, row: row + 1, column }), material);
+      upper.updateMatrixWorld(); lower.updateMatrixWorld();
+      for (const across of [.013, .21, .49, .73, .987]) for (const overlap of [.001, .23, .51, .79, .999]) {
+        const t = (row + .78 + overlap * .22) / spec.rows;
+        const u = (column + (pan ? .5 : 0) + (across * 2 - 1) * (pan ? .475 : .26)) / spec.lanes;
+        const point = roofPoint(0, t, u, spec.inner, spec.outer, spec.base, spec.height);
+        ray.ray.origin.set(point.x, 20, point.z);
+        const a = ray.intersectObject(upper), b = ray.intersectObject(lower);
+        const at = `${pan ? 'pan' : 'cap'} roof ${spec.outer} row ${row}, column ${column}, ${across}/${overlap}`;
+        assert.ok(a.length >= 2 && b.length >= 2, at);
+        const gap = a.at(-1).point.y - b[0].point.y;
+        assert.ok(gap <= .000002, `unsupported lap: ${gap} m at ${at}`);
+        assert.ok(gap >= -.004, `bearing must remain local: ${gap} m at ${at}`);
+        assert.ok(a[0].point.y > b[0].point.y + .001, `visible tile lip lost at ${at}`);
       }
+      upper.geometry.dispose(); lower.geometry.dispose();
     }
   }
+  material.dispose();
+});
+
+test('hip bedding is closed and blocks lateral daylight below all raised ridge caps', () => {
+  const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+  for (const spec of [{ inner: .2, outer: 2.49, base: 6.12, height: 1.81, pieces: 16 }, { inner: 1, outer: 4.66, base: 4.48, height: 1.94, pieces: 22 }]) for (const sector of [0, 1, 5]) {
+    const beds = [], radial = new THREE.Vector3(Math.cos(sector * Math.PI / 3), 0, Math.sin(sector * Math.PI / 3));
+    const side = new THREE.Vector3(-radial.z, 0, radial.x);
+    for (let j = 0; j < spec.pieces; j++) {
+      const a = roofPoint(sector, j / spec.pieces, 0, spec.inner, spec.outer, spec.base, spec.height).add(new THREE.Vector3(0, .065, 0));
+      const b = roofPoint(sector, (j + 1) / spec.pieces, 0, spec.inner, spec.outer, spec.base, spec.height).add(new THREE.Vector3(0, .065, 0));
+      const along = b.clone().sub(a).normalize(), across = new THREE.Vector3(along.z, 0, -along.x).normalize(), up = along.clone().cross(across).normalize();
+      const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(across, up, along));
+      const transform = new THREE.Matrix4().compose(a.clone().lerp(b, .5), q, new THREE.Vector3(.14, .13, a.distanceTo(b) * 1.035));
+      const shell = clayTileGeometry(false), bed = hipTileBeddingGeometry(shell, transform, sector, spec);
+      closedVolume(bed); beds.push(new THREE.Mesh(bed, material)); shell.dispose();
+    }
+    for (let i = 1; i < spec.pieces * 10; i++) {
+      const point = roofPoint(sector, i / (spec.pieces * 10), 0, spec.inner, spec.outer, spec.base, spec.height);
+      point.y += .035;
+      const ray = new THREE.Raycaster(point.addScaledVector(side, .2), side.clone().negate(), 0, .4);
+      assert.ok(ray.intersectObjects(beds).length, `hip daylight: ${spec.outer}/${sector}/${i}`);
+    }
+    beds.forEach(bed => bed.geometry.dispose());
+  }
+  material.dispose();
 });
 
 test('hex beam mitres and curved slabs enclose a single correctly wound solid', () => {

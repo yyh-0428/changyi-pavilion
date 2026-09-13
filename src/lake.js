@@ -3,6 +3,7 @@ import { Reflector } from 'three/addons/objects/Reflector.js';
 import { Refractor } from 'three/addons/objects/Refractor.js';
 import { meadowNoise } from './detail-geometry.js';
 import { RENDER_LAYERS } from './render-pipeline.js';
+import { optionalAsset } from './material-assets.js';
 
 const vertexShader = /* glsl */`
   #include <common>
@@ -107,7 +108,10 @@ const fragmentShader = /* glsl */`
 
 export async function createLake({ renderer, mobile, reducedMotion, sun }) {
   const loader = new THREE.TextureLoader();
-  const normalMaps = await Promise.all(['textures/water-normal-1.jpg', 'textures/water-normal-2.jpg'].map(path => loader.loadAsync(`${import.meta.env?.BASE_URL??'/'}${path}`)));
+  const normalMaps = await Promise.all(['textures/water-normal-1.jpg', 'textures/water-normal-2.jpg'].map(path => optionalAsset(
+    () => loader.loadAsync(`${import.meta.env?.BASE_URL??'/'}${path}`),
+    () => { const texture = new THREE.DataTexture(new Uint8Array([128, 128, 255, 255]), 1, 1); texture.needsUpdate = true; return texture; },
+  )));
   normalMaps.forEach(texture => { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.anisotropy = renderer.capabilities.getMaxAnisotropy(); });
   const geometry = new THREE.PlaneGeometry(240, 240, 192, 192);
   const reflector = new Reflector(geometry, { textureWidth: 1, textureHeight: 1, multisample: mobile ? 0 : 2, clipBias: 0 });

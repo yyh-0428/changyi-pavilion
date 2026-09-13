@@ -35,7 +35,7 @@ export function clayTileGeometry(pan = false) {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-  geo.setIndex(indices); geo.computeVertexNormals(); return geo;
+  geo.setIndex(indices); geo.computeVertexNormals(); geo.userData.shellLayerSize = layerSize; return geo;
 }
 
 export function taperedBranchGeometry(points, baseRadius, tipRadius, segments = 16) {
@@ -138,12 +138,14 @@ export function meadowTexture() {
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const wx = (x / size - .5) * 64, wz = (y / size - .5) * 64;
     const broad = meadowNoise(wx * .44, wz * .44), medium = meadowNoise(wx * 2.3 + 9, wz * 2.3);
-    const fine = meadowNoise(wx * 23, wz * 23), flecks = meadowNoise(wx * 87, wz * 87);
-    const dry = THREE.MathUtils.smoothstep(broad, .59, .85), shade = broad * 12 + medium * 17 + fine * 16 + flecks * 8;
+    // At 16 texels/metre, each noise cell spans at least four texels. Fine
+    // grass fibres belong in the separate 2 m detail map, never this 64 m map.
+    const fine = meadowNoise(wx * 4, wz * 4);
+    const dry = THREE.MathUtils.smoothstep(broad, .59, .85), shade = broad * 9 + medium * 7 + fine * 3;
     const i = (y * size + x) * 4;
-    data.data[i] = 36 + shade + dry * 18;
-    data.data[i + 1] = 51 + shade + dry * 8;
-    data.data[i + 2] = 22 + shade * .47;
+    data.data[i] = 54 + shade + dry * 10;
+    data.data[i + 1] = 73 + shade + dry * 5;
+    data.data[i + 2] = 33 + shade * .47;
     data.data[i + 3] = 255;
   }
   ctx.putImageData(data, 0, 0);
@@ -153,10 +155,10 @@ export function meadowTexture() {
 
 export function grassClumpGeometry() {
   const positions = [], colors = [], indices = [], uvs = [];
-  const root = new THREE.Color('#35491e'), middle = new THREE.Color('#617f38'), tip = new THREE.Color('#8da45d');
+  const root = new THREE.Color('#3f5227'), middle = new THREE.Color('#5e7635'), tip = new THREE.Color('#788e4b');
   for (let blade = 0; blade < 6; blade++) {
     const angle = blade * 2.39996, height = .18 + (blade % 4) * .047, bend = .065 + (blade % 3) * .028;
-    const width = .009 + (blade % 2) * .003, bx = Math.cos(angle) * .065, bz = Math.sin(angle) * .065, offset = positions.length / 3;
+    const width = .012 + (blade % 2) * .003, bx = Math.cos(angle) * .065, bz = Math.sin(angle) * .065, offset = positions.length / 3;
     for (let row = 0; row < 3; row++) {
       const t = row / 2, across = width * (1 - t), curve = bend * t * t;
       const color = t < .5 ? root.clone().lerp(middle, t * 2) : middle.clone().lerp(tip, (t - .5) * 2);

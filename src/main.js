@@ -1,30 +1,21 @@
-import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Sky } from 'three/addons/objects/Sky.js';
-import { createIcons, Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Fish, Image, Box, X, RotateCw } from 'lucide';
 import { buildPavilion } from './model.js';
-import { loadSurfaceImages } from './material-assets.js';
+import { loadSurfaceImages, optionalAsset } from './material-assets.js';
 import { createLake, createLakebed } from './lake.js';
 import { createTerrain } from './scene-context.js';
 import { applyLighting, lightingPreset, MOON_POSITION } from './lighting.js';
 import { createFishSchool } from './fish-school.js';
 import { enableMainSceneLayers,partitionWaterPasses,renderFrame } from './render-pipeline.js';
 
-const icons = { Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Fish, Image, Box, X, RotateCw };
-createIcons({ icons });
 const $ = selector => document.querySelector(selector);
 const experience = $('#experience');
 const mobileQuery = matchMedia('(max-width: 760px)');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let toastTimer;
-function toast(message) {
-  clearTimeout(toastTimer); $('#toast').textContent = message; $('#toast').classList.add('visible');
-  toastTimer = setTimeout(() => $('#toast').classList.remove('visible'), 3500);
-}
-$('#reload').addEventListener('click', () => location.reload());
-
-async function start() {
+export async function start(ui) {
+  const { toast, closeMenus } = ui;
+  let disposed = false;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#cbd9d2');
   const atmosphere=lightingPreset('sunset');
@@ -44,7 +35,7 @@ async function start() {
   renderer.domElement.setAttribute('aria-label', '长衣亭三维模型');
   renderer.domElement.setAttribute('tabindex', '0');
   renderer.domElement.addEventListener('webglcontextlost', event => {
-    event.preventDefault(); $('#render-error').hidden = false;
+    event.preventDefault(); disposed = true; ui.showRenderError();
   });
   renderer.domElement.addEventListener('webglcontextrestored', () => location.reload());
 
@@ -125,11 +116,13 @@ async function start() {
 
   // Reuse the original model's lettering so every phone gets the same calligraphy.
   const [plaqueMap, surfaceImages] = await Promise.all([
-    new THREE.TextureLoader().loadAsync(`${import.meta.env.BASE_URL}textures/plaque-atlas.png`),
+    optionalAsset(() => new THREE.TextureLoader().loadAsync(`${import.meta.env.BASE_URL}textures/plaque-atlas.png`), () => undefined),
     loadSurfaceImages(import.meta.env.BASE_URL),
   ]);
-  plaqueMap.flipY = false; plaqueMap.colorSpace = THREE.SRGBColorSpace;
-  plaqueMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  if (plaqueMap) {
+    plaqueMap.flipY = false; plaqueMap.colorSpace = THREE.SRGBColorSpace;
+    plaqueMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  }
   const model = buildPavilion({ plaqueMap, surfaceImages }); scene.add(model.root);
   const lampLights = model.lightPositions.map(position => {
     const light = new THREE.PointLight('#ffbd70', .4, 5.5, 2); light.position.copy(position); scene.add(light); return light;
@@ -161,32 +154,17 @@ async function start() {
   const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: '#e1eada', size: .38, sizeAttenuation: true, transparent: true, opacity: .65, fog: false, depthWrite: false }));
   stars.visible = false; scene.add(stars);
 
-  const verses = [
-    ['银汉低回傍霓裳，', '明月窥帘照玉珰。'],
-    ['若教春色妒卿妆，', '桃李无言自敛芳。'],
-    ['瑶台纵有月华凉，', '不及携卿看夕阳。'],
-    ['此生相守鬓成霜，', '愿挽星河缀嫁裳。'],
-  ];
-  function setVerse(index) {
-    $('#scene-verse').replaceChildren(document.createTextNode(verses[index][0]), document.createElement('br'), document.createTextNode(verses[index][1]));
-    document.querySelectorAll('[data-stanza]').forEach(button => button.classList.toggle('active', Number(button.dataset.stanza) === index));
-  }
   function setTheme(value, changeVerse = true) {
     theme = value; const night = value === 'moonlight';
-    experience.dataset.theme = value;
-    document.querySelectorAll('[data-light]').forEach(button => { button.classList.toggle('active', button.dataset.light === value); button.setAttribute('aria-pressed', String(button.dataset.light === value)); });
+    ui.setTheme(value, changeVerse);
     sky.visible = !night; moon.visible = night; stars.visible = night;
     applyLighting(value, { sun, fill, hemisphere, lamps: lampLights, lanternMaterial: model.lanternMaterial, scene, renderer });
     lake.setTheme(night);
     fish.setTheme(night);
-    $('#scene-time').textContent = night ? '月夜 · 亥时' : '夕照 · 酉时';
-    if (changeVerse) setVerse(night ? 0 : 2);
   }
-  setTheme(theme, false);
-  document.querySelectorAll('[data-light]').forEach(button => button.addEventListener('click', () => setTheme(button.dataset.light)));
+  setTheme(experience.dataset.theme, false);
 
   const menus = [['#view-open', '#view-menu'], ['#download-open', '#download-menu']];
-  function closeMenus() { menus.forEach(([button, menu]) => { $(menu).hidden = true; $(button).setAttribute('aria-expanded', 'false'); }); }
   for (const [button, menu] of menus) $(button).addEventListener('click', event => {
     event.stopPropagation(); const open = $(menu).hidden; closeMenus(); $(menu).hidden = !open; $(button).setAttribute('aria-expanded', String(open));
     if (open) $(menu).querySelector('button').focus();
@@ -212,37 +190,18 @@ async function start() {
     if (event.key.toLowerCase() === 'r') setView('overview');
   });
 
-  const poemDialog = $('#poem-dialog');
-  $('#poem-open').addEventListener('click', () => { closeMenus(); poemDialog.showModal(); });
-  $('#poem-close').addEventListener('click', () => poemDialog.close());
-  poemDialog.addEventListener('click', event => { const r = poemDialog.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) poemDialog.close(); });
-  document.querySelectorAll('[data-stanza]').forEach(button => button.addEventListener('click', () => {
-    const index = Number(button.dataset.stanza);
-    setVerse(index); setTheme(index === 0 || index === 3 ? 'moonlight' : 'sunset', false);
-    setView(['inside', 'blossom', 'overview', 'architecture'][index]);
-    poemDialog.close();
-  }));
-
-  $('#fullscreen').addEventListener('click', async () => {
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else if (experience.requestFullscreen) await experience.requestFullscreen();
-      else toast('当前浏览器暂不支持全屏');
-    } catch { toast('当前浏览器暂不支持全屏'); }
-  });
-  document.addEventListener('fullscreenchange', () => {
-    const full = Boolean(document.fullscreenElement);
-    $('#fullscreen').innerHTML = `<i data-lucide="${full ? 'minimize' : 'maximize'}"></i>`;
-    $('#fullscreen').dataset.tip = full ? '退出全屏' : '全屏'; $('#fullscreen').setAttribute('aria-label', full ? '退出全屏' : '全屏'); createIcons({ icons });
-  });
-
   function download(blob, filename) {
     const url = URL.createObjectURL(blob); const link = document.createElement('a');
     link.href = url; link.download = filename; link.click(); setTimeout(() => URL.revokeObjectURL(url), 15000);
   }
-  $('#save-image').addEventListener('click', () => {
-    renderFrame(renderer,scene,camera);
-    renderer.domElement.toBlob(blob => { if (blob) { download(blob, `长衣亭-${theme === 'sunset' ? '夕照' : '月夜'}.png`); toast('此景已留存'); } else toast('此景暂未能保存'); });
+  $('#save-image').addEventListener('click', async () => {
+    try {
+      const { keepsakeCanvas } = await import('./keepsake.js');
+      renderFrame(renderer,scene,camera);
+      const verse = [...$('#scene-verse').childNodes].filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent);
+      const canvas = keepsakeCanvas(renderer.domElement, verse, theme === 'moonlight');
+      canvas.toBlob(blob => { if (blob) { download(blob, `长衣亭-予张依婷-${theme === 'sunset' ? '夕照' : '月夜'}.png`); toast('此景与诗，已一同留存'); } else toast('此景暂未能保存'); });
+    } catch (error) { console.error('Image export failed', error); toast('此景暂未能保存，请再试一次'); }
   });
   const exportButtons = [$('#save-model'), $('#save-compatible')];
   exportButtons.forEach(button => button.addEventListener('click', async () => {
@@ -263,11 +222,10 @@ async function start() {
     finally { exportButtons.forEach(item => { item.disabled = false; item.removeAttribute('aria-busy'); }); }
   }));
 
-  let resizeTimer;
   addEventListener('resize', () => {
     renderer.setPixelRatio(Math.min(devicePixelRatio, mobileQuery.matches ? 1.6 : 2)); renderer.setSize(innerWidth, innerHeight); projection();
     lake.resize(innerWidth, innerHeight, mobileQuery.matches);
-    clearTimeout(resizeTimer); resizeTimer = setTimeout(() => setView(currentView, false), 120);
+    // Preserve the chosen orbit/zoom; only an explicit view selection moves it.
   });
   // Resolve shader variants while the existing loading screen is still present.
   // Reflection, refraction, shadows and animation keep their original cadence.
@@ -279,7 +237,7 @@ async function start() {
   }
   const shaderWarmupMs=performance.now()-warmupStart;
   const clock = new THREE.Clock();
-  let disposed = false;
+
   function animate() {
     if (disposed) return;
     requestAnimationFrame(animate);
@@ -298,7 +256,9 @@ async function start() {
     }
     lake.update(elapsed);
     fish.update(reducedMotion?0:dt,camera);
-    controls.update(dt); renderer.info.reset(); renderFrame(renderer,scene,camera); frames++;
+    controls.update(dt);
+    model.updateMeadow(camera, renderer.domElement.height);
+    renderer.info.reset(); renderFrame(renderer,scene,camera); frames++;
     if (frames === 3) { experience.classList.add('ready'); $('#loading').setAttribute('aria-hidden', 'true'); }
   }
   window.__pavilion = {
@@ -306,14 +266,10 @@ async function start() {
     model: model.root,
     fishStats: fish.stats,
     performanceStats:()=>({...renderPartition.stats(),shaderWarmupMs,sceneMatrixUpdatesPerFrame:1,waterPassesPerFrame:2}),
-    version: '12',
+    version: '13',
   };
+  ui.connectScene({ setTheme, setView });
   addEventListener('pagehide', event => { disposed = true;if(!event.persisted)fish.dispose(); });
   addEventListener('pageshow', event => { if (event.persisted) { disposed = false; animate(); } });
   animate();
 }
-
-start().catch(error => {
-  console.error('Pavilion initialization failed', error); $('#render-error').hidden = false;
-  $('#loading').style.display = 'none';
-});

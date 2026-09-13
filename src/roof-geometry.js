@@ -22,6 +22,59 @@ export function tileElevation(across, along, pan, laneWidth, underside = false) 
   return seat + curve + lap - (underside ? thickness : 0);
 }
 
+function tilePoint(spec, across, along) {
+  const { row, column, rows, lanes, pan, inner, outer, base, height } = spec;
+  const t0 = Math.max(0, (row - .22) / rows), t1 = (row + 1) / rows;
+  const center = (column + (pan ? .5 : 0)) / lanes, half = (pan ? .475 : .26) / lanes;
+  const width = (inner + (outer - inner) * (t0 + t1) / 2) / lanes;
+  const p = roofPoint(0, THREE.MathUtils.lerp(t0, t1, along), center + (across * 2 - 1) * half, inner, outer, base, height);
+  p.y += tileElevation(across, along, pan, width);
+  return p;
+}
+
+// Sample the next tile's actual triangle plane, including the crown taper and
+// curved eave. An analytic roof height alone misses its chord/arch interpolation.
+function tileContactHeight(spec, across, along) {
+  const nx = spec.pan ? 4 : 6, x = Math.min(nx - 1, Math.floor(across * nx));
+  const z = Math.min(1, Math.floor(along * 2));
+  const point = tilePoint(spec, across, along);
+  const corners = [tilePoint(spec, x / nx, z / 2), tilePoint(spec, (x + 1) / nx, z / 2),
+    tilePoint(spec, x / nx, (z + 1) / 2), tilePoint(spec, (x + 1) / nx, (z + 1) / 2)];
+  for (const ids of [[0, 1, 2], [2, 1, 3]]) {
+    const [a, b, c] = ids.map(i => corners[i]);
+    const den = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+    const u = ((b.z - c.z) * (point.x - c.x) + (c.x - b.x) * (point.z - c.z)) / den;
+    const v = ((c.z - a.z) * (point.x - c.x) + (a.x - c.x) * (point.z - c.z)) / den;
+    if (u >= -1e-7 && v >= -1e-7 && u + v <= 1 + 1e-7) return u * a.y + v * b.y + (1 - u - v) * c.y;
+  }
+  throw new Error('Tile contact lies outside the adjacent shell');
+}
+
+// The raised hip caps also need a bed: their original ceramic shells sit
+// 65 mm above the roof and otherwise leave daylight along the roof silhouette.
+export function hipTileBeddingGeometry(shell, transform, sector, spec) {
+  const geometry = shell.clone(), p = geometry.attributes.position, layerSize = shell.userData.shellLayerSize;
+  const point = new THREE.Vector3(), local = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    const bottom = i < layerSize * 2 ? i >= layerSize : (i - layerSize * 2) % 4 >= 2;
+    point.fromBufferAttribute(p, i);
+    // Copy the cap's underside exactly, then extend only the concealed bed.
+    if (!bottom) point.y -= .09;
+    point.applyMatrix4(transform);
+    if (bottom) {
+      local.copy(point).applyAxisAngle(new THREE.Vector3(0, 1, 0), sector * Math.PI / 3);
+      local.z = Math.abs(local.z);
+      const radius = local.x + local.z / Math.sqrt(3);
+      const t = THREE.MathUtils.clamp((radius - spec.inner) / (spec.outer - spec.inner), 0, 1);
+      const u = THREE.MathUtils.clamp(2 * local.z / (Math.sqrt(3) * radius), 0, 1);
+      point.y = Math.min(point.y - .001, roofPoint(0, t, u, spec.inner, spec.outer, spec.base, spec.height).y - .002);
+    } else point.y += .0007;
+    p.setXYZ(i, point.x, point.y, point.z);
+  }
+  geometry.computeVertexNormals(); geometry.computeBoundingBox(); geometry.computeBoundingSphere();
+  return geometry;
+}
+
 // Every vertex lies on the roof profile, including the taper at the ridge.
 // A sector is baked once and repeated six times, keeping only four roof draw groups.
 export function conformalTileGeometry({ row, column, rows, lanes, pan, inner, outer, base, height }) {
@@ -30,11 +83,21 @@ export function conformalTileGeometry({ row, column, rows, lanes, pan, inner, ou
   const center = pan ? (column + .5) / lanes : column / lanes;
   const half = (pan ? .475 : .26) / lanes;
   const laneWidth = (inner + (outer - inner) * (t0 + t1) / 2) / lanes;
+  const spec = { row, column, rows, lanes, pan, inner, outer, base, height };
+  const hasLap = row < rows - 1, next0 = (row + .78) / rows, next1 = (row + 2) / rows;
   const positions = [], uv = [], indices = [], layerSize = (nx + 1) * (nz + 1);
   for (let layer = 0; layer < 2; layer++) for (let z = 0; z <= nz; z++) for (let x = 0; x <= nx; x++) {
-    const across = x / nx, along = z / nz, t = THREE.MathUtils.lerp(t0, t1, along), u = center + (across * 2 - 1) * half;
+    const across = x / nx;
+    // Reuse the three underside rings: the middle one starts the contact band.
+    // The visible top and final eave lip keep their original profile and budget.
+    const t = layer && hasLap && z === 1 ? next0 : THREE.MathUtils.lerp(t0, t1, z / nz);
+    const along = (t - t0) / (t1 - t0), u = center + (across * 2 - 1) * half;
     const p = roofPoint(0, t, u, inner, outer, base, height);
     p.y += tileElevation(across, along, pan, laneWidth, layer === 1);
+    if (layer && hasLap && z > 0) {
+      // Embed the hidden bearing face by 1 mm, avoiding coplanar flicker.
+      p.y = Math.min(p.y, tileContactHeight({ ...spec, row: row + 1 }, across, (t - next0) / (next1 - next0)) - .001);
+    }
     positions.push(p.x, p.y, p.z); uv.push(across, along);
     if (x < nx && z < nz) {
       const a = layer * layerSize + z * (nx + 1) + x, b = a + nx + 1;

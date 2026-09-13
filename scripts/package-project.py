@@ -6,7 +6,7 @@ import os
 import zipfile
 
 root = Path(__file__).resolve().parents[1]
-output = root.parent / 'changyi-pavilion-v12.zip'
+output = root.parent / 'changyi-pavilion-v13.zip'
 manifest_path = root / 'docs/PACKAGE_MANIFEST.json'
 executables = {'Start-Mac.command', 'Stop-Mac.command', 'scripts/mac/node.sh'}
 root_files = [
@@ -27,7 +27,7 @@ for folder in ['src', 'public', 'dist', 'tests', 'scripts', 'docs', 'previews', 
 files = sorted(set(files), key=lambda path: path.relative_to(root).as_posix())
 
 manifest = {
-    'revision': '12',
+    'revision': '13',
     'excluded': ['node_modules', 'all GLB and glTF files', 'full-resolution PNG previews'],
     'files': [{
         'path': path.relative_to(root).as_posix(),

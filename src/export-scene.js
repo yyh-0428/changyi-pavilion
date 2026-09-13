@@ -48,8 +48,9 @@ export function captureScene(root, context = {}) {
   const scene = new THREE.Scene(); scene.name = '长衣亭·当前场景';
   const materialCache = new Map(), geometryCache = new Map();
   function copy(object) {
-    if (!object.visible) return null;
+    if (!object.visible && !object.userData.meadow) return null;
     const target = object.clone(false);
+    if (object.userData.meadow) target.visible = true;
     if (object.isDirectionalLight || object.isSpotLight) {
       object.updateMatrixWorld(true); object.target.updateMatrixWorld(true);
       target.lookAt(object.target.getWorldPosition(new THREE.Vector3()));
@@ -91,7 +92,7 @@ export function captureScene(root, context = {}) {
     scene.add(view);
   }
   scene.userData = {
-    generator: 'Changyi Pavilion 8', time, theme, units: 'metres', exposure,
+    generator: 'Changyi Pavilion 13', time, theme, units: 'metres', exposure,
     modelBounds: new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3()).toArray(),
     detailCounts: structuredClone(root.userData.detailCounts),
     displayNotes: 'Choose the embedded camera. Water is a static PBR approximation. Procedural sky, fog, hemisphere/IBL lighting, ACES exposure and camera view offset depend on the viewer and are recorded as metadata, not baked into materials.',

@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory(prefix='fish-shader-check-',dir=root.parent) as
     try:
         report['compiler']=ctx.info['GL_VERSION']
         report['programs']=[]
-        for name in ['fish','fish-production','fish-fins','fish-fins-production','bed','water']:
+        for name in ['fish','fish-production','fish-fins','fish-fins-production','bed','water','meadow','meadow-production']:
             vertex=(work/(name+'.vert')).read_text()
             fragment=(work/(name+'.frag')).read_text()
             assert vertex.startswith('#version 300 es') and fragment.startswith('#version 300 es')
