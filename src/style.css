@@ -16,6 +16,8 @@ button svg { width: 19px; height: 19px; stroke-width: 1.4; flex: 0 0 auto; }
 .signature-en { display: block; font-family: "Palatino Linotype", "Book Antiqua", serif; font-size: 9px; color: var(--muted); }
 .seal { height: 41px; width: 33px; display: grid; place-items: center; color: #f0e7d9; background: #97584d; border: 1px solid #b87b6e; box-shadow: inset 0 0 0 3px #97584d, inset 0 0 0 4px #e6c3b48c; font-size: 24px; }
 .header-right { display: flex; align-items: center; gap: 30px; }
+.view-shortcuts { display: flex; align-items: center; gap: 18px; }
+.view-shortcuts [aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
 .dedication { color: var(--muted); font-size: 12px; }
 .text-action { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 9px 0; border: 0; border-bottom: 1px solid var(--line); background: none; font-size: 14px; }
 .text-action:hover { color: var(--accent); border-color: var(--accent); }
@@ -47,7 +49,7 @@ h1 { font-weight: 400; font-size: 70px; line-height: 1.2; margin: 23px 0 31px; t
 .icon-button:hover::after, .icon-button:focus-visible::after { opacity: 1; transform: translate(-50%,0); }
 .tool-divider { width: 1px; height: 19px; background: var(--line); margin: 0 9px; }
 .menu-anchor { position: relative; }
-.tool-menu { position: absolute; bottom: 52px; right: 0; width: 176px; border: 1px solid var(--glass-border); background: var(--glass-panel); backdrop-filter: blur(14px); box-shadow: 0 8px 30px #162e2012; padding: 6px; border-radius: 4px; }
+.tool-menu { position: absolute; bottom: 52px; right: 0; width: 176px; max-height: min(70vh, 360px); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--glass-border); background: var(--glass-panel); backdrop-filter: blur(14px); box-shadow: 0 8px 30px #162e2012; padding: 6px; border-radius: 4px; }
 .tool-menu button { width: 100%; display: flex; gap: 11px; align-items: center; text-align: left; border: 0; background: none; padding: 12px 10px; font-size: 13px; border-radius: 2px; }
 .tool-menu button:hover, .tool-menu button:focus-visible { background: var(--line); }
 .tool-menu svg { width: 17px; height: 17px; }
@@ -79,7 +81,8 @@ h1 { font-weight: 400; font-size: 70px; line-height: 1.2; margin: 23px 0 31px; t
   .signature-en { font-size: 7px; }
   .seal { width: 27px; height: 35px; font-size: 22px; }
   .header-right { gap: 15px; }
-  .dedication { font-size: 10px; }
+  .dedication { display: none; }
+  .view-shortcuts { gap: 12px; }
   .text-action { font-size: 12px; gap: 5px; }
   .text-action svg { width: 17px; height: 17px; }
   .inscription { left: 26px; top: 113px; }
@@ -105,7 +108,7 @@ h1 { font-weight: 400; font-size: 70px; line-height: 1.2; margin: 23px 0 31px; t
   .poem-signature { padding-top: 16px; }
   #toast { bottom: 137px; }
 }
-@media (max-width: 370px) { .dedication { display: none; } .scene-controls { inset-inline: 16px; } .light-switch { gap: 12px; } .icon-button { width: 28px; } }
+@media (max-width: 370px) { .dedication { display: none; } .view-shortcuts svg { display: none; } .view-shortcuts { gap: 10px; } .scene-controls { inset-inline: 16px; } .light-switch { gap: 12px; } .icon-button { width: 28px; } }
 @media (max-height: 700px) and (min-width: 761px) { .inscription { top: 23%; } h1 { font-size: 52px; margin-block: 17px 22px; } .inscription-foot { margin-top: 18px; } #poem-dialog { inset-block: 80px 90px; padding: 15px 24px; max-height: calc(100dvh - 170px); } .couplet { font-size: 16px; padding-block: 5px; } }
 @media (max-height: 700px) and (max-width: 760px) { .inscription { top: 93px; } h1 { font-size: 34px; margin-bottom: 9px; } .scene-verse { font-size: 12px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

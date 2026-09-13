@@ -1,0 +1,1805 @@
+{
+  "revision": 11,
+  "baselineRevision": 10,
+  "scope": "CPU submission counts using Three.js virtual cameras, clipping frusta, layers and draw ranges; includes main, water and directional shadows. No GPU or FPS measurement.",
+  "geometry": {
+    "triangles": 2549612,
+    "geometryBytes": 20556673,
+    "meshes": 107,
+    "instances": 66797,
+    "geometries": 107,
+    "materials": 30,
+    "textures": 31,
+    "textureBytes": 23855104,
+    "textureBytesWithMipmaps": 31806772
+  },
+  "partition": {
+    "aboveWater": 80,
+    "belowWater": 1,
+    "shared": 28,
+    "clipMargin": 0.02,
+    "geometryRemoved": 0
+  },
+  "sceneMatrixTraversals": {
+    "baseline": 3,
+    "optimized": 1
+  },
+  "displayComparison": [
+    {
+      "time": null,
+      "baseline": "c73cc628b0ad80540555083c4f172ee8972be2ec8ea735f6cdad5e7b77b4c87c",
+      "optimized": "c73cc628b0ad80540555083c4f172ee8972be2ec8ea735f6cdad5e7b77b4c87c",
+      "equal": true
+    },
+    {
+      "time": 0,
+      "baseline": "603f3ca4f2c64c3884a90e2fd7575e525b4d3ddb471ffc8381ef19bc2574193a",
+      "optimized": "603f3ca4f2c64c3884a90e2fd7575e525b4d3ddb471ffc8381ef19bc2574193a",
+      "equal": true
+    },
+    {
+      "time": 0.7,
+      "baseline": "49be40af7b23e116c921a6c09c64eb2e154625b4c4ec0b9c309d28bdd97bca6a",
+      "optimized": "49be40af7b23e116c921a6c09c64eb2e154625b4c4ec0b9c309d28bdd97bca6a",
+      "equal": true
+    },
+    {
+      "time": 2.1,
+      "baseline": "5caa7b81962b9eb0d90200ac279bb793557621782c8441f6b01e7b17ffb7b3c8",
+      "optimized": "5caa7b81962b9eb0d90200ac279bb793557621782c8441f6b01e7b17ffb7b3c8",
+      "equal": true
+    },
+    {
+      "time": 8.6,
+      "baseline": "9a0f47d8564d2c6e1e5d14084f2f6126080b653fc6899ea9c429730ed9acdf5c",
+      "optimized": "9a0f47d8564d2c6e1e5d14084f2f6126080b653fc6899ea9c429730ed9acdf5c",
+      "equal": true
+    }
+  ],
+  "unchangedSources": [
+    {
+      "file": "src/fish-school.js",
+      "sha256": "d4fcbd8ed852633a574c2f0e789a314b31bb652601439653516a0774a18b65bd"
+    },
+    {
+      "file": "src/fish-geometry.js",
+      "sha256": "79e268cb7134b78aec9fff8770b487cd77003690f34e66b8041b1fe5f76438f5"
+    },
+    {
+      "file": "src/fish-material.js",
+      "sha256": "05ec0506db304c37b480eec2a1ffc8dc72d07170e2f51b3fea7f47923ffac64f"
+    },
+    {
+      "file": "src/fish-simulation.js",
+      "sha256": "5927e8321fa3629b9f1f5e46e1845c4959f9bcfe13d6f38728023425eb78b751"
+    },
+    {
+      "file": "src/fish-worker.js",
+      "sha256": "20c0a6c222a31430825b1adc2b5e28019a4979798f9ed8bc8bc33febe326adfc"
+    },
+    {
+      "file": "src/fish-habitat.js",
+      "sha256": "80afffb9ae9a2305ee72979bb8bd499fc1564301474b76e9389a846168f31006"
+    },
+    {
+      "file": "src/lighting.js",
+      "sha256": "47331d5137144b85fe54c63fd6468607f4e16265de1c3ca20b47d2541eff7de9"
+    },
+    {
+      "file": "src/model-optimization.js",
+      "sha256": "b323ff73d1cab849b4e37d97c2bbf9d2dc688a367f45614b2acd31d93e226184"
+    },
+    {
+      "file": "src/surface-materials.js",
+      "sha256": "74c0a7386b70fa9d74180ed00304db3e83ca0267450c239137e26ae4072541e7"
+    },
+    {
+      "file": "src/surface-finishing.js",
+      "sha256": "2e866886c74736defae1ca03747b284fd5f6200700fe9b6c28328dff476f64de"
+    },
+    {
+      "file": "src/roof-geometry.js",
+      "sha256": "28c542aa2f0c48fa41a547f1fc157094ecb5316480af3a5ecc7c6afbb957dc80"
+    },
+    {
+      "file": "src/pavilion-craft.js",
+      "sha256": "988990b94104783f68e2cbc7792eb99def814011f6e89263001d13de7e5ba613"
+    },
+    {
+      "file": "src/moon-gate.js",
+      "sha256": "06309cbdc3cbf6617b6e5fa2a651a7855d6676eb59a53e17d7b759d358097685"
+    },
+    {
+      "file": "src/garden-details.js",
+      "sha256": "697fb4234b0255f8914a0f6a40b28f2d1a707c5e5c39d8f989d5b30ad1c914c9"
+    },
+    {
+      "file": "src/style.css",
+      "sha256": "e5f37784112a7eb0d30e2ec1233b3773bc66e0a72a379f9abd31ba66dc3167e2"
+    }
+  ],
+  "minimumClipSeparation": 0.033163670301435993,
+  "submissionComparison": [
+    {
+      "mobile": false,
+      "theme": "sunset",
+      "view": "overview",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 99,
+          "triangles": 2410892,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 65,
+          "triangles": 2359226,
+          "points": 0
+        },
+        "main": {
+          "calls": 101,
+          "triangles": 2531672,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 98,
+          "triangles": 2305292,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 377296,
+          "points": 0
+        },
+        "main": {
+          "calls": 101,
+          "triangles": 2531672,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 2087530,
+      "triangleReductionPercent": 23.915144444250963
+    },
+    {
+      "mobile": false,
+      "theme": "sunset",
+      "view": "architecture",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 40,
+          "triangles": 1484810,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 33,
+          "triangles": 1596430,
+          "points": 0
+        },
+        "main": {
+          "calls": 66,
+          "triangles": 1756904,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 39,
+          "triangles": 1379210,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 377296,
+          "points": 0
+        },
+        "main": {
+          "calls": 66,
+          "triangles": 1756904,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1324734,
+      "triangleReductionPercent": 21.144125269861192
+    },
+    {
+      "mobile": false,
+      "theme": "sunset",
+      "view": "inside",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 32,
+          "triangles": 1402162,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 33,
+          "triangles": 1702174,
+          "points": 0
+        },
+        "main": {
+          "calls": 65,
+          "triangles": 1752188,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 31,
+          "triangles": 1296562,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 487756,
+          "points": 0
+        },
+        "main": {
+          "calls": 65,
+          "triangles": 1752188,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1320018,
+      "triangleReductionPercent": 21.007225432146154
+    },
+    {
+      "mobile": false,
+      "theme": "sunset",
+      "view": "blossom",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 48,
+          "triangles": 1493214,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 36,
+          "triangles": 1668322,
+          "points": 0
+        },
+        "main": {
+          "calls": 68,
+          "triangles": 1762520,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 47,
+          "triangles": 1387614,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 443572,
+          "points": 0
+        },
+        "main": {
+          "calls": 68,
+          "triangles": 1762520,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1330350,
+      "triangleReductionPercent": 20.94653426061655
+    },
+    {
+      "mobile": false,
+      "theme": "sunset",
+      "view": "garden",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 85,
+          "triangles": 2061982,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 55,
+          "triangles": 2009990,
+          "points": 0
+        },
+        "main": {
+          "calls": 91,
+          "triangles": 2182436,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 84,
+          "triangles": 1956382,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 377296,
+          "points": 0
+        },
+        "main": {
+          "calls": 91,
+          "triangles": 2182436,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1738294,
+      "triangleReductionPercent": 22.629551799760517
+    },
+    {
+      "mobile": false,
+      "theme": "sunset",
+      "view": "moonGate",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 94,
+          "triangles": 2268566,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 59,
+          "triangles": 2169848,
+          "points": 0
+        },
+        "main": {
+          "calls": 95,
+          "triangles": 2342294,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 93,
+          "triangles": 2162966,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 377296,
+          "points": 0
+        },
+        "main": {
+          "calls": 95,
+          "triangles": 2342294,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1898152,
+      "triangleReductionPercent": 23.126135045326276
+    },
+    {
+      "mobile": false,
+      "theme": "sunset",
+      "view": "tea",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 28,
+          "triangles": 1348558,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 29,
+          "triangles": 1727164,
+          "points": 0
+        },
+        "main": {
+          "calls": 37,
+          "triangles": 1496672,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 27,
+          "triangles": 1242958,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 569812,
+          "points": 0
+        },
+        "main": {
+          "calls": 37,
+          "triangles": 1496672,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1262952,
+      "triangleReductionPercent": 21.050926175946426
+    },
+    {
+      "mobile": false,
+      "theme": "sunset",
+      "view": "fish",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 69,
+          "triangles": 1744574,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 36,
+          "triangles": 1692004,
+          "points": 0
+        },
+        "main": {
+          "calls": 35,
+          "triangles": 1509136,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 68,
+          "triangles": 1638974,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 443572,
+          "points": 0
+        },
+        "main": {
+          "calls": 35,
+          "triangles": 1509136,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1354032,
+      "triangleReductionPercent": 21.246956610158
+    },
+    {
+      "mobile": false,
+      "theme": "moonlight",
+      "view": "overview",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 100,
+          "triangles": 2412352,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 65,
+          "triangles": 2359214,
+          "points": 1150
+        },
+        "main": {
+          "calls": 101,
+          "triangles": 2531660,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 99,
+          "triangles": 2306752,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 377284,
+          "points": 1150
+        },
+        "main": {
+          "calls": 101,
+          "triangles": 2531660,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 2087530,
+      "triangleReductionPercent": 23.911210789041434
+    },
+    {
+      "mobile": false,
+      "theme": "moonlight",
+      "view": "architecture",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 40,
+          "triangles": 1484798,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 33,
+          "triangles": 1596418,
+          "points": 1150
+        },
+        "main": {
+          "calls": 66,
+          "triangles": 1756892,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 39,
+          "triangles": 1379198,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 377284,
+          "points": 1150
+        },
+        "main": {
+          "calls": 66,
+          "triangles": 1756892,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1324734,
+      "triangleReductionPercent": 21.144246764121046
+    },
+    {
+      "mobile": false,
+      "theme": "moonlight",
+      "view": "inside",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 32,
+          "triangles": 1402150,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 33,
+          "triangles": 1702162,
+          "points": 1150
+        },
+        "main": {
+          "calls": 65,
+          "triangles": 1752176,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 31,
+          "triangles": 1296550,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 487744,
+          "points": 1150
+        },
+        "main": {
+          "calls": 65,
+          "triangles": 1752176,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1320018,
+      "triangleReductionPercent": 21.00734578670005
+    },
+    {
+      "mobile": false,
+      "theme": "moonlight",
+      "view": "blossom",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 49,
+          "triangles": 1494674,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 36,
+          "triangles": 1668310,
+          "points": 1150
+        },
+        "main": {
+          "calls": 68,
+          "triangles": 1762508,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 48,
+          "triangles": 1389074,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 443560,
+          "points": 1150
+        },
+        "main": {
+          "calls": 68,
+          "triangles": 1762508,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1330350,
+      "triangleReductionPercent": 20.94179931826403
+    },
+    {
+      "mobile": false,
+      "theme": "moonlight",
+      "view": "garden",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 85,
+          "triangles": 2061970,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 55,
+          "triangles": 2009978,
+          "points": 1150
+        },
+        "main": {
+          "calls": 91,
+          "triangles": 2182424,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 84,
+          "triangles": 1956370,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 377284,
+          "points": 1150
+        },
+        "main": {
+          "calls": 91,
+          "triangles": 2182424,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1738294,
+      "triangleReductionPercent": 22.629657855263943
+    },
+    {
+      "mobile": false,
+      "theme": "moonlight",
+      "view": "moonGate",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 94,
+          "triangles": 2268554,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 59,
+          "triangles": 2169836,
+          "points": 1150
+        },
+        "main": {
+          "calls": 95,
+          "triangles": 2342282,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 93,
+          "triangles": 2162954,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 377284,
+          "points": 1150
+        },
+        "main": {
+          "calls": 95,
+          "triangles": 2342282,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1898152,
+      "triangleReductionPercent": 23.126236478387717
+    },
+    {
+      "mobile": false,
+      "theme": "moonlight",
+      "view": "tea",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 28,
+          "triangles": 1348546,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 29,
+          "triangles": 1727152,
+          "points": 1150
+        },
+        "main": {
+          "calls": 37,
+          "triangles": 1496660,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 27,
+          "triangles": 1242946,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 569800,
+          "points": 1150
+        },
+        "main": {
+          "calls": 37,
+          "triangles": 1496660,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1262952,
+      "triangleReductionPercent": 21.051052492619352
+    },
+    {
+      "mobile": false,
+      "theme": "moonlight",
+      "view": "fish",
+      "fish": 120,
+      "baseline": {
+        "reflection": {
+          "calls": 70,
+          "triangles": 1746034,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 36,
+          "triangles": 1691992,
+          "points": 1150
+        },
+        "main": {
+          "calls": 35,
+          "triangles": 1509124,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 69,
+          "triangles": 1640434,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 443560,
+          "points": 1150
+        },
+        "main": {
+          "calls": 35,
+          "triangles": 1509124,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1354032,
+      "triangleReductionPercent": 21.242170076419804
+    },
+    {
+      "mobile": true,
+      "theme": "sunset",
+      "view": "overview",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 96,
+          "triangles": 2368628,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 61,
+          "triangles": 2231846,
+          "points": 0
+        },
+        "main": {
+          "calls": 97,
+          "triangles": 2442356,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 95,
+          "triangles": 2263028,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339232,
+          "points": 0
+        },
+        "main": {
+          "calls": 97,
+          "triangles": 2442356,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1998214,
+      "triangleReductionPercent": 23.591820677917116
+    },
+    {
+      "mobile": true,
+      "theme": "sunset",
+      "view": "architecture",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 59,
+          "triangles": 1684828,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 36,
+          "triangles": 1564108,
+          "points": 0
+        },
+        "main": {
+          "calls": 69,
+          "triangles": 1762646,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 58,
+          "triangles": 1579228,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339232,
+          "points": 0
+        },
+        "main": {
+          "calls": 69,
+          "triangles": 1762646,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1330476,
+      "triangleReductionPercent": 20.66374930576005
+    },
+    {
+      "mobile": true,
+      "theme": "sunset",
+      "view": "inside",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 40,
+          "triangles": 1470938,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 34,
+          "triangles": 1604752,
+          "points": 0
+        },
+        "main": {
+          "calls": 58,
+          "triangles": 1746334,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 39,
+          "triangles": 1365338,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 392884,
+          "points": 0
+        },
+        "main": {
+          "calls": 58,
+          "triangles": 1746334,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1317468,
+      "triangleReductionPercent": 21.082395684012738
+    },
+    {
+      "mobile": true,
+      "theme": "sunset",
+      "view": "blossom",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 53,
+          "triangles": 1677282,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 33,
+          "triangles": 1558366,
+          "points": 0
+        },
+        "main": {
+          "calls": 56,
+          "triangles": 1752046,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 52,
+          "triangles": 1571682,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339232,
+          "points": 0
+        },
+        "main": {
+          "calls": 56,
+          "triangles": 1752046,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1324734,
+      "triangleReductionPercent": 20.651187065926212
+    },
+    {
+      "mobile": true,
+      "theme": "sunset",
+      "view": "garden",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 88,
+          "triangles": 2050696,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 55,
+          "triangles": 1961738,
+          "points": 0
+        },
+        "main": {
+          "calls": 90,
+          "triangles": 2165788,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 87,
+          "triangles": 1945096,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339232,
+          "points": 0
+        },
+        "main": {
+          "calls": 90,
+          "triangles": 2165788,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1728106,
+      "triangleReductionPercent": 22.722283407334007
+    },
+    {
+      "mobile": true,
+      "theme": "sunset",
+      "view": "moonGate",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 76,
+          "triangles": 2133060,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 50,
+          "triangles": 2001134,
+          "points": 0
+        },
+        "main": {
+          "calls": 77,
+          "triangles": 2206788,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 75,
+          "triangles": 2027460,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339232,
+          "points": 0
+        },
+        "main": {
+          "calls": 77,
+          "triangles": 2206788,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1767502,
+      "triangleReductionPercent": 22.753349083224514
+    },
+    {
+      "mobile": true,
+      "theme": "sunset",
+      "view": "tea",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 25,
+          "triangles": 1322956,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 26,
+          "triangles": 1600684,
+          "points": 0
+        },
+        "main": {
+          "calls": 35,
+          "triangles": 1474772,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 24,
+          "triangles": 1217356,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 465472,
+          "points": 0
+        },
+        "main": {
+          "calls": 35,
+          "triangles": 1474772,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1240812,
+      "triangleReductionPercent": 21.29957020190108
+    },
+    {
+      "mobile": true,
+      "theme": "sunset",
+      "view": "fish",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 41,
+          "triangles": 1644988,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 29,
+          "triangles": 1585768,
+          "points": 0
+        },
+        "main": {
+          "calls": 28,
+          "triangles": 1453588,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 40,
+          "triangles": 1539388,
+          "points": 0
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 392884,
+          "points": 0
+        },
+        "main": {
+          "calls": 28,
+          "triangles": 1453588,
+          "points": 0
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1298484,
+      "triangleReductionPercent": 21.246713959254894
+    },
+    {
+      "mobile": true,
+      "theme": "moonlight",
+      "view": "overview",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 96,
+          "triangles": 2368616,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 61,
+          "triangles": 2231834,
+          "points": 1150
+        },
+        "main": {
+          "calls": 97,
+          "triangles": 2442344,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 95,
+          "triangles": 2263016,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339220,
+          "points": 1150
+        },
+        "main": {
+          "calls": 97,
+          "triangles": 2442344,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1998214,
+      "triangleReductionPercent": 23.5919209512075
+    },
+    {
+      "mobile": true,
+      "theme": "moonlight",
+      "view": "architecture",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 59,
+          "triangles": 1684816,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 36,
+          "triangles": 1564096,
+          "points": 1150
+        },
+        "main": {
+          "calls": 69,
+          "triangles": 1762634,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 58,
+          "triangles": 1579216,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339220,
+          "points": 1150
+        },
+        "main": {
+          "calls": 69,
+          "triangles": 1762634,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1330476,
+      "triangleReductionPercent": 20.663864841442162
+    },
+    {
+      "mobile": true,
+      "theme": "moonlight",
+      "view": "inside",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 40,
+          "triangles": 1470926,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 34,
+          "triangles": 1604740,
+          "points": 1150
+        },
+        "main": {
+          "calls": 58,
+          "triangles": 1746322,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 39,
+          "triangles": 1365326,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 392872,
+          "points": 1150
+        },
+        "main": {
+          "calls": 58,
+          "triangles": 1746322,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1317468,
+      "triangleReductionPercent": 21.08251713606211
+    },
+    {
+      "mobile": true,
+      "theme": "moonlight",
+      "view": "blossom",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 53,
+          "triangles": 1677270,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 33,
+          "triangles": 1558354,
+          "points": 1150
+        },
+        "main": {
+          "calls": 56,
+          "triangles": 1752034,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 52,
+          "triangles": 1571670,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339220,
+          "points": 1150
+        },
+        "main": {
+          "calls": 56,
+          "triangles": 1752034,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1324734,
+      "triangleReductionPercent": 20.65130296135233
+    },
+    {
+      "mobile": true,
+      "theme": "moonlight",
+      "view": "garden",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 88,
+          "triangles": 2050684,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 55,
+          "triangles": 1961726,
+          "points": 1150
+        },
+        "main": {
+          "calls": 90,
+          "triangles": 2165776,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 87,
+          "triangles": 1945084,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339220,
+          "points": 1150
+        },
+        "main": {
+          "calls": 90,
+          "triangles": 2165776,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1728106,
+      "triangleReductionPercent": 22.72239096419602
+    },
+    {
+      "mobile": true,
+      "theme": "moonlight",
+      "view": "moonGate",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 76,
+          "triangles": 2133048,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 50,
+          "triangles": 2001122,
+          "points": 1150
+        },
+        "main": {
+          "calls": 77,
+          "triangles": 2206776,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 75,
+          "triangles": 2027448,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 7,
+          "triangles": 339220,
+          "points": 1150
+        },
+        "main": {
+          "calls": 77,
+          "triangles": 2206776,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1767502,
+      "triangleReductionPercent": 22.75345453047479
+    },
+    {
+      "mobile": true,
+      "theme": "moonlight",
+      "view": "tea",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 25,
+          "triangles": 1322944,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 26,
+          "triangles": 1600672,
+          "points": 1150
+        },
+        "main": {
+          "calls": 35,
+          "triangles": 1474760,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 24,
+          "triangles": 1217344,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 465460,
+          "points": 1150
+        },
+        "main": {
+          "calls": 35,
+          "triangles": 1474760,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1240812,
+      "triangleReductionPercent": 21.299701827657415
+    },
+    {
+      "mobile": true,
+      "theme": "moonlight",
+      "view": "fish",
+      "fish": 96,
+      "baseline": {
+        "reflection": {
+          "calls": 41,
+          "triangles": 1644976,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 29,
+          "triangles": 1585756,
+          "points": 1150
+        },
+        "main": {
+          "calls": 28,
+          "triangles": 1453576,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "optimized": {
+        "reflection": {
+          "calls": 40,
+          "triangles": 1539376,
+          "points": 1150
+        },
+        "refraction": {
+          "calls": 8,
+          "triangles": 392872,
+          "points": 1150
+        },
+        "main": {
+          "calls": 28,
+          "triangles": 1453576,
+          "points": 1150
+        },
+        "shadows": {
+          "calls": 56,
+          "triangles": 1427114,
+          "points": 0
+        }
+      },
+      "triangleReduction": 1298484,
+      "triangleReductionPercent": 21.246839115348276
+    }
+  ],
+  "browserMeasured": false,
+  "glbExported": false,
+  "submissionPose": {
+    "modelTimeSeconds": 8.6,
+    "fishTimeSeconds": 0
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 17,
+      "failed": 0
+    },
+    "build": {
+      "success": true,
+      "main": "index-Buo6QB5I.js"
+    },
+    "shaderAudit": "SHADER_AUDIT_V11.json"
+  }
+}

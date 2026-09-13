@@ -1,0 +1,354 @@
+[
+  {
+    "index": 0,
+    "width": 128,
+    "height": 128,
+    "visiblePixels": 16384,
+    "channelRange": [
+      239,
+      254
+    ],
+    "sha256": "6223df0fefcdb801ac35a9396389a1bb29923f126e5997fe460bb9dc63d11687"
+  },
+  {
+    "index": 1,
+    "width": 128,
+    "height": 128,
+    "visiblePixels": 16384,
+    "channelRange": [
+      116,
+      255
+    ],
+    "sha256": "83054977f78b7d46bce697ffa8b4e00f7aad837843cf29a34878b3b42225b23b"
+  },
+  {
+    "index": 2,
+    "width": 128,
+    "height": 128,
+    "visiblePixels": 16384,
+    "channelRange": [
+      171,
+      252
+    ],
+    "sha256": "407c245ed194e27be4d7efd51956be0659b7c985a08f3cba3a6c3a5a57fd485b"
+  },
+  {
+    "index": 3,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      172,
+      255
+    ],
+    "sha256": "4b1ddfc349b825ed485adb57f19e1498a29b8296f98ea9a8d6d736edf107288d"
+  },
+  {
+    "index": 4,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      30,
+      255
+    ],
+    "sha256": "3307785214cf8eea0cc9f2c796fa22f63f52f2853e7b3634e2fcd5196c18b56b"
+  },
+  {
+    "index": 5,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      76,
+      255
+    ],
+    "sha256": "b3fe506118e7d73ee4c97f60faec1abeb2456425900303a62a0168dd519225df"
+  },
+  {
+    "index": 6,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      164,
+      255
+    ],
+    "sha256": "20483c16ef4fecbdd20f4e9b6d62b581ce74244f82710fe7e0cde10af4f142f6"
+  },
+  {
+    "index": 7,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      96,
+      255
+    ],
+    "sha256": "4d518d1513a47904c0bc4b7d016e7c4ddea1cf97db02df2c8c561080dbc4d8a1"
+  },
+  {
+    "index": 8,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      58,
+      255
+    ],
+    "sha256": "ed6e0a9eb6f57721c7fd4003a1dde838965be6c68dee75d796abf04a92907408"
+  },
+  {
+    "index": 9,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      174,
+      255
+    ],
+    "sha256": "ed6569359bfc26b5542de1d3dc860e32c93b272e9ec0b471568ac4239445d6a3"
+  },
+  {
+    "index": 10,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      23,
+      255
+    ],
+    "sha256": "941e7f8bfcfcf84aff40ce0fe0efa2bb68ea67ad8c137d2c3e0b0d5fa00b5559"
+  },
+  {
+    "index": 11,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      66,
+      255
+    ],
+    "sha256": "b7e4ebfbf8c22175a852c092b437f5c476da9c86967b7076a5f0b911ba22a2e7"
+  },
+  {
+    "index": 12,
+    "width": 256,
+    "height": 256,
+    "visiblePixels": 65536,
+    "channelRange": [
+      191,
+      255
+    ],
+    "sha256": "d64466eb16a3703c8839e29b241361d0358405930b606dd32eda7b02126f2de9"
+  },
+  {
+    "index": 13,
+    "width": 256,
+    "height": 256,
+    "visiblePixels": 65536,
+    "channelRange": [
+      94,
+      228
+    ],
+    "sha256": "9fe77c154e932fbfe638b6d0112b6ff52cb02e83f7b9214030035ad3f4c1fbe8"
+  },
+  {
+    "index": 14,
+    "width": 256,
+    "height": 256,
+    "visiblePixels": 65536,
+    "channelRange": [
+      58,
+      255
+    ],
+    "sha256": "3aff13bf58980535ff84871cbb49994a1e5fdab68b7e5c4e2f7e8e53e5c8736f"
+  },
+  {
+    "index": 15,
+    "width": 1024,
+    "height": 320,
+    "visiblePixels": 327680,
+    "channelRange": [
+      35,
+      228
+    ],
+    "sha256": "25dbd42b09d4a272f6bf597683613e19dc167be94d29bad07c39ba1a1fdf898d"
+  },
+  {
+    "index": 16,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      192,
+      255
+    ],
+    "sha256": "4b9838058d4aa61b85877643f938148b3baa76ba1b72b68e68cabfa782be142a"
+  },
+  {
+    "index": 17,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      5,
+      255
+    ],
+    "sha256": "cdfb72b121c39d94c5ff3e611a4204da48e79b2ec8a0095176d968f69b9f263b"
+  },
+  {
+    "index": 18,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      58,
+      255
+    ],
+    "sha256": "fffe649bb78d1399f0995bd1f3cfa9e992e1b7c407e9df9530fbf5e3d4f4d77a"
+  },
+  {
+    "index": 19,
+    "width": 128,
+    "height": 256,
+    "visiblePixels": 32768,
+    "channelRange": [
+      181,
+      252
+    ],
+    "sha256": "c8b9a12e42a3da07d06ec4b228482bb687a820996a41bfd6a48cafefea696a2e"
+  },
+  {
+    "index": 20,
+    "width": 128,
+    "height": 256,
+    "visiblePixels": 32768,
+    "channelRange": [
+      112,
+      255
+    ],
+    "sha256": "50fb686bdf6a92f602c07b56d50bbd7aee3c6e1369372144089b9baa7b9ae2b9"
+  },
+  {
+    "index": 21,
+    "width": 1024,
+    "height": 1024,
+    "visiblePixels": 1048576,
+    "channelRange": [
+      24,
+      108
+    ],
+    "sha256": "37bd4a6e46cb6a9d38f10ed32442492c0f759263fd8d11cf1a69398425176f2f"
+  },
+  {
+    "index": 22,
+    "width": 256,
+    "height": 256,
+    "visiblePixels": 65536,
+    "channelRange": [
+      92,
+      255
+    ],
+    "sha256": "4a731a65d06c1f86ed3bbce0fa8d058caa9c22d5227e90aba8672241d4e1e4ae"
+  },
+  {
+    "index": 23,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      215,
+      255
+    ],
+    "sha256": "2ee0bb264877c1636fffcc7d3bfc50a7abab592da09241eb25d4c4854b926125"
+  },
+  {
+    "index": 24,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      190,
+      250
+    ],
+    "sha256": "14ee42926a5038e4d5ccb2f96ff1b3280eade389702c7c6a81b66349ab52286a"
+  },
+  {
+    "index": 25,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      58,
+      255
+    ],
+    "sha256": "ea29e98348ded1eb019dca3908db82ba3e64d304223e5db91727416fc7ab3707"
+  },
+  {
+    "index": 26,
+    "width": 256,
+    "height": 256,
+    "visiblePixels": 65536,
+    "channelRange": [
+      194,
+      255
+    ],
+    "sha256": "a1a59fe68a5bff2d1aaa8b8135bbaf55171c0897f9c821708455ecb3e1222be6"
+  },
+  {
+    "index": 27,
+    "width": 256,
+    "height": 256,
+    "visiblePixels": 65536,
+    "channelRange": [
+      114,
+      255
+    ],
+    "sha256": "90e926155e63d611dc63523c2a66aace6ad8d201140810418e7ebbbfe116c8ff"
+  },
+  {
+    "index": 28,
+    "width": 256,
+    "height": 256,
+    "visiblePixels": 65536,
+    "channelRange": [
+      58,
+      255
+    ],
+    "sha256": "7f9f05d8c0866d363024192a50174804cbb52a5b4a6a9b32684f69531cb70a21"
+  },
+  {
+    "index": 29,
+    "width": 128,
+    "height": 512,
+    "visiblePixels": 65536,
+    "channelRange": [
+      35,
+      170
+    ],
+    "sha256": "b25f1e8f917261fb90154d94124a4f223d9865a7fea826ae25895dd89b80437f"
+  },
+  {
+    "index": 30,
+    "width": 64,
+    "height": 256,
+    "visiblePixels": 16384,
+    "channelRange": [
+      97,
+      255
+    ],
+    "sha256": "a600e5cf906ba2401951576843028d12c88e39f130429e0ce598a5903ed0d179"
+  },
+  {
+    "index": 31,
+    "width": 512,
+    "height": 512,
+    "visiblePixels": 262144,
+    "channelRange": [
+      65,
+      255
+    ],
+    "sha256": "394e04fff664e6c045541f446a99ac164cb5b9f03cc53f2b20974e37c89a61a4"
+  }
+]

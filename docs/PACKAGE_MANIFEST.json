@@ -1,0 +1,862 @@
+{
+  "revision": "12",
+  "excluded": [
+    "node_modules",
+    "all GLB and glTF files",
+    "full-resolution PNG previews"
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/deploy.yml",
+      "bytes": 739,
+      "sha256": "99d6699c0fe0ef6f66ef134214d6bcd1d9f0e154fc9b3d53def2d22a1595db21",
+      "mode": "0644"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 325,
+      "sha256": "b40caf4e4e0d0134d3ab7ddac26549a36383d9cda6e01a559b7ec39c93d3845b",
+      "mode": "0644"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1065,
+      "sha256": "13a22e103766942f3803058898d318997482d5dfcad3c32428a8bbb6f09744a1",
+      "mode": "0644"
+    },
+    {
+      "path": "MAC_QUICKSTART.md",
+      "bytes": 3271,
+      "sha256": "aedc3dedfd4b2071c35e5173bc5afe6ec67e0368646f1ada6ea49531322eaf40",
+      "mode": "0644"
+    },
+    {
+      "path": "README.md",
+      "bytes": 10842,
+      "sha256": "b1d7794506342858caf996ae9be845595fe3ca98e83da0967148f91a5ea16eaf",
+      "mode": "0644"
+    },
+    {
+      "path": "Start-Mac.command",
+      "bytes": 633,
+      "sha256": "35b3f8d5b27808b9c7c50f10fa1b5c559338edac77219b006c19b0681b36d6c3",
+      "mode": "0755"
+    },
+    {
+      "path": "Stop-Mac.command",
+      "bytes": 471,
+      "sha256": "4e4ec92782ad46aa5e0ec3b122d5147f36d6fda3615153cc78b26c11874e2df1",
+      "mode": "0755"
+    },
+    {
+      "path": "UPGRADE_NOTES.md",
+      "bytes": 7815,
+      "sha256": "7b7ec9944949964f222894dc5aa196bac5df086e7a6e4b1e99d08259f1fee97d",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/assets/export-scene-B59nA383.js",
+      "bytes": 41081,
+      "sha256": "2bee0bbd3dbf4433c12d9601e20cf2720e4cc320885bebe93ee52ef966dfcf6c",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/assets/export-scene-CMxE3ioI.js",
+      "bytes": 41081,
+      "sha256": "71b677317069aa306dfc6a79467f1e519f408f83ea004f2a64d6fa42df0e1e64",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/assets/export-scene-DosNfnPF.js",
+      "bytes": 41081,
+      "sha256": "88aff00c5bb272d1cdc329edd7d849832697db8a6e95e3c6fa67dc87d5a78b64",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/assets/fish-worker-BYYHSCby.js",
+      "bytes": 8507,
+      "sha256": "14dc993c30479eb858759f1e1dacfeec192ecdc6385a5b2238c08998b896b986",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/assets/index-BUKVJfnW.css",
+      "bytes": 10746,
+      "sha256": "0ecad3aacc64603da107ccff9fa83b68a74abff88990b7ebd1b829ff98f765bd",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/assets/index-Buo6QB5I.js",
+      "bytes": 705172,
+      "sha256": "58db3f43b3a9eb96fbb9dbc2f6770033b96d0ded77f22c747ac9b1cd308fdedd",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/assets/index-Cc5W-s_m.js",
+      "bytes": 708653,
+      "sha256": "aa7b73470cd29a3edd8e30f420b1368352eeca1b3907daae96b240dc434de23f",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/assets/index-CyYzv3Yp.js",
+      "bytes": 710676,
+      "sha256": "47ffeafa41e860ab6e2c56239717ee07dbc5b2f4b0005bc52d173e0919efb32b",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 6442,
+      "sha256": "835d1d4e0d30b5e51f91e7ded199df6a195566ff3d8f7e82b042704e65267bff",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/textures/CREDITS.txt",
+      "bytes": 1064,
+      "sha256": "9efea42aed5e675ad9f5077cc8aaec9528972ab1a79e3c96425101e9e1e87785",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/textures/blue-clay-albedo-v6.png",
+      "bytes": 3400757,
+      "sha256": "3f05604de8bbaa0a1a4b64f8971cd463d76daa3215e89321b3b6004736556ff2",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/textures/peach-bark-albedo-v6.png",
+      "bytes": 3492122,
+      "sha256": "9fb36fda0d3e1bf6026ec2a77a82c6e3b2edfbab54a81624e7d21966f085c9a1",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/textures/plaque-atlas.png",
+      "bytes": 32072,
+      "sha256": "091c1e8d7dd58dcaa04f726cf2599d394a31c4b8dd0a8a8a3a0369128cd86733",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/textures/timber-albedo-v6.png",
+      "bytes": 2707704,
+      "sha256": "8772818064335554e6b7bfaabd864af3ab23f8f733b482586026328bb28b58ff",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/textures/water-normal-1.jpg",
+      "bytes": 406361,
+      "sha256": "6d7825469a374ff84700b4fb1a2890bd1fce0ca1f777bdd4d5ecdaf15833a804",
+      "mode": "0644"
+    },
+    {
+      "path": "dist/textures/water-normal-2.jpg",
+      "bytes": 437899,
+      "sha256": "1f6f3fc5af584fb3ad7ff97df39b1835aaa184f53bf647c63120a83be7d63183",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/DETAIL_AUDIT_V12.json",
+      "bytes": 3000,
+      "sha256": "fadef20b12e894c3413fe3cdb58b1d9bb637a13e76f1e40d3bff07dac05601bf",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/DETAIL_FIX_V12.md",
+      "bytes": 4642,
+      "sha256": "c9bc1873329cb1378da3171181fa807ce53cd5f336e22fe5a6309a4a16bd66a3",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/FISH_ARCHITECTURE.md",
+      "bytes": 7720,
+      "sha256": "e2477e722b8052a8d1f3840d8d8a7a6c75aec768a552036ccbc5d8dbb22e0bee",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/FISH_AUDIT_V9.json",
+      "bytes": 3490,
+      "sha256": "80c1efd7c0b952843ab89ac483ee5e69beb571ac82dfd009e311de037ebe694d",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/FISH_AUDIT_V9_1.json",
+      "bytes": 1630,
+      "sha256": "fd0ed39d3ff7c5b5617b68ad4b6ba76f82247ab7079fea55368c017ecc2efd82",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/FISH_VISIBILITY_V9_1.md",
+      "bytes": 2885,
+      "sha256": "8eb6266a7f416dec0ac3a7a1f185b110e087850ae32e3fb5d651e906a0d5fafa",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/MATERIAL_PROMPTS_V6.txt",
+      "bytes": 3607,
+      "sha256": "14420f9d69352f18b36419726740bfe05fe9cbb9b91d7206945d0a4814b1be47",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/NEXT_UPGRADES.md",
+      "bytes": 1403,
+      "sha256": "53039ad742c82057a8de4225ab52ef6934e422c30dd8885baea7c075ecc4d7b3",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/PAVILION_AUDIT_V10.json",
+      "bytes": 3422,
+      "sha256": "ca89f0afd61bdb22e878256b89f6ef3b783481fc0b164ce6af977d72c95f4067",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/PAVILION_V10.md",
+      "bytes": 2683,
+      "sha256": "40cd114088484ed63bcd338412ad240d22060b866f465a69301de2d529f710a8",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/PERFORMANCE_AUDIT_V11.json",
+      "bytes": 40655,
+      "sha256": "003993670b7917a618fafd964e0d7363b3d4955b04fcbee151afc28f67979534",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/PERFORMANCE_V11.md",
+      "bytes": 5819,
+      "sha256": "f270d19902f5783aa654f4c4dad48902103e1bc184626edee2fde8df3d3abeee",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/REVIEW_V8.md",
+      "bytes": 3424,
+      "sha256": "19466548ff7640dd180785df8f25b44df043f715df8f511be81f23ba9b12b72a",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/SHADER_AUDIT_V10.json",
+      "bytes": 820,
+      "sha256": "821dd1712494869ade715c2f037920ff250544c5a09d223686d613e9c13b1e77",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/SHADER_AUDIT_V11.json",
+      "bytes": 820,
+      "sha256": "63b84a1d11a25bb64d1e126bb0d0da4182200078db2da8db8011f71fc31a311e",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/SHADER_AUDIT_V12.json",
+      "bytes": 1001,
+      "sha256": "b9c3f641f3d40b53701ececa54c2b7e856f64a8249cc6cef4bad33e2cae4ff64",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/SHADER_AUDIT_V9_2.json",
+      "bytes": 821,
+      "sha256": "c1cf09fc2aa44ce1c3a4544600e29c86b70cffcb16f6c7e8e322961bb03a9ef6",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/SHADER_FIX_V9_2.md",
+      "bytes": 2605,
+      "sha256": "76c918f742aab285a8a0ec8ff2419a572064d247a43dff404ee84650112bdf19",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/UPGRADE_V2.md",
+      "bytes": 6010,
+      "sha256": "199de057fa36ad90a4c2a4dabfb4279de2340e472ee48f2cce404500404dc1ca",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/UPGRADE_V3.md",
+      "bytes": 7542,
+      "sha256": "384481a1f57600659f6ab2ec78d985d4b9808bcad75636402287187409244c95",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/UPGRADE_V4.md",
+      "bytes": 4459,
+      "sha256": "a384af1ace6396fe3f98ccb8e959e6a1b4aef81de4a48814c6b34eff2b2dbf1d",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/UPGRADE_V5.md",
+      "bytes": 5604,
+      "sha256": "05b3e3b8a08fabd83b1d1be15cd952dc1e1c7339ff0a84e849c9eb52a7959d6e",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/UPGRADE_V6.md",
+      "bytes": 4363,
+      "sha256": "0cc3b4b5de9d6872d62f0db83586d515cc262f2734c069ceef6b0d37451429b9",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/UPGRADE_V7.md",
+      "bytes": 1794,
+      "sha256": "0f2ee19d20c1bdf18d115c802299421d5eca2e9af4df7a524cb2b26e0162f670",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/UPGRADE_V8.md",
+      "bytes": 3314,
+      "sha256": "52d15f799ca107cb8cba2c746204e9ef8d405d9aa8cd6a53b9d3fe58a782cc04",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/VALIDATION_V6.txt",
+      "bytes": 5142,
+      "sha256": "5346b73fdec7785122348bff06fc1f92a24e3e287544f0533e0cd773812afdfb",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/changyi-pavilion-compatible-images.json",
+      "bytes": 7099,
+      "sha256": "187c09d5462bf78591a05740e48e443f239a40253da65c0ecca5dfb441bdd450",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/changyi-pavilion-compatible-validation-before-final-export-v7.json",
+      "bytes": 10658,
+      "sha256": "af9833d2d30d34ab73dee812bf47808cd8c75fc304d4b939f404d9f08ad3c463",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/changyi-pavilion-compatible-validation-v5.json",
+      "bytes": 7922,
+      "sha256": "ceee51e54fa450227b62cec52fbdd15a2f32656ab0ba9f07a3c50f99162715f7",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/changyi-pavilion-compatible-validation.json",
+      "bytes": 11266,
+      "sha256": "8c1824e8e5bf2358927a23e873b6dd2fcf7aca667b51c867df86181033036b26",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/changyi-pavilion-images.json",
+      "bytes": 7099,
+      "sha256": "4e17ad36c84ecd2f82bf6303523b6852b584aafb5e5ad6349494bc4eb9782e15",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/changyi-pavilion-validation-before-final-export-v7.json",
+      "bytes": 43039,
+      "sha256": "d16a01059c1f02d299c429bb40d9e7885d0c80ed849f66836ac804e21200e844",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/changyi-pavilion-validation.json",
+      "bytes": 43647,
+      "sha256": "869c566c13538727402d5356a24b7aad6a7852787ebaf160a314f6130950c233",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/export-audit-v8.json",
+      "bytes": 1249,
+      "sha256": "c43b397663f1a6e63933fe4e0a710acb16fbb2c65e2cbe5097d1faa112c8cbbb",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/model-audit-v5.json",
+      "bytes": 3515,
+      "sha256": "8755b2e59c2c7df38a322870400790999e055110e32763be51255922a8a4a077",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/model-audit-v7.json",
+      "bytes": 1650,
+      "sha256": "b567cadc59ecf0cfabc91230b6487386abbdbe6bde458cfbd92eca5a16ddec8a",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/model-audit-v8.json",
+      "bytes": 2330,
+      "sha256": "49842fc595ff9f918c8bea8db9b2bf41006c079182abd68dbb5d4a3fd2f56ead",
+      "mode": "0644"
+    },
+    {
+      "path": "docs/model-audit.json",
+      "bytes": 5499,
+      "sha256": "a1d24d0c54c8b6aba6d5ad2e84c5fd90d5358c33740265ba846f63d38745a670",
+      "mode": "0644"
+    },
+    {
+      "path": "index.html",
+      "bytes": 6309,
+      "sha256": "b13bee11c451864a263c40b1c347b35d439da6ae37c89bed46ae622830043257",
+      "mode": "0644"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 43077,
+      "sha256": "0417d6fc1827ebde976b91a5a912927dc3be477be7a8df5003b89fd4540f787b",
+      "mode": "0644"
+    },
+    {
+      "path": "package.json",
+      "bytes": 694,
+      "sha256": "c3b18014fb2f80fdcf894f563a0dfd015462814760390d58c75f462f04ad413b",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/README.md",
+      "bytes": 2964,
+      "sha256": "d6053d8f30b217da1822a923c8f2e7c6b7fdf8740eeea2a5f358c6c71f8b0ba9",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/fish-swimming-v12.jpg",
+      "bytes": 144591,
+      "sha256": "6e8ce77fc27f2a524bb864df39800d3651db4194dc34243735ce8d591970333b",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/fish-swimming-v9.jpg",
+      "bytes": 156693,
+      "sha256": "6954b733d146dfb941f39ad2047b445546aafd907322ccb36890beb7c9931a90",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/fish-swimming-v9.mp4",
+      "bytes": 1703128,
+      "sha256": "433a08c458051463dcf1633856595a94943bc9e6910774de32a005bd82abfa96",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/garden-overview.jpg",
+      "bytes": 419682,
+      "sha256": "8cf4fd4946b4f04fae0694c3410d3a74c2d4078317979927c4757bd89011b0ab",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/grass-bank-v12.jpg",
+      "bytes": 1258793,
+      "sha256": "f8fe0a329e9db30f2eba7a23804b91b4541a6a26f9a8e901bdc5685838cfd1e3",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/grass-island-v12.jpg",
+      "bytes": 493219,
+      "sha256": "04d57e34220a1a68362efc73481829ec2933f8dabb2bd481bf9ed02c929ca884",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/iris-details.jpg",
+      "bytes": 579710,
+      "sha256": "a405284a25ebdf5788da07ad06f3fe31e81bb5cae5fd4e0100812c40e59d71c1",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/moon-gate-reverse.jpg",
+      "bytes": 464319,
+      "sha256": "21c5dca7718989b979663b8d9bf5b7a0ef77b3a63ea2de1762e917fa0415d928",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/moon-gate.jpg",
+      "bytes": 597454,
+      "sha256": "e6f71b978c22117a562920f04d6aa49641c833b9ad9ea2b1d3a85558a5b3c6f0",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/railing-inside-v12.jpg",
+      "bytes": 217673,
+      "sha256": "5405ef51b7739549c70ebcb64b7536f2da90d8a699d7c01a1728f0eb4056309c",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/railing-outside-v12.jpg",
+      "bytes": 436151,
+      "sha256": "7894b0f9fc43e0c47a36cc0c7e4cda78bb3bfdc94a0a846fe30ba20073678e83",
+      "mode": "0644"
+    },
+    {
+      "path": "previews/tea-details.jpg",
+      "bytes": 402922,
+      "sha256": "47381169a1bad2d9c3329d0bb4857f969a5937978a22bc8a146f3b05c288f89c",
+      "mode": "0644"
+    },
+    {
+      "path": "public/textures/CREDITS.txt",
+      "bytes": 1064,
+      "sha256": "9efea42aed5e675ad9f5077cc8aaec9528972ab1a79e3c96425101e9e1e87785",
+      "mode": "0644"
+    },
+    {
+      "path": "public/textures/blue-clay-albedo-v6.png",
+      "bytes": 3400757,
+      "sha256": "3f05604de8bbaa0a1a4b64f8971cd463d76daa3215e89321b3b6004736556ff2",
+      "mode": "0644"
+    },
+    {
+      "path": "public/textures/peach-bark-albedo-v6.png",
+      "bytes": 3492122,
+      "sha256": "9fb36fda0d3e1bf6026ec2a77a82c6e3b2edfbab54a81624e7d21966f085c9a1",
+      "mode": "0644"
+    },
+    {
+      "path": "public/textures/plaque-atlas.png",
+      "bytes": 32072,
+      "sha256": "091c1e8d7dd58dcaa04f726cf2599d394a31c4b8dd0a8a8a3a0369128cd86733",
+      "mode": "0644"
+    },
+    {
+      "path": "public/textures/timber-albedo-v6.png",
+      "bytes": 2707704,
+      "sha256": "8772818064335554e6b7bfaabd864af3ab23f8f733b482586026328bb28b58ff",
+      "mode": "0644"
+    },
+    {
+      "path": "public/textures/water-normal-1.jpg",
+      "bytes": 406361,
+      "sha256": "6d7825469a374ff84700b4fb1a2890bd1fce0ca1f777bdd4d5ecdaf15833a804",
+      "mode": "0644"
+    },
+    {
+      "path": "public/textures/water-normal-2.jpg",
+      "bytes": 437899,
+      "sha256": "1f6f3fc5af584fb3ad7ff97df39b1835aaa184f53bf647c63120a83be7d63183",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/audit-render-pipeline.mjs",
+      "bytes": 14087,
+      "sha256": "a9691902983d31d1ecb98aaa3139ed4007cb5ff2978ad40db3b580954f86bfe6",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/check-fish-shaders.py",
+      "bytes": 2389,
+      "sha256": "ee11695938d208cf14162154b9e1497f5a83378c51e025577d830ab925e1ef3b",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/export-model.mjs",
+      "bytes": 1489,
+      "sha256": "29f2fbae41a42fdc5e25cfc88b83b7fccdbc36012bc4948d84ebf90202c066a4",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/inspect-images.mjs",
+      "bytes": 1412,
+      "sha256": "e1a7a722ab16923f7f92fd63b72a1a8dd744d0a0b04b4ae87feace646305fb11",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/launch.mjs",
+      "bytes": 10477,
+      "sha256": "f5aea1a8ff40f69ff2de5a2fcae1049795d28a29584ab12c3f4f95fee01c0e41",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/mac/node.sh",
+      "bytes": 1207,
+      "sha256": "f44e63eb9a6c7dc8addc417f7ffcbba182192d0ca7c5c1be2a2363bbd8897d17",
+      "mode": "0755"
+    },
+    {
+      "path": "scripts/node-canvas.mjs",
+      "bytes": 1947,
+      "sha256": "c58bc3de8d1e1ef8de2f921b9f0c8034b971b24472c707ccef008259b485a688",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/package-project.py",
+      "bytes": 4141,
+      "sha256": "71173df33d4fb39fb363f072fdc6e56244d3d9083392d7389d026a975e371cea",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/prepare-detail-preview.mjs",
+      "bytes": 3620,
+      "sha256": "98bc9f206b90944e874bf440c54a2dc93f32df0f59bedd0dccf99bd91f3d3c19",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/prepare-fish-preview.mjs",
+      "bytes": 5886,
+      "sha256": "4669b8983c7ffe64d4d5367c8a7bed2641a66a376dd2881b0cb720e4d1e6ed5d",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/render-detail-preview.py",
+      "bytes": 4242,
+      "sha256": "4cc9f6c372ca5fc172ae16a7f8169db3869526701833207cfbecd497504ac98f",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/render-fish-preview.py",
+      "bytes": 8009,
+      "sha256": "9aaf82d433ac68ba714c51e0652ee78820d9214a802f72187c5b85d31d535cc2",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/render-preview.py",
+      "bytes": 3944,
+      "sha256": "3a509379d7eca88be2c5fd07ae90ac99eab46616b0cac279c0b115cb4f8fde2b",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/verify-export.mjs",
+      "bytes": 8679,
+      "sha256": "7ccd5a37211c7fdca84e4e0594cc124119429c9611fbb4eb7a36911f65e5f88a",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/write-glb.mjs",
+      "bytes": 1999,
+      "sha256": "eed7790027a1498bbdd8c253bf38c2ddcba7c955b38ec7611e431aa5349f5ec6",
+      "mode": "0644"
+    },
+    {
+      "path": "src/architecture-geometry.js",
+      "bytes": 14564,
+      "sha256": "f2f79a0bd5b12e7d99ca091875a24769e48ef0597e38984793f5944f4b620f70",
+      "mode": "0644"
+    },
+    {
+      "path": "src/cloth.js",
+      "bytes": 1515,
+      "sha256": "f9174a83863318e93084d94a13e7faa4c2c32b915f14dcf3b5a018e925d63234",
+      "mode": "0644"
+    },
+    {
+      "path": "src/detail-geometry.js",
+      "bytes": 11486,
+      "sha256": "fa364355e101519338402ebc2db25dcce0a915b5c6699d2cda073078121db31f",
+      "mode": "0644"
+    },
+    {
+      "path": "src/export-scene.js",
+      "bytes": 11193,
+      "sha256": "045b7cfb57dea4473505175f6bcd63f9cb9f31fc11b0471846363d91fe33e6db",
+      "mode": "0644"
+    },
+    {
+      "path": "src/fish-geometry.js",
+      "bytes": 8171,
+      "sha256": "11ebcf8e253b2197051bc362120440c3fa284ca3033ca11da21b7b024cbf04d8",
+      "mode": "0644"
+    },
+    {
+      "path": "src/fish-habitat.js",
+      "bytes": 1320,
+      "sha256": "80afffb9ae9a2305ee72979bb8bd499fc1564301474b76e9389a846168f31006",
+      "mode": "0644"
+    },
+    {
+      "path": "src/fish-material.js",
+      "bytes": 7368,
+      "sha256": "e6bfa7121dea8b394e1b0fcf02d432d757b10ceb9fc188fc5724eb8a44f7b051",
+      "mode": "0644"
+    },
+    {
+      "path": "src/fish-school.js",
+      "bytes": 8061,
+      "sha256": "9772f16a5800e5d7290094993cc53f841ab6a580f8fe352b666439528fea23af",
+      "mode": "0644"
+    },
+    {
+      "path": "src/fish-simulation.js",
+      "bytes": 11715,
+      "sha256": "5927e8321fa3629b9f1f5e46e1845c4959f9bcfe13d6f38728023425eb78b751",
+      "mode": "0644"
+    },
+    {
+      "path": "src/fish-worker.js",
+      "bytes": 470,
+      "sha256": "20c0a6c222a31430825b1adc2b5e28019a4979798f9ed8bc8bc33febe326adfc",
+      "mode": "0644"
+    },
+    {
+      "path": "src/garden-details.js",
+      "bytes": 12277,
+      "sha256": "697fb4234b0255f8914a0f6a40b28f2d1a707c5e5c39d8f989d5b30ad1c914c9",
+      "mode": "0644"
+    },
+    {
+      "path": "src/garden-geometry.js",
+      "bytes": 6232,
+      "sha256": "ef9df2f9c039bee545055d1b0e85748fba20c9a2dda075808ca26e4cc7603eb7",
+      "mode": "0644"
+    },
+    {
+      "path": "src/lake.js",
+      "bytes": 11796,
+      "sha256": "9c0c8ff400ba7fde61d20ccdfc83cade5a4820d489f0838c9b09feed22b10a50",
+      "mode": "0644"
+    },
+    {
+      "path": "src/lighting.js",
+      "bytes": 3417,
+      "sha256": "47331d5137144b85fe54c63fd6468607f4e16265de1c3ca20b47d2541eff7de9",
+      "mode": "0644"
+    },
+    {
+      "path": "src/main.js",
+      "bytes": 20130,
+      "sha256": "2640f41723aa551eacabdd4dea5acedd952f974d9239fdb385e59dccab38bbd3",
+      "mode": "0644"
+    },
+    {
+      "path": "src/material-assets.js",
+      "bytes": 482,
+      "sha256": "a387caecfffeef9d09635dfffce37e7e9285bc475691ff19074363e7c6ab4caa",
+      "mode": "0644"
+    },
+    {
+      "path": "src/materials.js",
+      "bytes": 2252,
+      "sha256": "9c9ecb88659575453e192cc175dabedad84cc9fef1bc1d008806a56ee85b2f7e",
+      "mode": "0644"
+    },
+    {
+      "path": "src/meadow-layout.js",
+      "bytes": 4542,
+      "sha256": "69ea02e30069a022c2378f2f90d419117e2eb22a6af2809de2a667c5ddb22b3b",
+      "mode": "0644"
+    },
+    {
+      "path": "src/model-optimization.js",
+      "bytes": 6710,
+      "sha256": "b323ff73d1cab849b4e37d97c2bbf9d2dc688a367f45614b2acd31d93e226184",
+      "mode": "0644"
+    },
+    {
+      "path": "src/model.js",
+      "bytes": 45713,
+      "sha256": "26ef5938e004e5ba169d39c4401382e35b520e151bb7086846c39f68f5e1f378",
+      "mode": "0644"
+    },
+    {
+      "path": "src/moon-gate.js",
+      "bytes": 8459,
+      "sha256": "06309cbdc3cbf6617b6e5fa2a651a7855d6676eb59a53e17d7b759d358097685",
+      "mode": "0644"
+    },
+    {
+      "path": "src/pavilion-craft.js",
+      "bytes": 7084,
+      "sha256": "d6d011370fa7804b8d321eb78de57252b66fa0336656ad637c13eb709365b353",
+      "mode": "0644"
+    },
+    {
+      "path": "src/render-pipeline.js",
+      "bytes": 3633,
+      "sha256": "b9d7feea7d7c1a37adb52a4607a743277ea010f2915423e6b2ed623defac3810",
+      "mode": "0644"
+    },
+    {
+      "path": "src/roof-geometry.js",
+      "bytes": 5203,
+      "sha256": "28c542aa2f0c48fa41a547f1fc157094ecb5316480af3a5ecc7c6afbb957dc80",
+      "mode": "0644"
+    },
+    {
+      "path": "src/scene-context.js",
+      "bytes": 3438,
+      "sha256": "4137edf77b6835aca2071c47e26ae1dbf9162914660b3ebb29c387518b1f89bb",
+      "mode": "0644"
+    },
+    {
+      "path": "src/style.css",
+      "bytes": 12240,
+      "sha256": "e5f37784112a7eb0d30e2ec1233b3773bc66e0a72a379f9abd31ba66dc3167e2",
+      "mode": "0644"
+    },
+    {
+      "path": "src/surface-finishing.js",
+      "bytes": 3362,
+      "sha256": "2e866886c74736defae1ca03747b284fd5f6200700fe9b6c28328dff476f64de",
+      "mode": "0644"
+    },
+    {
+      "path": "src/surface-materials.js",
+      "bytes": 13425,
+      "sha256": "74c0a7386b70fa9d74180ed00304db3e83ca0267450c239137e26ae4072541e7",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/detail-v12.test.mjs",
+      "bytes": 2685,
+      "sha256": "856a7746347f4e31d72419cb326da4efd023d91dd0dc660b051ae98d86ffd57b",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/fish-visibility.test.mjs",
+      "bytes": 4210,
+      "sha256": "593e43b568a1a731f1f55c299c1d97778f6c3e15319dfcb68019c5637a7cdd26",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/fish.test.mjs",
+      "bytes": 6762,
+      "sha256": "afb7a51b781c7069a3949babbf98a8d8bfd918f9bcd2d5dc6c6277befd5d20c7",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/fixtures/fish-worker-host.mjs",
+      "bytes": 239,
+      "sha256": "090f9f36b67aaf1cef702527a96785b5d139067f24f304f5a038ad74027a2f42",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/garden-craft.test.mjs",
+      "bytes": 5157,
+      "sha256": "50395c4ba5e6bd82bc258a65ab5d71b8603169b84a82927f7258934b3e6db2e9",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/glb-write.test.mjs",
+      "bytes": 1313,
+      "sha256": "c44b092c51f602518c84cd078804aae5ce96116039ac49bed7346bb53e7a51f0",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/joints-export.test.mjs",
+      "bytes": 9703,
+      "sha256": "ffc1a70bf75b25cbd76fcf8c396a624d178e11977e57757f7afde3f6e4366acd",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/launcher.test.mjs",
+      "bytes": 6069,
+      "sha256": "9e3f0c9b574d050250df14ddb1987ecc37625597d1f28a0054b81302c3cc1b27",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/model.test.mjs",
+      "bytes": 13774,
+      "sha256": "6afeb9def3581ed3edcb94f76d3cca88fcf8b940cbaf7394ed460c0f739fbae6",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/moon-gate.test.mjs",
+      "bytes": 2930,
+      "sha256": "8de900b62e14c38d800a50b21230a68e4d5e7d1dc4af44fdecc9fcc21c3c5aa8",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/pavilion-v10.test.mjs",
+      "bytes": 5872,
+      "sha256": "94795f27378d6f74f6715302282769ff1aa5421791f53af2917450c113d072e3",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/realism.test.mjs",
+      "bytes": 8355,
+      "sha256": "2cff83d77b3fdadb6b151387cccf210de71629996eb8b7d4fc3ddf3f1cab4fce",
+      "mode": "0644"
+    },
+    {
+      "path": "tests/render-pipeline.test.mjs",
+      "bytes": 7890,
+      "sha256": "bf5b13bb4fd0af3330ae5bf464336231ccb69348401b09dffd9924d1ce05c673",
+      "mode": "0644"
+    },
+    {
+      "path": "vite.config.js",
+      "bytes": 169,
+      "sha256": "08fcf3a573f0607a56d1182c00b7518864335b6cfa129db442563ff6e1126e22",
+      "mode": "0644"
+    }
+  ]
+}

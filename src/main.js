@@ -2,14 +2,16 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Sky } from 'three/addons/objects/Sky.js';
-import { createIcons, Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Image, Box, X, RotateCw } from 'lucide';
+import { createIcons, Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Fish, Image, Box, X, RotateCw } from 'lucide';
 import { buildPavilion } from './model.js';
 import { loadSurfaceImages } from './material-assets.js';
 import { createLake, createLakebed } from './lake.js';
 import { createTerrain } from './scene-context.js';
 import { applyLighting, lightingPreset, MOON_POSITION } from './lighting.js';
+import { createFishSchool } from './fish-school.js';
+import { enableMainSceneLayers,partitionWaterPasses,renderFrame } from './render-pipeline.js';
 
-const icons = { Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Image, Box, X, RotateCw };
+const icons = { Feather, SunMedium, Moon, Rotate3d, ScanEye, Plus, Minus, Download, Maximize, Minimize, Mountain, Landmark, Lamp, Flower2, Fish, Image, Box, X, RotateCw };
 createIcons({ icons });
 const $ = selector => document.querySelector(selector);
 const experience = $('#experience');
@@ -25,7 +27,8 @@ $('#reload').addEventListener('click', () => location.reload());
 async function start() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#cbd9d2');
-  scene.fog = new THREE.FogExp2('#cbd9d2', .009);
+  const atmosphere=lightingPreset('sunset');
+  scene.fog = new THREE.Fog(atmosphere.fog,atmosphere.fogNear,atmosphere.fogFar);
   // The image action renders immediately before toBlob, so no retained backbuffer is needed.
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, mobileQuery.matches ? 1.6 : 2));
@@ -46,6 +49,7 @@ async function start() {
   renderer.domElement.addEventListener('webglcontextrestored', () => location.reload());
 
   const camera = new THREE.PerspectiveCamera(39, innerWidth / innerHeight, .1, 800);
+  enableMainSceneLayers(camera);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; controls.dampingFactor = .055;
   controls.minDistance = 3; controls.maxDistance = 70;
@@ -58,6 +62,9 @@ async function start() {
     inside: { position: [3.5, 3.15, 7.2], target: [0, 2.5, .1], label: '檐下听风' },
     blossom: { position: [-11, 6.1, 8.4], target: [-3.0, 3.4, -.3], label: '花间望亭' },
     garden: { position: [11, 6.8, 23], target: [1, 2.3, 6.5], label: '曲径入园' },
+    moonGate: { position: [10.65, 3.42, 24.5], target: [4.7, 1.68, 16.3], label: '月洞寻幽' },
+    tea: { position: [.45, 2.35, .58], target: [-.66, 1.52, -.7], label: '一盏清茗', minDistance: 1.05 },
+    fish: { position: [10.8, 5.8, 12.4], target: [7.2, -.8, 5.3], label: '临池观鲤', minDistance: 2.2 },
   };
   let currentView = 'overview', transition = null, theme = 'sunset', elapsed = 0, frames = 0;
   function destination(name) {
@@ -66,6 +73,7 @@ async function start() {
     const position = new THREE.Vector3(...view.position);
     if (mobileQuery.matches) {
       if (name === 'overview') { position.set(11, 19, 48); target.set(1, 2, 5.8); }
+      else if (name === 'fish') position.set(10.7, 6.8, 12.0);
       else position.sub(target).multiplyScalar(1.65).add(target);
     }
     return { position, target };
@@ -73,17 +81,22 @@ async function start() {
   function projection() {
     const w = innerWidth, h = innerHeight;
     camera.aspect = w / h;
-    if (mobileQuery.matches) camera.setViewOffset(w, h, 0, -h * .045, w, h);
+    if (currentView === 'fish') camera.clearViewOffset();
+    else if (mobileQuery.matches) camera.setViewOffset(w, h, 0, -h * .045, w, h);
     else camera.setViewOffset(w, h, -w * .10, 0, w, h);
     camera.updateProjectionMatrix();
   }
   function setView(name, animate = true) {
     currentView = name; experience.dataset.view = name; $('#view-name').textContent = cameraViews[name].label;
+    document.querySelectorAll('.view-shortcuts button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.view===name)));
+    controls.minDistance = cameraViews[name].minDistance ?? 3;
+    projection();
     const dest = destination(name);
     if (animate && !reducedMotion) transition = { start: performance.now(), from: camera.position.clone(), fromTarget: controls.target.clone(), ...dest };
-    else { camera.position.copy(dest.position); controls.target.copy(dest.target); controls.update(); }
+    else { transition=null; camera.position.copy(dest.position); controls.target.copy(dest.target); controls.update(); }
   }
-  setView('overview', false); projection();
+  const requestedView=location.hash.slice(1);
+  setView(Object.hasOwn(cameraViews,requestedView)?requestedView:'overview', false);
 
   const hemisphere = new THREE.HemisphereLight(); scene.add(hemisphere);
   const sun = new THREE.DirectionalLight(); sun.name = '主光';
@@ -125,6 +138,9 @@ async function start() {
   const lake = await createLake({ renderer, mobile: mobileQuery.matches, reducedMotion, sun });
   const lakebed = createLakebed(), terrain = createTerrain();
   scene.add(lake.water, lakebed, terrain);
+  const fish=createFishSchool({mobile:mobileQuery.matches});scene.add(fish.root);
+  lake.setSubmergedObjects([fish.root]);
+  const renderPartition=partitionWaterPasses([model.root,lakebed,terrain]);
 
   const moonTexture = document.createElement('canvas'); moonTexture.width = moonTexture.height = 256;
   const mc = moonTexture.getContext('2d'); mc.fillStyle = '#e3e5d9'; mc.fillRect(0, 0, 256, 256);
@@ -162,6 +178,7 @@ async function start() {
     sky.visible = !night; moon.visible = night; stars.visible = night;
     applyLighting(value, { sun, fill, hemisphere, lamps: lampLights, lanternMaterial: model.lanternMaterial, scene, renderer });
     lake.setTheme(night);
+    fish.setTheme(night);
     $('#scene-time').textContent = night ? '月夜 · 亥时' : '夕照 · 酉时';
     if (changeVerse) setVerse(night ? 0 : 2);
   }
@@ -224,7 +241,7 @@ async function start() {
     link.href = url; link.download = filename; link.click(); setTimeout(() => URL.revokeObjectURL(url), 15000);
   }
   $('#save-image').addEventListener('click', () => {
-    renderer.render(scene, camera);
+    renderFrame(renderer,scene,camera);
     renderer.domElement.toBlob(blob => { if (blob) { download(blob, `长衣亭-${theme === 'sunset' ? '夕照' : '月夜'}.png`); toast('此景已留存'); } else toast('此景暂未能保存'); });
   });
   const exportButtons = [$('#save-model'), $('#save-compatible')];
@@ -252,6 +269,15 @@ async function start() {
     lake.resize(innerWidth, innerHeight, mobileQuery.matches);
     clearTimeout(resizeTimer); resizeTimer = setTimeout(() => setView(currentView, false), 120);
   });
+  // Resolve shader variants while the existing loading screen is still present.
+  // Reflection, refraction, shadows and animation keep their original cadence.
+  scene.updateMatrixWorld(true);
+  const warmupStart=performance.now();
+  if(typeof renderer.compileAsync==='function') {
+    await renderer.compileAsync(scene,camera);
+    await lake.prepare(renderer,scene);
+  }
+  const shaderWarmupMs=performance.now()-warmupStart;
   const clock = new THREE.Clock();
   let disposed = false;
   function animate() {
@@ -271,14 +297,18 @@ async function start() {
       lampLights.forEach((light, i) => light.position.copy(model.lightPositions[i]));
     }
     lake.update(elapsed);
-    controls.update(dt); renderer.info.reset(); renderer.render(scene, camera); frames++;
+    fish.update(reducedMotion?0:dt,camera);
+    controls.update(dt); renderer.info.reset(); renderFrame(renderer,scene,camera); frames++;
     if (frames === 3) { experience.classList.add('ready'); $('#loading').setAttribute('aria-hidden', 'true'); }
   }
   window.__pavilion = {
     stats: () => ({ frames, theme, view: currentView, transitioning: Boolean(transition), camera: camera.position.toArray(), triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, renderScope: 'complete-frame-including-water-and-shadows', geometries: renderer.info.memory.geometries, geometryMetrics: model.root.userData.geometryMetrics, waterPhase: lake.stats().time, water: lake.stats(), detailCounts: model.root.userData.detailCounts, modelBounds: new THREE.Box3().setFromObject(model.root).getSize(new THREE.Vector3()).toArray() }),
     model: model.root,
+    fishStats: fish.stats,
+    performanceStats:()=>({...renderPartition.stats(),shaderWarmupMs,sceneMatrixUpdatesPerFrame:1,waterPassesPerFrame:2}),
+    version: '12',
   };
-  addEventListener('pagehide', () => { disposed = true; });
+  addEventListener('pagehide', event => { disposed = true;if(!event.persisted)fish.dispose(); });
   addEventListener('pageshow', event => { if (event.persisted) { disposed = false; animate(); } });
   animate();
 }

@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 // Six original planes, twelve edge chamfers and eight corner cuts. All vertices
 // stay inside the original box, so existing joints and clearances cannot grow.
@@ -70,30 +69,24 @@ export function hexRingGeometry(radius, width, height) {
   return geometry;
 }
 
-function clipHalfPlane(points, normal, distance) {
-  const out = [];
-  for (let i = 0; i < points.length; i++) {
-    const a = points[i], b = points[(i + 1) % points.length];
-    const da = normal.dot(a) - distance, db = normal.dot(b) - distance;
-    if (da >= -1e-9) out.push(a);
-    if (da * db < 0) out.push(a.clone().lerp(b, da / (da - db)));
-  }
-  return out;
+export function joinedLatticeGeometry(width, height, bar = .033, depth = .033) {
+  // Extrude the union outline as one solid. Cutting three separate bars left
+  // daylight through the crossing, even though their front faces looked joined.
+  const length = Math.hypot(width, height), w = width / 2, h = height / 2;
+  const nx = height / length * bar / 2, ny = width / length * bar / 2;
+  const ix = bar * length / (2 * height), iy = bar * length / (2 * width);
+  const points = [[w+nx,h-ny],[w-nx,h+ny],[0,iy],[-w+nx,h+ny],[-w-nx,h-ny],[-ix,0],
+    [-w-nx,-h+ny],[-w+nx,-h-ny],[0,-iy],[w-nx,-h-ny],[w+nx,-h+ny],[ix,0]];
+  const geometry = new THREE.ExtrudeGeometry(new THREE.Shape(points.map(p => new THREE.Vector2(...p))), { depth, bevelEnabled: false, steps: 1 });
+  geometry.translate(0, 0, -depth / 2); return geometry;
 }
 
-export function joinedLatticeGeometry(width, height, bar = .033, depth = .033) {
-  const length = Math.hypot(width, height), normal = new THREE.Vector2(-height / length, width / length);
-  const rectangle = sign => {
-    const a = new THREE.Vector2(-width / 2, -sign * height / 2), b = new THREE.Vector2(width / 2, sign * height / 2);
-    const n = new THREE.Vector2(-sign * height / length, width / length).multiplyScalar(bar / 2);
-    return [a.clone().add(n), a.clone().sub(n), b.clone().sub(n), b.clone().add(n)];
-  };
-  const polygons = [rectangle(1), clipHalfPlane(rectangle(-1), normal, bar / 2 + .0005), clipHalfPlane(rectangle(-1), normal.clone().negate(), bar / 2 + .0005)];
-  const geometries = polygons.map(points => {
-    const geometry = new THREE.ExtrudeGeometry(new THREE.Shape(points), { depth, bevelEnabled: false, steps: 1 });
-    geometry.translate(0, 0, -depth / 2); return geometry;
-  });
-  const geometry = mergeGeometries(geometries); geometries.forEach(g => g.dispose()); return geometry;
+// Local X faces outward and Z follows a hexagonal bay. Both ends share the
+// radial mitre plane with their neighbours, including offset seat planks.
+export function miterHexBeam(geometry, length, offset = 0) {
+  const p = geometry.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) * (1 + 2 * (p.getX(i) + offset) * Math.tan(Math.PI / 6) / length));
+  geometry.computeVertexNormals(); return geometry;
 }
 
 // Neighbouring slabs share a curve cross-section, with an explicit narrow joint.

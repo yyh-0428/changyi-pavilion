@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
-import { clayTileGeometry, taperedBranchGeometry, peachLeafGeometry, peachLeafTexture, peachBlossomGeometry, meadowNoise, meadowTexture, grassClumpGeometry } from './detail-geometry.js';
-import { clipToHexagon, pavingStoneGeometry, columnBaseGeometry, timberColumnGeometry, bracketArmGeometry, bridgeHeight, archStoneGeometry, hexRingGeometry, joinedLatticeGeometry, dressedPathSlabGeometry as pathSlabGeometry, beveledBoxGeometry } from './architecture-geometry.js';
+import { clayTileGeometry, taperedBranchGeometry, peachLeafGeometry, peachLeafTexture, peachBlossomGeometry, meadowTexture, grassClumpGeometry } from './detail-geometry.js';
+import { clipToHexagon, pavingStoneGeometry, columnBaseGeometry, timberColumnGeometry, bracketArmGeometry, bridgeHeight, archStoneGeometry, hexRingGeometry, joinedLatticeGeometry, dressedPathSlabGeometry as pathSlabGeometry, beveledBoxGeometry, miterHexBeam } from './architecture-geometry.js';
 import { roofPoint, roofTileSectors, tileElevation, ROOF_COLOR_SCALE } from './roof-geometry.js';
 import { CLOTH_HEIGHT, CLOTH_TIE_Y, clothProfile, clothWave, clothShader } from './cloth.js';
 import { standardizeSurfaceMaterials } from './materials.js';
@@ -11,6 +11,7 @@ import { addPavilionCraft } from './pavilion-craft.js';
 import { batchModel, modelMetrics } from './model-optimization.js';
 import { refineMoonGate } from './moon-gate.js';
 import { addGardenDetails } from './garden-details.js';
+import { createMeadowLayout } from './meadow-layout.js';
 
 const TAU = Math.PI * 2;
 let seed = 48;
@@ -64,7 +65,7 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
     tileLight: new THREE.MeshStandardMaterial({ color: '#687273', ...surfaces.tile, normalScale: new THREE.Vector2(.55, .55), roughness: 1 }),
     tileDark: new THREE.MeshStandardMaterial({ color: '#353b37', roughness: .8 }),
     brass: new THREE.MeshStandardMaterial({ color: '#9e895b', roughness: .58, metalness: .72 }),
-    soil: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, map: meadowMap, bumpMap: meadowMap, bumpScale: .025 }),
+    soil: new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 1, map: meadowMap, bumpMap: meadowMap, bumpScale: .025 }),
     bark: new THREE.MeshStandardMaterial({ color: '#8b8073', ...surfaces.bark, normalScale: new THREE.Vector2(.82, .82), roughness: 1 }),
     leaf: new THREE.MeshStandardMaterial({ color: '#71886b', roughness: .85, side: THREE.DoubleSide }),
     lantern: new THREE.MeshStandardMaterial({ color: '#eedcaf', ...surfaces.paper, roughness: .92, emissive: '#ffbf70', emissiveMap: surfaces.paper.map, emissiveIntensity: .25 }),
@@ -134,7 +135,16 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
   }
   function meadowUV(geometry) {
     const { position, uv } = geometry.attributes;
+    geometry.computeBoundingBox();
+    const top=geometry.boundingBox.max.y,colors=[];
     for (let i = 0; i < position.count; i++) uv.setXY(i, position.getX(i) / 64 + .5, -position.getZ(i) / 64 + .5);
+    for (let i=0;i<position.count;i++) {
+      // Submerged bank faces are damp earth, not a green turf skin. The flat
+      // lawn keeps its original map and colour, with grass rooted above it.
+      const damp=THREE.MathUtils.smoothstep(top-position.getY(i),.035,.22);
+      colors.push(1-damp*.08,1-damp*.50,1-damp*.52);
+    }
+    geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
     return geometry;
   }
 
@@ -173,8 +183,8 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
       const bracketShape = new THREE.Shape();
       bracketShape.moveTo(0, 0); bracketShape.lineTo(.65, 0);
       bracketShape.bezierCurveTo(.57, -.14, .32, -.15, .15, -.43); bracketShape.lineTo(0, -.43); bracketShape.closePath();
-      const bracket = mesh(new THREE.ExtrudeGeometry(bracketShape, { depth: .09, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: 2, steps: 1 }), mats.wood, v(start.x + direction.x * .06, 4.05, start.z + direction.z * .06));
-      bracket.rotation.y = -Math.atan2(direction.z, direction.x);
+      const bracket = mesh(timberUV(new THREE.ExtrudeGeometry(bracketShape, { depth: .09, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: 2, steps: 1 }),'x'), mats.wood, v(start.x + direction.x * .06, 4.05, start.z + direction.z * .06));
+      bracket.rotation.y = -Math.atan2(direction.z, direction.x);bracket.name='梁柱·曲线雀替';
     }
     for (let j = 1; j < 12; j++) {
       const point = p.clone().lerp(q, j / 12);
@@ -197,18 +207,21 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
     box(.26, .09, .26, p.x, 4.285, p.z, mats.darkWood).rotation.y = -angle;
     if (i !== 1) {
       const insetP = p.clone().lerp(q, .07), insetQ = p.clone().lerp(q, .93);
-      for (const y of [1.02, 1.57]) beam(v(insetP.x, y, insetP.z), v(insetQ.x, y, insetQ.z), .105, .09);
+      const railP = p.clone().lerp(q, .044), railQ = p.clone().lerp(q, .956);
+      for (const y of [1.02, 1.57]) beam(v(railP.x, y, railP.z), v(railQ.x, y, railQ.z), .105, .09).name = '栏杆·入柱横枋';
       for (let j = 0; j <= 6; j++) {
         const r = insetP.clone().lerp(insetQ, j / 6);
-        box(.066, .466, .066, r.x, 1.295, r.z);
+        const post = box(.066, .490, .066, r.x, 1.295, r.z);
+        post.rotation.y = -Math.atan2(q.z-p.z, q.x-p.x); post.name = '栏杆·入榫立棂';
       }
       for (let j = 0; j < 6; j++) {
-        const a = insetP.clone().lerp(insetQ, (j + .1) / 6), b = insetP.clone().lerp(insetQ, (j + .9) / 6);
-        const fret = mesh(joinedLatticeGeometry(a.distanceTo(b), .41), mats.darkWood, v((a.x + b.x) / 2, 1.285, (a.z + b.z) / 2));
+        const a = insetP.clone().lerp(insetQ, j / 6), b = insetP.clone().lerp(insetQ, (j + 1) / 6);
+        const fret = mesh(joinedLatticeGeometry(a.distanceTo(b) - .026, .505), mats.darkWood, v((a.x + b.x) / 2, 1.295, (a.z + b.z) / 2));
         fret.rotation.y = -Math.atan2(b.z - a.z, b.x - a.x); fret.name = '裁口拼接花格';
       }
       const bp = p.clone().multiplyScalar(.86), bq = q.clone().multiplyScalar(.86);
-      beam(v(bp.x, 1.16, bp.z), v(bq.x, 1.16, bq.z), .38, .1, mats.darkWood);
+      const seat = beam(v(bp.x, 1.16, bp.z), v(bq.x, 1.16, bq.z), .38, .1, mats.darkWood);
+      miterHexBeam(seat.geometry, bp.distanceTo(bq)); seat.name = '坐凳·转角合榫座板';
     }
     beam(v(p.x, 4.38, p.z), v(0, 5.42, 0), .14, .16, mats.darkWood);
   }
@@ -395,7 +408,7 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
     const a = corners[index].clone().lerp(corners[(index + 1) % 6], .5).multiplyScalar(1.04);
     if (index === 1) a.x = -1.02;
     const group = new THREE.Group(); group.name = '悬灯'; group.position.set(a.x, 4.12, a.z); group.userData.dynamic = true; pavilion.add(group);
-    cylinder(.015, .015, .26, 0, -.16, 0, mats.brass, 8, group);
+    cylinder(.015, .015, .30, 0, -.132, 0, mats.brass, 8, group).name = '悬灯·接梁吊杆';
     const lamp = mesh(new THREE.SphereGeometry(.21, 24, 16), mats.lantern, v(0, -.53, 0), group); lamp.scale.set(1, 1.36, 1);
     for (let j = 0; j < 8; j++) {
       const a = j * TAU / 8;
@@ -406,7 +419,7 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
       tube(pts, .008, mats.brass, group, 14, 4);
     }
     for (const y of [-.81, -.25]) cylinder(.083, .083, .055, 0, y, 0, mats.brass, 12, group);
-    for (let j = 0; j < 5; j++) beam(v((j - 2) * .008, -.85, 0), v((j - 2) * .012, -1.03, .015), .006, .006, mats.wood, group);
+    for (let j = 0; j < 5; j++) beam(v((j - 2) * .008, -.831, 0), v((j - 2) * .012, -1.03, .015), .006, .006, mats.wood, group).name = '悬灯·接座垂穗';
     lanterns.push(group); lightPositions.push(v(a.x, 3.59, a.z));
   }
 
@@ -417,7 +430,7 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
     const noise = 1 + Math.sin(a * 7) * .025 + Math.sin(a * 13 + .7) * .012;
     ip.setX(i, x * noise); ip.setZ(i, z * noise * .89);
   }
-  islandGeo.computeVertexNormals(); mesh(meadowUV(islandGeo), mats.soil, v(0, -.32, 0), garden);
+  islandGeo.computeVertexNormals(); const islandGround=mesh(meadowUV(islandGeo), mats.soil, v(0, -.32, 0), garden);
 
   for (let i = 0; i < 47; i++) {
     const a = i / 47 * TAU;
@@ -455,7 +468,7 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
     if (i === 0) shoreShape.moveTo(p.x, -p.z); else shoreShape.lineTo(p.x, -p.z);
   }
   const shoreGeo = new THREE.ExtrudeGeometry(shoreShape, { depth: .65, bevelEnabled: true, bevelThickness: .17, bevelSize: .3, bevelSegments: 2, steps: 1 });
-  shoreGeo.rotateX(-Math.PI / 2); mesh(meadowUV(shoreGeo), mats.soil, v(0, -.89, 0), garden);
+  shoreGeo.rotateX(-Math.PI / 2); const shoreGround=mesh(meadowUV(shoreGeo), mats.soil, v(0, -.89, 0), garden);
   const path = new THREE.CatmullRomCurve3([v(0, .01, 11.05), v(.65, .025, 12.65), v(2.7, .03, 14.8), v(4.7, .03, 16.3), v(6.4, .03, 19.6), v(7.3, .03, 24.4), v(8.5, .03, 31)]);
   let landingLow = 0, landingHigh = 1;
   for (let i = 0; i < 30; i++) {
@@ -586,58 +599,32 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
   grassGeo.computeBoundingBox(); grassGeo.boundingBox.expandByVector(v(.026, 0, .013));
   grassGeo.boundingSphere = grassGeo.boundingBox.getBoundingSphere(new THREE.Sphere());
   const grassMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: .92, side: THREE.DoubleSide });
-  const pathPoints = path.getSpacedPoints(130);
-  function pathDistance(x, z) {
-    let distanceSquared = Infinity;
-    for (let i = 0; i < pathPoints.length - 1; i++) {
-      const a = pathPoints[i], b = pathPoints[i + 1], dx = b.x - a.x, dz = b.z - a.z;
-      const t = THREE.MathUtils.clamp(((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz), 0, 1);
-      distanceSquared = Math.min(distanceSquared, (x - a.x - dx * t) ** 2 + (z - a.z - dz * t) ** 2);
-    }
-    return Math.sqrt(distanceSquared);
-  }
+  const islandOutline = Array.from({ length: 64 }, (_, i) => {
+    const a = Math.PI / 2 - i * TAU / 64;
+    const noise = 1 + Math.sin(a * 7) * .025 + Math.sin(a * 13 + .7) * .012;
+    return { x: Math.cos(a) * 6.22 * noise, z: Math.sin(a) * 6.22 * noise * .89 };
+  });
+  const shoreOutline = Array.from({ length: 120 }, (_, i) => shoreEdge(i / 120 * TAU));
+  islandGround.updateWorldMatrix(true,false);shoreGround.updateWorldMatrix(true,false);
+  const edgeRay=new THREE.Raycaster(v(0,1,0),v(0,-1,0),0,1.13);
+  const surfaceHeight=(x,z,island)=>{
+    edgeRay.ray.origin.set(x,1,z);
+    return edgeRay.intersectObject(island?islandGround:shoreGround)[0]?.point.y;
+  };
+  const { placements, counts: grassCounts } = createMeadowLayout({ islandOutline, shoreOutline, pathPoints: path.getSpacedPoints(200), surfaceHeight });
   const grassPatches = new Map();
-  const grassCounts = { island: 0, arrival: 0, blades: 0, minimumPathClearance: Infinity };
-  for (let i = 0; i < 84000; i++) {
-    const island = i < 15000, angle = random() * TAU, radius = Math.sqrt(random());
-    const x = island ? Math.cos(angle) * radius * 6.03 : shoreCenter.x + Math.cos(angle) * radius * 12.85;
-    const z = island ? Math.sin(angle) * radius * 5.35 : shoreCenter.z + Math.sin(angle) * radius * 12.3;
-    let edgeDistance, walkDistance;
-    if (island) {
-      const hexDistance = Math.max(Math.abs(x * .866 + z * .5), Math.abs(z), Math.abs(x * .866 - z * .5));
-      if (hexDistance < 3.75 || (Math.abs(x) < 1.42 && z > 2.9)) continue;
-      edgeDistance = 6.03 - Math.hypot(x, z / .89); walkDistance = hexDistance - 3.61;
-      if (Math.hypot(x + 5.05, z + 1.2) < .29 || Math.hypot(x - 4.8, z + 2.25) < .22) continue;
-    } else {
-      const edge = shoreEdge(angle), shoreRadius = Math.hypot((edge.x - shoreCenter.x) / shoreRX, (edge.z - shoreCenter.z) / shoreRZ);
-      const r = Math.hypot((x - shoreCenter.x) / shoreRX, (z - shoreCenter.z) / shoreRZ);
-      edgeDistance = (shoreRadius - r) * 12;
-      if (edgeDistance < .12) continue;
-      walkDistance = pathDistance(x, z);
-      if (walkDistance < 1.04) continue;
-      const gx = (x - 4.7) * Math.cos(.57) - (z - 16.3) * Math.sin(.57), gz = (x - 4.7) * Math.sin(.57) + (z - 16.3) * Math.cos(.57);
-      if (Math.abs(gx) < 2.51 && Math.abs(gz) < .40) continue;
-      if (Math.hypot(x + 3, z - 14.5) < .28) continue;
-      if ([-1.48, 1.51].some(lx => Math.hypot(x - lx, z - 11.8) < .34)) continue;
-    }
-    const patch = meadowNoise(x * .6 + 4, z * .6), dry = meadowNoise(x * .33, z * .33 + 5);
-    if (random() > .70 + patch * .29) continue;
-    let height = (.34 + random() * .43) * (.75 + patch * .55);
-    if (edgeDistance < .50) height *= 1.55;
-    if (walkDistance < 1.4) height *= .65;
-    const spread = .77 + random() * .78;
-    dummy.position.set(x, island ? -.044 : -.069, z); dummy.rotation.set((random() - .5) * .12, random() * TAU, (random() - .5) * .12);
+  for (const { x, y, z, height, spread, angle, color: rgb } of placements) {
+    dummy.position.set(x, y, z); dummy.rotation.set(0, angle, 0);
     dummy.scale.set(spread, height, spread); dummy.updateMatrix();
-    const color = dry > .65 && random() > .55 ? new THREE.Color().setRGB(1.23, 1.06, .74) : new THREE.Color().setRGB(.79 + random() * .38, .83 + random() * .30, .78 + random() * .34);
+    const color = new THREE.Color().setRGB(...rgb);
     const key = `${Math.floor(x / 5)},${Math.floor(z / 5)}`;
     if (!grassPatches.has(key)) grassPatches.set(key, []);
     grassPatches.get(key).push({ matrix: dummy.matrix.clone(), color });
-    grassCounts[island ? 'island' : 'arrival']++; grassCounts.blades += 6;
-    if (!island) grassCounts.minimumPathClearance = Math.min(grassCounts.minimumPathClearance, walkDistance);
   }
   for (const [key, instances] of grassPatches) {
     const geometry = grassGeo.clone(); geometry.attributes.position.setUsage(THREE.DynamicDrawUsage); geometry.attributes.normal.setUsage(THREE.DynamicDrawUsage);
     const grass = new THREE.InstancedMesh(geometry, grassMaterial, instances.length); grass.name = `草坪·${key}`; grass.userData.deformingGeometry = true;
+    grass.userData.renderMotionMargin={x:.026,y:0,z:.013};
     instances.forEach(({matrix, color}, i) => { grass.setMatrixAt(i, matrix); grass.setColorAt(i, color); });
     grass.receiveShadow = true; grass.computeBoundingSphere(); garden.add(grass);
     const [px, pz] = key.split(',').map(Number);
@@ -652,7 +639,7 @@ export function buildPavilion({ plaqueMap, surfaceImages } = {}) {
   standardizeSurfaceMaterials(root);
   batchModel(root);
   root.userData.geometryMetrics = modelMetrics(root);
-  root.userData.design = { type: 'original-artistic-pavilion', units: 'metres', roofDeckThickness: .055, pavingRadius: 3.74, revision: 7 };
+  root.userData.design = { type: 'original-artistic-pavilion', units: 'metres', roofDeckThickness: .055, pavingRadius: 3.74, revision: 12 };
 
   return {
     root, lanternMaterial: mats.lantern, lightPositions,

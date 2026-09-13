@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Reflector } from 'three/addons/objects/Reflector.js';
 import { Refractor } from 'three/addons/objects/Refractor.js';
 import { meadowNoise } from './detail-geometry.js';
+import { RENDER_LAYERS } from './render-pipeline.js';
 
 const vertexShader = /* glsl */`
   #include <common>
@@ -106,7 +107,7 @@ const fragmentShader = /* glsl */`
 
 export async function createLake({ renderer, mobile, reducedMotion, sun }) {
   const loader = new THREE.TextureLoader();
-  const normalMaps = await Promise.all(['textures/water-normal-1.jpg', 'textures/water-normal-2.jpg'].map(path => loader.loadAsync(`${import.meta.env.BASE_URL}${path}`)));
+  const normalMaps = await Promise.all(['textures/water-normal-1.jpg', 'textures/water-normal-2.jpg'].map(path => loader.loadAsync(`${import.meta.env?.BASE_URL??'/'}${path}`)));
   normalMaps.forEach(texture => { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.anisotropy = renderer.capabilities.getMaxAnisotropy(); });
   const geometry = new THREE.PlaneGeometry(240, 240, 192, 192);
   const reflector = new Reflector(geometry, { textureWidth: 1, textureHeight: 1, multisample: mobile ? 0 : 2, clipBias: 0 });
@@ -131,8 +132,16 @@ export async function createLake({ renderer, mobile, reducedMotion, sun }) {
   });
   const material = new THREE.ShaderMaterial({ name: 'Depth-Aware Lake', uniforms, vertexShader, fragmentShader, fog: true });
   const water = new THREE.Mesh(geometry, material); water.rotation.x = -Math.PI / 2; water.position.y = -.15; water.name = '清波·深度透射水面';
+  // All cameras share shoreline-crossing and moving objects. Entirely above /
+  // below-water objects are omitted only from the pass that already clips them.
+  const submergedLayer=RENDER_LAYERS.fish;
+  reflector.camera.layers.enable(RENDER_LAYERS.aboveWater);
+  refractor.camera.layers.enable(submergedLayer);
+  refractor.camera.layers.enable(RENDER_LAYERS.belowWater);
+  let submergedObjects=[];
   const reflectionSourceCamera = new THREE.PerspectiveCamera();
   water.onBeforeRender = (activeRenderer, scene, camera) => {
+    const previousTarget=activeRenderer.getRenderTarget(),previousShadowUpdate=activeRenderer.shadowMap.autoUpdate,previousXr=activeRenderer.xr.enabled;
     water.visible = false;
     try {
       reflector.matrixWorld.copy(water.matrixWorld); refractor.matrixWorld.copy(water.matrixWorld);
@@ -146,7 +155,10 @@ export async function createLake({ renderer, mobile, reducedMotion, sun }) {
       uniforms.refractionMatrix.value.copy(refractor.material.uniforms.textureMatrix.value);
       uniforms.inverseRefractionProjection.value.copy(refractor.camera.projectionMatrix).invert();
       uniforms.refractionCameraWorld.value.copy(refractor.camera.matrixWorld);
-    } finally { water.visible = true; }
+    } finally {
+      water.visible=true;
+      activeRenderer.setRenderTarget(previousTarget);activeRenderer.shadowMap.autoUpdate=previousShadowUpdate;activeRenderer.xr.enabled=previousXr;
+    }
   };
   function resize(width, height, isMobile) {
     const maxSide = isMobile ? 1024 : 2048, ratio = Math.min(devicePixelRatio, 1.5, maxSide / Math.max(width, height));
@@ -156,6 +168,23 @@ export async function createLake({ renderer, mobile, reducedMotion, sun }) {
   resize(innerWidth, innerHeight, mobile);
   return {
     water, resize,
+    async prepare(renderer,scene) {
+      if(typeof renderer.compileAsync!=='function')return;
+      const previousTarget=renderer.getRenderTarget();
+      try {
+        // Both water targets use the same HDR shader variants and shared lights.
+        // Three.compileAsync visits all materials, so one HDR warmup covers both
+        // passes, including fish and above-water objects on their separate layers.
+        renderer.setRenderTarget(refractionTarget);await renderer.compileAsync(scene,refractor.camera);
+      } finally {renderer.setRenderTarget(previousTarget);}
+    },
+    setSubmergedObjects(objects) {
+      submergedObjects.forEach(({object,mask})=>{object.layers.mask=mask;});
+      submergedObjects=[];
+      objects.forEach(root=>root.traverse(object=>{
+        submergedObjects.push({object,mask:object.layers.mask});object.layers.set(submergedLayer);
+      }));
+    },
     update(time) { uniforms.time.value = reducedMotion ? 0 : time; },
     setTheme(night) {
       uniforms.sunDirection.value.copy(sun.position).normalize();

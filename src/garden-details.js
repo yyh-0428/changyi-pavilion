@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { beveledBoxGeometry } from './architecture-geometry.js';
 import { peachLeafGeometry, taperedBranchGeometry } from './detail-geometry.js';
 import { detailRandom, timberUV } from './surface-finishing.js';
+import { hollowSpoutGeometry, irisPetalGeometry, createGardenLeafSurface } from './garden-geometry.js';
 
 const TAU = Math.PI * 2;
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -13,7 +14,9 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
   const counts = { planters: 0, bambooCulms: 0, irisFlowers: 0, pebbles: 0, fallenPetals: 0, teaObjects: 0 };
   const accents = new THREE.MeshStandardMaterial({ name: '园趣·花瓣与细叶', color: '#ffffff', vertexColors: true, roughness: .8, side: THREE.DoubleSide });
   const pottery = new THREE.MeshStandardMaterial({ name: '陶盆·窑变灰褐', color: '#796b57', ...surfaces.tile, normalScale: new THREE.Vector2(.25, .25), roughness: .9 });
-  const earth = new THREE.MeshStandardMaterial({ name: '盆土与茶汤', color: '#453f2d', ...surfaces.stone, roughness: .96 });
+  const earth = new THREE.MeshStandardMaterial({ name: '盆土', color: '#453f2d', ...surfaces.stone, roughness: .96 });
+  const teaLiquid = new THREE.MeshPhysicalMaterial({ name: '茶汤·琥珀清润', color: '#69501f', roughness: .14, metalness: 0, ior: 1.333, clearcoat: .30, clearcoatRoughness: .10 });
+  const foliage = new THREE.MeshStandardMaterial({ name: '园趣·细叶脉络', color: '#ffffff', vertexColors: true, ...createGardenLeafSurface(), normalScale: new THREE.Vector2(.20,.20), roughness: .72, side: THREE.DoubleSide });
   let id = 0;
   const add = (geometry, material, position, parent, name, tint) => {
     const mesh = new THREE.Mesh(geometry, material); mesh.name = name;
@@ -22,7 +25,8 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
     if (material.vertexColors || tint) {
       const shade = tint ? new THREE.Color(tint) : new THREE.Color().setScalar(.88 + r(id++, 1) * .12);
       const colors = new Float32Array(geometry.attributes.position.count * 3);
-      for (let i = 0; i < colors.length; i += 3) colors.set(shade.toArray(), i);
+      const existing = geometry.attributes.color;
+      for (let i = 0; i < colors.length; i += 3) colors.set([shade.r*(existing?.getX(i/3)??1),shade.g*(existing?.getY(i/3)??1),shade.b*(existing?.getZ(i/3)??1)],i);
       geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     }
     parent.add(mesh); return mesh;
@@ -36,7 +40,7 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
   const lathe = (profile, material, position, parent, name, segments = 32) => add(new THREE.LatheGeometry(profile.map(p => new THREE.Vector2(...p)), segments), material, position, parent, name);
   const leaf = (position, length, width, a, lean, parent, tint = '#74814e') => {
     const geometry = peachLeafGeometry(); geometry.scale(width / .076, length / .26, length / .26); geometry.rotateX(Math.PI / 2);
-    const item = add(geometry, accents, position, parent, '园趣·卷曲叶', tint);
+    const item = add(geometry, foliage, position, parent, '园趣·卷曲叶', tint);
     item.rotation.set(lean, a, .12); return item;
   };
   function pebble(x, y, z, scale, parent, i) {
@@ -72,9 +76,14 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
     const a = i * 2.39996, y = .88 + i % 3 * .16, radius = .2 + r(i,7) * .15;
     const end = v(Math.cos(a)*radius,y,Math.sin(a)*radius);
     branch([v(.01,.76+i*.031,0),end.clone().multiply(v(.62,1,.62)),end], .015,.004);
-    for (let j = 0; j < 11; j++) {
-      const k = i * 11 + j, angle = j * 2.39996;
-      leaf(end.clone().add(v(Math.cos(angle)*.12*r(k,8),r(k,9)*.075,Math.sin(angle)*.12*r(k,10))), .16+r(k,11)*.055,.07+r(k,12)*.025,angle,-.2+r(k,13)*.5,bonsai, j%3 ? '#677f48':'#8c9b60');
+    for (let j = 0; j < 6; j++) {
+      const k = i * 6 + j, angle = j * 2.39996;
+      const tip=end.clone().add(v(Math.sin(angle)*(.10+r(k,8)*.08),.035+r(k,9)*.055,Math.cos(angle)*(.10+r(k,10)*.08)));
+      branch([end,end.clone().lerp(tip,.52).add(v(0,.014,0)),tip],.004,.0015);
+      for(const [t,offset] of [[.45,-.8],[.72,.8],[1,0]]) {
+        const origin=end.clone().lerp(tip,t);
+        leaf(origin,.12+r(k,11)*.045,.045+r(k,12)*.016,angle+offset,-.18+r(k,13)*.32,bonsai,t===1?'#8c9b60':'#677f48');
+      }
     }
   }
   const bamboo = planter(3.02,-.16,1.12);
@@ -87,9 +96,11 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
       add(new THREE.CylinderGeometry(.025,.026,.017,8),accents,v(0,y,0),culm,'门畔·竹节','#a0a278');
       if(j<3) continue;
       const a=i*2.2+j*2.4,tip=v(Math.cos(a)*.33,y+.10,Math.sin(a)*.33);
-      tube([v(0,y,0),tip.clone().add(v(0,.06,0)),tip],.006,accents,culm,'门畔·竹枝','#677847');
+      const twigPoints=[v(0,y,0),v(0,y,0).lerp(tip,.55).add(v(0,.055,0)),tip];
+      tube(twigPoints,.006,accents,culm,'门畔·竹枝','#677847');
+      const twigCurve=new THREE.CatmullRomCurve3(twigPoints);
       for(let k=0;k<5;k++) {
-        const position=v(0,y,0).lerp(tip,.30+k*.14);
+        const position=twigCurve.getPoint(.30+k*.14);
         leaf(position,.24+k*.012,.038,a+(k%2?.7:-.7),-.25,culm,k%2?'#6f8552':'#9baf72');
       }
     }
@@ -105,9 +116,6 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
     }
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(p,3));geo.setIndex(indices);geo.computeVertexNormals();return geo;
   }
-  function irisPetal() {
-    const geo=new THREE.SphereGeometry(1,10,6);geo.scale(.052,.016,.096);geo.translate(0,.005,.06);return geo;
-  }
   for(const [bed,[x,z]] of [[-2.16,12.65],[2.55,12.95],[-3.85,3.1],[4.12,3.25]].entries()) {
     const group=new THREE.Group();group.name='临水·鸢尾与卵石';group.position.set(x,-.035,z);garden.add(group);
     for(let i=0;i<7;i++) {
@@ -120,8 +128,8 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
       const h=.61+r(i,25+bed)*.18;
       tube([v(bx,0,bz),v(bx+.03,h*.7,bz),v(bx+.065,h,bz+.03)],.007,accents,group,'临水·鸢尾花茎','#677d4e');
       for(let j=0;j<6;j++) {
-        const petal=add(irisPetal(),accents,v(bx+.065,h,bz+.03),group,'临水·鸢尾花瓣',j<3?'#8672a8':'#b6a6ce');
-        petal.rotation.set(j<3?.24:-1.0,j*TAU/3+(j<3?0:Math.PI/3),0);
+        const petal=add(irisPetalGeometry(j>=3),accents,v(bx+.065,h,bz+.03),group,'临水·鸢尾花瓣',j<3?'#8672a8':'#b6a6ce');
+        petal.rotation.y=j*TAU/3+(j<3?0:Math.PI/3);
         if(j<3) {
           const beard=add(new THREE.SphereGeometry(1,6,4),accents,v(bx+.065+Math.sin(j*TAU/3)*.047,h+.020,bz+.03+Math.cos(j*TAU/3)*.047),group,'临水·鸢尾金蕊','#d6b565');
           beard.scale.set(.009,.009,.034);beard.rotation.y=j*TAU/3;
@@ -155,12 +163,10 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
   lathe([[0,0],[.071,0],[.073,.012],[.05,.028],[0,.032]],porcelain,v(0,.15,0),pot,'茶席·青瓷壶盖');
   add(new THREE.SphereGeometry(.017,12,8),porcelain,v(0,.19,0),pot,'茶席·壶钮');
   tube([v(-.08,.04,0),v(-.175,.058,0),v(-.17,.135,0),v(-.075,.14,0)],.014,porcelain,pot,'茶席·壶把');
-  const spout=tube([v(.080,.072,0),v(.13,.093,0),v(.165,.161,0)],.022,porcelain,pot,'茶席·壶流');
-  const lip=add(new THREE.TorusGeometry(.022,.004,5,16),porcelain,v(.165,.161,0),pot,'茶席·壶口');lip.rotation.x=Math.PI/2-.44;
-  const opening=add(new THREE.CircleGeometry(.018,16),earth,v(.165,.161,0),pot,'茶席·壶口内壁');opening.rotation.copy(lip.rotation);
+  add(hollowSpoutGeometry(),porcelain,null,pot,'茶席·中空渐细壶流');
   // Tea surfaces sit inside the existing hollow cups.
-  for(const z of [-1.02,-.39]) {const teaSurface=add(new THREE.CircleGeometry(.072,24),earth,v(-.65,1.545,z),tea,'茶席·茶汤');teaSurface.rotation.x=-Math.PI/2;}
-  const caddy=lathe([[0,0],[.049,0],[.06,.014],[.06,.096],[.05,.11],[0,.11]],porcelain,v(-.95,1.435,-.78),tea,'茶席·小茶罐',24);
+  for(const z of [-1.02,-.39]) {const teaSurface=add(new THREE.CircleGeometry(.072,32),teaLiquid,v(-.65,1.545,z),tea,'茶席·茶汤');teaSurface.rotation.x=-Math.PI/2;}
+  lathe([[0,0],[.049,0],[.06,.014],[.06,.096],[.05,.11],[0,.11]],porcelain,v(-.95,1.435,-.78),tea,'茶席·小茶罐',24);
   add(new THREE.CylinderGeometry(.056,.056,.017,24),mats.darkWood,v(-.95,1.553,-.78),tea,'茶席·茶罐木盖');
   // A small narrow vase with a single twig balances the compact tea set.
   lathe([[0,0],[.034,0],[.051,.075],[.032,.13],[.019,.20],[.025,.23],[.018,.23],[.014,.19],[.021,.13],[.037,.06],[0,.02]],porcelain,v(-.99,1.435,-.49),tea,'茶席·一枝瓶',24);
@@ -168,6 +174,7 @@ export function addGardenDetails({ garden, pavilion, gate, mats, porcelain, surf
   leaf(v(-.972,1.82,-.51),.13,.035,1.8,-.4,tea,'#76845b');
   leaf(v(-.95,1.91,-.50),.10,.030,-.8,-.1,tea,'#879c65');
   counts.teaObjects=7;
+  counts.bonsaiLeaves=162; counts.bambooLeaves=75; counts.hollowTeapotSpout=true;
   garden.userData.gardenCraft=counts;
   return counts;
 }

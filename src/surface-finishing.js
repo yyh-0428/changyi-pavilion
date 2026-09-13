@@ -31,7 +31,7 @@ export function finishSurfaces(root) {
     const bark = name === 'bark', plaster = name === '石灰抹面';
     const ceramic = name === 'tile' || name === 'tileLight';
     if (!(stone || timber || bark || plaster || ceramic)) return;
-    const seed = ++id, geometry = object.geometry.clone();
+    const seed = object.userData.surfaceSeed ?? ++id, geometry = object.geometry.clone();
     object.geometry = geometry;
     const { position: p, normal: n, uv } = geometry.attributes;
     const colors = new Float32Array(p.count * 3);

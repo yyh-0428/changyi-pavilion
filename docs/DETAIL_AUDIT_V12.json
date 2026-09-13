@@ -1,0 +1,91 @@
+{
+  "revision": "12",
+  "modelMetrics": {
+    "triangles": 2518958,
+    "geometryBytes": 20476653,
+    "meshes": 110,
+    "instances": 65044,
+    "geometries": 110,
+    "materials": 30,
+    "textures": 31,
+    "textureBytes": 23855104,
+    "textureBytesWithMipmaps": 31806772
+  },
+  "grass": {
+    "island": 6045,
+    "arrival": 49803,
+    "bankEdges": 2683,
+    "blades": 335088,
+    "minimumPathClearance": 0.9850295796458435,
+    "spacing": 0.098,
+    "distribution": "jittered cells following actual land outlines"
+  },
+  "baselineModelTriangles": 2549612,
+  "triangleChange": -30654,
+  "unchangedSourceSHA256": {
+    "src/lake.js": "9c0c8ff400ba7fde61d20ccdfc83cade5a4820d489f0838c9b09feed22b10a50",
+    "src/fish-habitat.js": "80afffb9ae9a2305ee72979bb8bd499fc1564301474b76e9389a846168f31006",
+    "src/fish-simulation.js": "5927e8321fa3629b9f1f5e46e1845c4959f9bcfe13d6f38728023425eb78b751",
+    "src/render-pipeline.js": "b9d7feea7d7c1a37adb52a4607a743277ea010f2915423e6b2ed623defac3810",
+    "src/lighting.js": "47331d5137144b85fe54c63fd6468607f4e16265de1c3ca20b47d2541eff7de9",
+    "src/roof-geometry.js": "28c542aa2f0c48fa41a547f1fc157094ecb5316480af3a5ecc7c6afbb957dc80",
+    "src/moon-gate.js": "06309cbdc3cbf6617b6e5fa2a651a7855d6676eb59a53e17d7b759d358097685",
+    "src/garden-details.js": "697fb4234b0255f8914a0f6a40b28f2d1a707c5e5c39d8f989d5b30ad1c914c9"
+  },
+  "changedImplementationAndTests": [
+    "src/architecture-geometry.js",
+    "src/fish-geometry.js",
+    "src/fish-material.js",
+    "src/fish-school.js",
+    "src/main.js",
+    "src/meadow-layout.js",
+    "src/model.js",
+    "src/pavilion-craft.js",
+    "scripts/check-fish-shaders.py",
+    "scripts/package-project.py",
+    "scripts/prepare-detail-preview.mjs",
+    "scripts/prepare-fish-preview.mjs",
+    "scripts/render-detail-preview.py",
+    "scripts/render-fish-preview.py",
+    "tests/detail-v12.test.mjs",
+    "tests/fish.test.mjs",
+    "tests/model.test.mjs"
+  ],
+  "validation": {
+    "fullSuite": {
+      "command": "npm test",
+      "passed": 60,
+      "failed": 0,
+      "scope": "after structural and fish changes, before final bank-edge grass extension"
+    },
+    "finalTerrainRegression": {
+      "command": "node --test tests/model.test.mjs",
+      "passed": 14,
+      "failed": 0,
+      "scope": "after final bank-edge grass and wet-soil colour changes"
+    },
+    "shaderPrograms": 6,
+    "productionBuild": true,
+    "browserCapture": false,
+    "browserLimit": "Local preview URL was blocked by the browser environment (ERR_BLOCKED_BY_CLIENT).",
+    "nativeViews": [
+      "railing-outside-v12",
+      "railing-inside-v12",
+      "grass-bank-v12",
+      "grass-island-v12",
+      "fish-swimming-v12"
+    ],
+    "nativeRenderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "phoneFPSMeasured": false
+  },
+  "fish": {
+    "desktopCount": 120,
+    "mobileCount": 96,
+    "maximumDrawCalls": 4,
+    "materialPasses": [
+      "opaque skin",
+      "transparent fins"
+    ],
+    "simulationChanged": false
+  }
+}

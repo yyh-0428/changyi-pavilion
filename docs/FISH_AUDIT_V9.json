@@ -1,0 +1,129 @@
+{
+  "revision": 9,
+  "fishCount": {
+    "desktop": 120,
+    "mobile": 96
+  },
+  "benchmark": [
+    {
+      "count": 96,
+      "samples": 1800,
+      "meanMs": 0.26292455666666614,
+      "p50Ms": 0.24953400000003967,
+      "p95Ms": 0.40516700000000583,
+      "p99Ms": 0.5577849999999955,
+      "finalState": {
+        "count": 96,
+        "time": 34.9999999999993,
+        "minimumGap": 0.01916524079595744,
+        "minimumShore": 0.497963014941606,
+        "minimumSurface": 0.06022376996085993,
+        "minimumBottom": 1.1460498941538502,
+        "maxSpeed": 0.3326309398252286,
+        "maxCorrection": 0.0036046550395063505,
+        "maxNeighbours": 16,
+        "droppedTime": 0,
+        "steps": 2100
+      }
+    },
+    {
+      "count": 120,
+      "samples": 1800,
+      "meanMs": 0.3735938122222251,
+      "p50Ms": 0.3620050000001811,
+      "p95Ms": 0.525861999999961,
+      "p99Ms": 0.6541160000001582,
+      "finalState": {
+        "count": 120,
+        "time": 34.9999999999993,
+        "minimumGap": 0.02117820255375813,
+        "minimumShore": 0.3590446987819085,
+        "minimumSurface": 0.06495508549993412,
+        "minimumBottom": 0.8251031819273682,
+        "maxSpeed": 0.3586366067265681,
+        "maxCorrection": 0.0046286917845108225,
+        "maxNeighbours": 19,
+        "droppedTime": 0,
+        "steps": 2100
+      }
+    }
+  ],
+  "geometry": [
+    {
+      "detail": "high",
+      "triangles": 4742,
+      "vertices": 2755,
+      "geometryBytes": 127632
+    },
+    {
+      "detail": "low",
+      "triangles": 1586,
+      "vertices": 1035,
+      "geometryBytes": 46776
+    }
+  ],
+  "unchanged": [
+    {
+      "file": "src/model.js",
+      "sha256": "85c30b7f33eba31282d16641249eb56c8574b0f0c901684d59dd4c0c3ec08df9"
+    },
+    {
+      "file": "src/moon-gate.js",
+      "sha256": "06309cbdc3cbf6617b6e5fa2a651a7855d6676eb59a53e17d7b759d358097685"
+    },
+    {
+      "file": "src/garden-details.js",
+      "sha256": "697fb4234b0255f8914a0f6a40b28f2d1a707c5e5c39d8f989d5b30ad1c914c9"
+    },
+    {
+      "file": "src/garden-geometry.js",
+      "sha256": "ef9df2f9c039bee545055d1b0e85748fba20c9a2dda075808ca26e4cc7603eb7"
+    },
+    {
+      "file": "src/materials.js",
+      "sha256": "9c9ecb88659575453e192cc175dabedad84cc9fef1bc1d008806a56ee85b2f7e"
+    },
+    {
+      "file": "src/surface-materials.js",
+      "sha256": "74c0a7386b70fa9d74180ed00304db3e83ca0267450c239137e26ae4072541e7"
+    },
+    {
+      "file": "src/lighting.js",
+      "sha256": "f5a82398e47111e29240dac56a69a286be65919376dd91df6f310ee50b9a55c5"
+    },
+    {
+      "file": "src/style.css",
+      "sha256": "94bed5000302a103ceaec3bd7e45c1f05f3f747b01b5e37bd110e4ebac198072"
+    },
+    {
+      "file": "src/cloth.js",
+      "sha256": "f9174a83863318e93084d94a13e7faa4c2c32b915f14dcf3b5a018e925d63234"
+    }
+  ],
+  "shaderCheck": {
+    "programs": 4,
+    "compiler": "Mesa EGL llvmpipe OpenGL 4.5",
+    "productionVariant": "PBR, instancing, environment, shadows and fog",
+    "scope": "Native shader compilation and fish/water rendering; not browser FPS measurement"
+  },
+  "preview": {
+    "seconds": 8,
+    "fps": 24,
+    "width": 1440,
+    "height": 900
+  },
+  "glbExported": false,
+  "glbPackaged": false,
+  "targetedTests": {
+    "passed": 11,
+    "failed": 0,
+    "fishTests": 6,
+    "v8RegressionTests": 5
+  },
+  "build": {
+    "success": true,
+    "workerFile": "fish-worker-BYYHSCby.js",
+    "mainFile": "index-B_Q7Z4SH.js",
+    "warning": "Existing Three.js main bundle exceeds 500 kB"
+  }
+}

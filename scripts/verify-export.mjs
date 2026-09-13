@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { modelMetrics } from '../src/model-optimization.js';
 import { lightingPreset } from '../src/lighting.js';
+import { inspectEmbeddedImages } from './inspect-images.mjs';
 
 globalThis.self = { URL };
 globalThis.createImageBitmap = async blob => loadImage(Buffer.from(await blob.arrayBuffer()));
@@ -18,6 +19,8 @@ assert.equal(file.readUInt32LE(0), 0x46546c67);
 assert.equal(file.readUInt32LE(4), 2);
 assert.equal(file.readUInt32LE(8), file.byteLength);
 const document = JSON.parse(file.subarray(20, 20 + file.readUInt32LE(12)).toString());
+const imageReports = await inspectEmbeddedImages(file,document);
+await writeFile(new URL(`../docs/${filename.replace('.glb','')}-images.json`,import.meta.url),JSON.stringify(imageReports,null,2)+'\n');
 const validation = await validateBytes(new Uint8Array(file), { uri: filename, maxIssues: 0, writeTimestamp: false });
 await writeFile(new URL(`../docs/${filename.replace('.glb','')}-validation.json`, import.meta.url), JSON.stringify(validation,null,2) + '\n');
 assert.equal(validation.issues.numErrors,0,JSON.stringify(validation.issues.messages));
@@ -28,7 +31,7 @@ const compatible = filename.includes('compatible');
 assert.equal(Boolean(document.extensionsRequired?.includes('EXT_mesh_gpu_instancing')), !compatible);
 if (compatible) assert.equal(document.extensionsRequired,undefined);
 const gltf = await new GLTFLoader().parseAsync(file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength), '');
-const root = gltf.scene.children.find(object => object.userData.design?.revision === 7);
+const root = gltf.scene.children.find(object => object.userData.design?.revision === 8);
 assert.ok(root);
 const metrics = modelMetrics(root);
 assert.equal(metrics.triangles,root.userData.geometryMetrics.triangles);
@@ -63,6 +66,9 @@ for (const name of ['wood', 'darkWood', 'stone', 'stoneDark', 'tile', 'tileLight
   assert.equal(material.roughnessMap.colorSpace, THREE.NoColorSpace);
 }
 assert.notEqual(materials.get('wood').map.image, materials.get('bark').map.image);
+const tea = materials.get('茶汤·琥珀清润'), soil = materials.get('盆土');
+assert.ok(tea && soil && tea !== soil && tea.roughness < .2 && soil.roughness > .9);
+assert.ok(materials.get('园趣·细叶脉络')?.normalMap);
 const linen = materials.get('轻纱'), paper = materials.get('lantern');
 assert.deepEqual(linen.map.repeat.toArray(), [8, 24]);
 assert.deepEqual(linen.normalMap.repeat.toArray(), [8, 24]);

@@ -1,0 +1,32 @@
+{
+  "revision": "11",
+  "sourceLanguage": "GLSL ES 3.00 (#version 300 es preserved)",
+  "browserCapture": false,
+  "glbExported": false,
+  "framesGenerated": 0,
+  "compiler": "4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2",
+  "programs": [
+    {
+      "name": "fish",
+      "compiled": true,
+      "linked": true
+    },
+    {
+      "name": "fish-production",
+      "compiled": true,
+      "linked": true
+    },
+    {
+      "name": "bed",
+      "compiled": true,
+      "linked": true
+    },
+    {
+      "name": "water",
+      "compiled": true,
+      "linked": true
+    }
+  ],
+  "originalErrorReproduced": true,
+  "originalError": "GLSL Compiler failed\n\nfragment_shader\n===============\n0:95(8): error: illegal use of reserved word `patch'\n0:95(8): error: syntax error, unexpected ERROR_TOK, expecting ',' or ';'"
+}

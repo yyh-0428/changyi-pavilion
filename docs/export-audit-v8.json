@@ -1,0 +1,50 @@
+{
+  "revision": 8,
+  "models": [
+    {
+      "file": "changyi-pavilion.glb",
+      "bytes": 45837484,
+      "sha256": "50ad9af2062fe8b321a61b243832d8b032e009bbb4d5fc407df3b831b2203756",
+      "validatorErrors": 0,
+      "validatorWarnings": 0,
+      "validatorInfos": 207,
+      "decodedEmbeddedImages": 32,
+      "loaderRoundTrip": true
+    },
+    {
+      "file": "changyi-pavilion-compatible.glb",
+      "bytes": 153222496,
+      "sha256": "ac0fa29378545a960448b185cc6a23a957e87da4a082db6e9a403d10ee9fa716",
+      "validatorErrors": 0,
+      "validatorWarnings": 0,
+      "validatorInfos": 3,
+      "decodedEmbeddedImages": 32,
+      "loaderRoundTrip": true
+    }
+  ],
+  "crossProfileParity": {
+    "sampledInstances": 153,
+    "completeClothMeshes": 6
+  },
+  "tests": {
+    "passed": 36,
+    "failed": 0
+  },
+  "build": {
+    "success": true,
+    "warning": "Vite main chunk exceeds 500 kB"
+  },
+  "visualInspection": [
+    "moon-gate",
+    "moon-gate-reverse",
+    "garden-overview",
+    "tea-details",
+    "iris-details"
+  ],
+  "visualMethod": "Offline rendering of compatible GLB with VTK, not a live browser screenshot",
+  "notTested": [
+    "live browser interaction",
+    "native macOS double click",
+    "physical mobile frame rate"
+  ]
+}

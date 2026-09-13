@@ -6,6 +6,16 @@ import { detailRandom } from './surface-finishing.js';
 export const MOON_GATE = Object.freeze({ radius: 1.47, centerY: 1.17, outerRadius: 1.70, bricks: 44, depth: .464 });
 const v2 = (x, y) => new THREE.Vector2(x, y);
 
+export function masonryUV(geometry, metres = .32) {
+  const {position:p,normal:n,uv}=geometry.attributes;
+  for(let i=0;i<p.count;i++) {
+    const nx=Math.abs(n.getX(i)),ny=Math.abs(n.getY(i)),nz=Math.abs(n.getZ(i));
+    if(ny>=nx && ny>=nz) uv.setXY(i,p.getX(i)/metres,p.getZ(i)/metres);
+    else uv.setXY(i,(nx>nz?p.getZ(i):p.getX(i))/metres,p.getY(i)/metres);
+  }
+  return geometry;
+}
+
 function clipAboveFloor(points, floor) {
   const out = [];
   for (let i = 0; i < points.length; i++) {
@@ -89,8 +99,7 @@ export function refineMoonGate({ gate, mats }) {
   wallShape.lineTo(2.35, 0); wallShape.lineTo(2.35, 3.34); wallShape.lineTo(-2.35, 3.34); wallShape.closePath();
   const wallGeo = new THREE.ExtrudeGeometry(wallShape, { depth: .38, bevelEnabled: true, bevelSize: .006, bevelThickness: .006, bevelSegments: 2, curveSegments: 96, steps: 1 });
   wallGeo.translate(0, 0, -.19);
-  const { position: wp, normal: wn, uv: wu } = wallGeo.attributes;
-  for (let i = 0; i < wp.count; i++) wu.setXY(i, (Math.abs(wn.getZ(i)) > .5 ? wp.getX(i) : wp.getZ(i)) / .82, wp.getY(i) / .82);
+  masonryUV(wallGeo,.82);
   add(shade(wallGeo, 10, lime), lime, '月洞门·双面灰泥墙');
   const angle = Math.asin(centerY / radius), start = -angle, span = Math.PI + angle * 2;
   add(moonBrickGeometry(start, start + span, { inner: radius, outer: wallRadius, depth: .418, bevel: 0, segments: 176 }), mortar, '月洞门·内退灰缝底层');
@@ -116,8 +125,7 @@ export function refineMoonGate({ gate, mats }) {
         const w = width / count - .009;
         const geometry = beveledBoxGeometry(w, .12, .424, .004);
         geometry.translate(sign * (innerX + width / count * (col + .5)), (y0 + y1) / 2, 0);
-        const { position: p, normal: n, uv } = geometry.attributes;
-        for (let i = 0; i < p.count; i++) uv.setXY(i, (Math.abs(n.getX(i)) > .5 ? p.getZ(i) : p.getX(i)) / .32, p.getY(i) / .32);
+        masonryUV(geometry);
         add(shade(geometry, 100 + wallBricks, brick), brick, '月洞门·错缝墙裙'); wallBricks++;
       }
     }

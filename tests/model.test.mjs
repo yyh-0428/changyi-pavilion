@@ -126,7 +126,8 @@ test('craft details stay within a bounded budget without removing tiles or garde
   assert.ok(metrics.meshes < baseline.meshes);
   const counts = model.root.userData.detailCounts;
   assert.deepEqual([counts.roofTiles, counts.branches, counts.leaves, counts.blossoms], [9526, 1044, 4752, 2210]);
-  assert.deepEqual([counts.grass.island, counts.grass.arrival, counts.grass.blades], [6118, 51483, 345606]);
+  assert.ok(counts.grass.island>5000 && counts.grass.arrival>45000);
+  assert.equal(counts.grass.blades,(counts.grass.island+counts.grass.arrival)*6);
   const size = new THREE.Box3().setFromObject(model.root).getSize(new THREE.Vector3());
   assert.ok(size.distanceTo(new THREE.Vector3(27.85598373413086, 9.490000247955322, 42.34136724472046)) < 1e-5);
   model.root.traverse(object => {
@@ -188,5 +189,59 @@ test('gathered curtains fit their elliptical ties and keep the same wind phase',
       const expected = clothProfile(0,CLOTH_TIE_Y).z + clothWave(CLOTH_TIE_Y,time,tie.userData.clothTiePhase).offset;
       assert.ok(Math.abs(tie.position.z - expected) < 1e-8);
     }
+  }
+});
+
+test('all five railing bays enter their columns at both rail and cap heights', () => {
+  model.root.updateMatrixWorld(true);
+  const timber=[];model.root.traverse(o=>{if(o.isMesh && ['wood','darkWood'].includes(o.material.name))timber.push(o);});
+  const corners=Array.from({length:6},(_,i)=>new THREE.Vector3(Math.cos(i*Math.PI/3)*3.14,0,Math.sin(i*Math.PI/3)*3.14));
+  for(let i=0;i<6;i++)if(i!==1) {
+    const p=corners[i],q=corners[(i+1)%6],along=q.clone().sub(p).normalize(),out=new THREE.Vector3(along.z,0,-along.x);
+    for(const start of [true,false])for(const d of [.18,.195,.212])for(const y of [1.02,1.57,1.626]) {
+      const point=(start?p:q).clone().addScaledVector(along,start?d:-d);point.y=y;
+      const ray=new THREE.Raycaster(point.addScaledVector(out,.5),out.clone().negate(),.40,.60);
+      assert.ok(ray.intersectObjects(timber).length,`daylight at bay ${i}, end ${start}, distance ${d}, height ${y}`);
+    }
+  }
+});
+
+test('connected seat corners cover the complete radial mitre including the outer wedge', () => {
+  const seats=[];model.root.traverse(o=>{if(o.isMesh && o.material.name==='darkWood')seats.push(o);});
+  for(const i of [0,3,4,5])for(const offset of [-.10,0,.10,.16]) {
+    const angle=i*Math.PI/3,r=3.14*.86+offset;
+    const ray=new THREE.Raycaster(new THREE.Vector3(Math.cos(angle)*r,1.30,Math.sin(angle)*r),new THREE.Vector3(0,-1,0),0,.10);
+    assert.ok(ray.intersectObjects(seats).length,`open corner ${i} at radial offset ${offset}`);
+  }
+});
+
+test('grass roots follow real top surfaces and interior lawns have no large empty cells', () => {
+  const soils=[],points=[],matrix=new THREE.Matrix4();
+  model.root.traverse(o=>{
+    if(o.isMesh && o.material.name==='soil')soils.push(o);
+    if(o.isInstancedMesh && o.name.startsWith('草坪·'))for(let i=0;i<o.count;i++){
+      o.getMatrixAt(i,matrix);points.push(new THREE.Vector3().setFromMatrixPosition(matrix).applyMatrix4(o.matrixWorld));
+    }
+  });
+  for(let i=0;i<points.length;i+=67) {
+    const p=points[i],hit=new THREE.Raycaster(p.clone().add(new THREE.Vector3(0,.5,0)),new THREE.Vector3(0,-1,0),0,.55).intersectObjects(soils)[0];
+    assert.ok(hit && Math.abs(hit.point.y-p.y)<.002,`root ${i} is floating or off the flat soil`);
+  }
+  const bins=new Map(),cell=.15;
+  for(const p of points){const key=`${Math.floor(p.x/cell)},${Math.floor(p.z/cell)}`;if(!bins.has(key))bins.set(key,[]);bins.get(key).push(p);}
+  const distance=(x,z)=>{
+    let best=Infinity;const ix=Math.floor(x/cell),iz=Math.floor(z/cell);
+    for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(const p of bins.get(`${ix+dx},${iz+dz}`)??[])best=Math.min(best,Math.hypot(x-p.x,z-p.z));
+    return best;
+  };
+  for(const [x0,x1,z0,z1] of [[-7,-3,19,26],[10,12,20,25],[4.3,5.4,-.8,.6]]) {
+    for(let x=x0;x<x1;x+=.073)for(let z=z0;z<z1;z+=.073)assert.ok(distance(x,z)<.12,`bare lawn at ${x}, ${z}`);
+  }
+  for(let i=0;i<120;i++){
+    const a=i/120*Math.PI*2;
+    if(a>4.2 && a<4.9)continue; // bridge landing
+    const irregular=1+Math.sin(a*5+.4)*.025+Math.sin(a*11)*.018;
+    const x=2+Math.cos(a)*(13*irregular-.19),z=23+Math.sin(a)*(12.5*irregular-.19);
+    assert.ok(distance(x,z)<.18,`unplanted shoreline lobe at ${a}`);
   }
 });

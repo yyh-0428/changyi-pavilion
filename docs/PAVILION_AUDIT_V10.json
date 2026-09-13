@@ -1,0 +1,137 @@
+{
+  "revision": 10,
+  "geometry": {
+    "triangles": 2549612,
+    "geometryBytes": 20556673,
+    "meshes": 107,
+    "instances": 66797,
+    "geometries": 107,
+    "materials": 30,
+    "textures": 31,
+    "textureBytes": 23855104,
+    "textureBytesWithMipmaps": 31806772
+  },
+  "details": {
+    "roofTiles": 9526,
+    "ridgeCaps": 228,
+    "branches": 1044,
+    "leaves": 4752,
+    "blossoms": 2210,
+    "pavingStones": 77,
+    "craft": {
+      "ashlarBlocks": 90,
+      "timberPegs": 12,
+      "bracketKeys": 36,
+      "miteredFrameRails": 4,
+      "benchLegs": 20,
+      "benchBearers": 10,
+      "benchAprons": 10,
+      "benchStretchers": 10,
+      "handrailCaps": 5,
+      "beamMouldings": 12
+    },
+    "grass": {
+      "island": 6118,
+      "arrival": 51483,
+      "blades": 345606,
+      "minimumPathClearance": 1.0401354261073237
+    },
+    "moonGate": {
+      "ringBricks": 44,
+      "wallBricks": 20,
+      "medallions": 4
+    },
+    "gardenCraft": {
+      "planters": 2,
+      "bambooCulms": 5,
+      "irisFlowers": 16,
+      "pebbles": 80,
+      "fallenPetals": 36,
+      "teaObjects": 7,
+      "bonsaiLeaves": 162,
+      "bambooLeaves": 75,
+      "hollowTeapotSpout": true
+    }
+  },
+  "design": {
+    "type": "original-artistic-pavilion",
+    "units": "metres",
+    "roofDeckThickness": 0.055,
+    "pavingRadius": 3.74,
+    "revision": 10
+  },
+  "tests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "glbExported": false,
+  "browserMeasured": false,
+  "baselineGeometry": {
+    "triangles": 2546536,
+    "geometryBytes": 20370217,
+    "meshes": 107,
+    "instances": 66797,
+    "geometries": 107,
+    "materials": 30,
+    "textures": 31,
+    "textureBytes": 23855104,
+    "textureBytesWithMipmaps": 31806772
+  },
+  "delta": {
+    "triangles": 3076,
+    "geometryBytes": 186456,
+    "meshes": 0,
+    "materials": 0,
+    "textures": 0
+  },
+  "unchangedSources": [
+    {
+      "file": "src/fish-school.js",
+      "sha256": "d4fcbd8ed852633a574c2f0e789a314b31bb652601439653516a0774a18b65bd"
+    },
+    {
+      "file": "src/fish-material.js",
+      "sha256": "05ec0506db304c37b480eec2a1ffc8dc72d07170e2f51b3fea7f47923ffac64f"
+    },
+    {
+      "file": "src/fish-geometry.js",
+      "sha256": "79e268cb7134b78aec9fff8770b487cd77003690f34e66b8041b1fe5f76438f5"
+    },
+    {
+      "file": "src/fish-simulation.js",
+      "sha256": "5927e8321fa3629b9f1f5e46e1845c4959f9bcfe13d6f38728023425eb78b751"
+    },
+    {
+      "file": "src/fish-worker.js",
+      "sha256": "20c0a6c222a31430825b1adc2b5e28019a4979798f9ed8bc8bc33febe326adfc"
+    },
+    {
+      "file": "src/fish-habitat.js",
+      "sha256": "80afffb9ae9a2305ee72979bb8bd499fc1564301474b76e9389a846168f31006"
+    },
+    {
+      "file": "src/roof-geometry.js",
+      "sha256": "28c542aa2f0c48fa41a547f1fc157094ecb5316480af3a5ecc7c6afbb957dc80"
+    },
+    {
+      "file": "src/detail-geometry.js",
+      "sha256": "fa364355e101519338402ebc2db25dcce0a915b5c6699d2cda073078121db31f"
+    },
+    {
+      "file": "src/moon-gate.js",
+      "sha256": "06309cbdc3cbf6617b6e5fa2a651a7855d6676eb59a53e17d7b759d358097685"
+    },
+    {
+      "file": "src/garden-details.js",
+      "sha256": "697fb4234b0255f8914a0f6a40b28f2d1a707c5e5c39d8f989d5b30ad1c914c9"
+    },
+    {
+      "file": "src/garden-geometry.js",
+      "sha256": "ef9df2f9c039bee545055d1b0e85748fba20c9a2dda075808ca26e4cc7603eb7"
+    }
+  ],
+  "build": {
+    "success": true,
+    "main": "index-DrhTEPM6.js"
+  }
+}

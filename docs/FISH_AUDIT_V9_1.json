@@ -1,0 +1,55 @@
+{
+  "revision": "9.1",
+  "sourceBaseline": "V9",
+  "targetedTests": {
+    "passed": 14,
+    "failed": 0,
+    "newRegressionTests": 3
+  },
+  "scope": [
+    "first frame populated without worker response",
+    "worker silence, messageerror and postMessage failure recovery",
+    "actual Refractor camera matrices, layers and frustum with a substitute renderer",
+    "existing 120-second fish simulation and V8 craft regressions"
+  ],
+  "build": {
+    "success": true,
+    "entry": "index-CSmUaKEa.js",
+    "worker": "fish-worker-BYYHSCby.js",
+    "linkedAssetsPresent": true
+  },
+  "browserPixelValidation": false,
+  "onlinePublished": false,
+  "glbExported": false,
+  "glbPackaged": false,
+  "changedSourceFiles": [
+    {
+      "file": "src/fish-school.js",
+      "sha256": "d4fcbd8ed852633a574c2f0e789a314b31bb652601439653516a0774a18b65bd"
+    },
+    {
+      "file": "src/lake.js",
+      "sha256": "d4bb1b8a58011e774d7d6964dc72f95cb8e7b62faa8c631d305555fa797a2e8d"
+    },
+    {
+      "file": "src/main.js",
+      "sha256": "7377aef912e67676c1d9428ffa87a88ec06f1ef8e678707ef1630abe3f5d6e71"
+    },
+    {
+      "file": "src/style.css",
+      "sha256": "e5f37784112a7eb0d30e2ec1233b3773bc66e0a72a379f9abd31ba66dc3167e2"
+    },
+    {
+      "file": "index.html",
+      "sha256": "30fceb5fb13f31ad18df56a40149b09f5da82244a50656344f1e821b79170e17"
+    },
+    {
+      "file": "tests/fish.test.mjs",
+      "sha256": "3a6a0ae12081a995a655d9dfda4e60029dbfbdc45480cb9699fcb585387c8151"
+    },
+    {
+      "file": "tests/fish-visibility.test.mjs",
+      "sha256": "593e43b568a1a731f1f55c299c1d97778f6c3e15319dfcb68019c5637a7cdd26"
+    }
+  ]
+}
